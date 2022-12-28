@@ -312,6 +312,32 @@ public class UserControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void updateUser_emptyFullName_returnsError() throws Exception {
+        // Arrange
+        var requestDto = new UpdateUserRequest("", "", null);
+
+        var body = new HashMap<String, String>();
+        body.put("fullName", "size must be between 1 and 255");
+
+        var expectedResponse = createFailApiResponse(body);
+
+        // Act
+        var result = mockMvc.perform(
+                put("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isUnprocessableEntity());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
     public void updateUser_successful_returnsUpdatedUserData() throws Exception {
         // Arrange
         var userId = 13;
