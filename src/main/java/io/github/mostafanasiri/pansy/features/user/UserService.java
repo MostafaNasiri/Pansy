@@ -40,14 +40,15 @@ public class UserService {
 
     public void followUser(int sourceUserId, int targetUserId) {
         if (sourceUserId == targetUserId) {
-            throw new InvalidInputException("A user can't follow him/herself");
+            throw new InvalidInputException("A user can't follow him/herself!");
         }
 
         var sourceUser = getUser(sourceUserId);
         var targetUser = getUser(targetUserId);
 
-        var follower = new Follower(sourceUser, targetUser);
-
-        followerRepository.save(follower);
+        if (followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser) == null) {
+            var follower = new Follower(sourceUser, targetUser);
+            followerRepository.save(follower);
+        }
     }
 }

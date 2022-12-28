@@ -98,7 +98,7 @@ public class UserController {
     ) {
         userService.followUser(userId, request.userId());
 
-        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
     // TODO: [DELETE] /users/{source_user_id}/following/{target_user_id} - Allows a user ID to unfollow another user.

@@ -8,17 +8,20 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "followers")
+@Table(
+        name = "followers",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"source_user_id", "target_user_id"})
+)
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class Follower extends BaseEntity {
     @ManyToOne
-    @JoinColumn(name = "source_user_id")
+    @JoinColumn(name = "source_user_id", nullable = false)
     private User sourceUser;
 
     @ManyToOne
-    @JoinColumn(name = "target_user_id")
+    @JoinColumn(name = "target_user_id", nullable = false)
     private User targetUser;
 }
