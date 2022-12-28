@@ -5,7 +5,7 @@ import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.File;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
-import io.github.mostafanasiri.pansy.features.user.User;
+import io.github.mostafanasiri.pansy.features.user.entity.User;
 import io.github.mostafanasiri.pansy.features.user.UserController;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import io.github.mostafanasiri.pansy.features.user.dto.*;

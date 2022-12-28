@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.user;
+package io.github.mostafanasiri.pansy.features.user.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.file.File;

@@ -4,6 +4,7 @@ import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.user.dto.*;
+import io.github.mostafanasiri.pansy.features.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -89,7 +90,16 @@ public class UserController {
 
     // TODO: [GET] /users/{user_id}/followers - Returns a list of users who are followers of the specified user ID.
 
-    // TODO: [POST] /users/{user_id}/following - Allows a user ID to follow another user.
+    @PostMapping("/users/{user_id}/following")
+    @Operation(summary = "Allows a user ID to follow another user")
+    public ResponseEntity<ApiResponse<Boolean>> followUser(
+            @PathVariable(name = "user_id") int userId,
+            @Valid @RequestBody FollowUserRequest request
+    ) {
+        userService.followUser(userId, request.userId());
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
+    }
 
     // TODO: [DELETE] /users/{source_user_id}/following/{target_user_id} - Allows a user ID to unfollow another user.
 }

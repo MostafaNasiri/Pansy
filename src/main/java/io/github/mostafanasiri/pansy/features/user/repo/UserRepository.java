@@ -1,5 +1,6 @@
-package io.github.mostafanasiri.pansy.features.user;
+package io.github.mostafanasiri.pansy.features.user.repo;
 
+import io.github.mostafanasiri.pansy.features.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
