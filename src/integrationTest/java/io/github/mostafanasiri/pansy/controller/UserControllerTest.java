@@ -445,4 +445,96 @@ public class UserControllerTest extends BaseControllerTest {
         assertThat(response)
                 .isEqualToIgnoringWhitespace(expectedResponse);
     }
+
+    @Test
+    public void unfollowUser_successful_returnsTrue() throws Exception {
+        // Arrange
+        var sourceUserId = 1;
+        var targetUserId = 13;
+
+        var requestDto = new FollowUnfollowUserRequest(targetUserId);
+        var expectedResponse = createSuccessApiResponse(true);
+
+        // Act
+        var result = mockMvc.perform(
+                delete("/users/" + sourceUserId + "/following")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isOk());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void unfollowUser_invalidTargetUserId_returnsError() throws Exception {
+        // Arrange
+        var sourceUserId = 1;
+        var targetUserId = 13;
+
+        var requestDto = new FollowUnfollowUserRequest(targetUserId);
+
+        var exception = new EntityNotFoundException(User.class, targetUserId);
+
+        when(userService.getUser(targetUserId))
+                .thenThrow(exception);
+
+        doCallRealMethod()
+                .when(userService)
+                .unfollowUser(sourceUserId, targetUserId);
+
+        var expectedResponse = createFailApiResponse(exception.getMessage());
+
+        // Act
+        var result = mockMvc.perform(
+                delete("/users/" + sourceUserId + "/following")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isNotFound());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void unfollowUser_targetUserIdSameAsSourceUserId_returnsError() throws Exception {
+        // Arrange
+        var sourceUserId = 13;
+        var targetUserId = sourceUserId;
+
+        var requestDto = new FollowUnfollowUserRequest(targetUserId);
+
+        var exception = new InvalidInputException("A user can't follow him/herself!");
+
+        doThrow(exception)
+                .when(userService)
+                .unfollowUser(sourceUserId, targetUserId);
+
+        var expectedResponse = createFailApiResponse(exception.getMessage());
+
+        // Act
+        var result = mockMvc.perform(
+                delete("/users/" + sourceUserId + "/following")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isUnprocessableEntity());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
 }
