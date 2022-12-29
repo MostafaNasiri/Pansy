@@ -96,7 +96,7 @@ public class UserController {
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUserRequest request
     ) {
-        userService.followUser(userId, request.userId());
+        userService.followUser(userId, request.targetUserId());
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }

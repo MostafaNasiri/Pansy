@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -249,36 +249,6 @@ public class UserControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void updateUser_invalidUserId_returnsError() throws Exception {
-        // Arrange
-        var userId = 13;
-
-        var exception = new EntityNotFoundException(User.class, userId);
-
-        when(userService.getUser(userId))
-                .thenThrow(exception);
-
-        var requestDto = new UpdateUserRequest("full", "", null);
-
-        var expectedResponse = createFailApiResponse(exception.getMessage());
-
-        // Act
-        var result = mockMvc.perform(
-                put("/users/" + userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapToJson(requestDto))
-        );
-
-        var response = result.andReturn().getResponse().getContentAsString();
-
-        // Assert
-        result.andExpect(status().isNotFound());
-
-        assertThat(response)
-                .isEqualToIgnoringWhitespace(expectedResponse);
-    }
-
-    @Test
     public void updateUser_invalidFileId_returnsError() throws Exception {
         // Arrange
         var userId = 13;
@@ -379,6 +349,98 @@ public class UserControllerTest extends BaseControllerTest {
 
         // Assert
         result.andExpect(status().isOk());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void followUser_successful_returnsTrue() throws Exception {
+        // Arrange
+        var sourceUserId = 1;
+        var targetUserId = 13;
+
+        var requestDto = new FollowUserRequest(targetUserId);
+        var expectedResponse = createSuccessApiResponse(true);
+
+        // Act
+        var result = mockMvc.perform(
+                post("/users/" + sourceUserId + "/following")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isCreated());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void followUser_invalidTargetUserId_returnsError() throws Exception {
+        // Arrange
+        var sourceUserId = 1;
+        var targetUserId = 13;
+
+        var requestDto = new FollowUserRequest(targetUserId);
+
+        var exception = new EntityNotFoundException(User.class, targetUserId);
+
+        when(userService.getUser(targetUserId))
+                .thenThrow(exception);
+
+        doCallRealMethod()
+                .when(userService)
+                .followUser(sourceUserId, targetUserId);
+
+        var expectedResponse = createFailApiResponse(exception.getMessage());
+
+        // Act
+        var result = mockMvc.perform(
+                post("/users/" + sourceUserId + "/following")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isNotFound());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void followUser_targetUserIdSameAsSourceUserId_returnsError() throws Exception {
+        // Arrange
+        var sourceUserId = 13;
+        var targetUserId = sourceUserId;
+
+        var requestDto = new FollowUserRequest(targetUserId);
+
+        var exception = new InvalidInputException("A user can't follow him/herself!");
+
+        doThrow(exception)
+                .when(userService)
+                .followUser(sourceUserId, targetUserId);
+
+        var expectedResponse = createFailApiResponse(exception.getMessage());
+
+        // Act
+        var result = mockMvc.perform(
+                post("/users/" + sourceUserId + "/following")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isUnprocessableEntity());
 
         assertThat(response)
                 .isEqualToIgnoringWhitespace(expectedResponse);
