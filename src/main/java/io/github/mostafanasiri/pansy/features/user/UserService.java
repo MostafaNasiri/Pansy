@@ -51,4 +51,18 @@ public class UserService {
             followerRepository.save(follower);
         }
     }
+
+    public void unfollowUser(int sourceUserId, int targetUserId) {
+        if (sourceUserId == targetUserId) {
+            throw new InvalidInputException("A user can't unfollow him/herself!");
+        }
+
+        var sourceUser = getUser(sourceUserId);
+        var targetUser = getUser(targetUserId);
+
+        var follower = followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser);
+        if (follower != null) {
+            followerRepository.delete(follower);
+        }
+    }
 }

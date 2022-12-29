@@ -5,10 +5,10 @@ import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.File;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
 import io.github.mostafanasiri.pansy.features.user.UserController;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import io.github.mostafanasiri.pansy.features.user.dto.*;
+import io.github.mostafanasiri.pansy.features.user.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -360,7 +360,7 @@ public class UserControllerTest extends BaseControllerTest {
         var sourceUserId = 1;
         var targetUserId = 13;
 
-        var requestDto = new FollowUserRequest(targetUserId);
+        var requestDto = new FollowUnfollowUserRequest(targetUserId);
         var expectedResponse = createSuccessApiResponse(true);
 
         // Act
@@ -385,7 +385,7 @@ public class UserControllerTest extends BaseControllerTest {
         var sourceUserId = 1;
         var targetUserId = 13;
 
-        var requestDto = new FollowUserRequest(targetUserId);
+        var requestDto = new FollowUnfollowUserRequest(targetUserId);
 
         var exception = new EntityNotFoundException(User.class, targetUserId);
 
@@ -420,7 +420,7 @@ public class UserControllerTest extends BaseControllerTest {
         var sourceUserId = 13;
         var targetUserId = sourceUserId;
 
-        var requestDto = new FollowUserRequest(targetUserId);
+        var requestDto = new FollowUnfollowUserRequest(targetUserId);
 
         var exception = new InvalidInputException("A user can't follow him/herself!");
 

@@ -26,7 +26,7 @@ public class UserController {
     private FileUtils fileUtils;
 
     @PostMapping("/users")
-    @Operation(summary = "Create a new user")
+    @Operation(summary = "Creates a new user")
     public ResponseEntity<ApiResponse<CreateUserResponse>> createUser(
             @Valid @RequestBody CreateUserRequest request
     ) {
@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{user_id}")
-    @Operation(summary = "Update user's data")
+    @Operation(summary = "Updates a user's data")
     public ResponseEntity<ApiResponse<UpdateUserResponse>> updateUser(
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody UpdateUserRequest request
@@ -69,7 +69,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{user_id}")
-    @Operation(summary = "Get a user's public data")
+    @Operation(summary = "Returns a user's public data")
     public ResponseEntity<ApiResponse<GetUserResponse>> getUser(@PathVariable(name = "user_id") int userId) {
         var entity = userService.getUser(userId);
 
@@ -94,12 +94,21 @@ public class UserController {
     @Operation(summary = "Allows a user ID to follow another user")
     public ResponseEntity<ApiResponse<Boolean>> followUser(
             @PathVariable(name = "user_id") int userId,
-            @Valid @RequestBody FollowUserRequest request
+            @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
         userService.followUser(userId, request.targetUserId());
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
-    // TODO: [DELETE] /users/{source_user_id}/following/{target_user_id} - Allows a user ID to unfollow another user.
+    @DeleteMapping("/users/{user_id}/following")
+    @Operation(summary = "Allows a user ID to unfollow another user")
+    public ResponseEntity<ApiResponse<Boolean>> unfollowUser(
+            @PathVariable(name = "user_id") int userId,
+            @Valid @RequestBody FollowUnfollowUserRequest request
+    ) {
+        userService.unfollowUser(userId, request.targetUserId());
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
+    }
 }
