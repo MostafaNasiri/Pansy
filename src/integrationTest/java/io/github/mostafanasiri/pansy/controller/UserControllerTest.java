@@ -20,7 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -422,13 +423,11 @@ public class UserControllerTest extends BaseControllerTest {
 
         var requestDto = new FollowUnfollowUserRequest(targetUserId);
 
-        var exception = new InvalidInputException("A user can't follow him/herself!");
-
-        doThrow(exception)
+        doCallRealMethod()
                 .when(userService)
                 .followUser(sourceUserId, targetUserId);
 
-        var expectedResponse = createFailApiResponse(exception.getMessage());
+        var expectedResponse = createFailApiResponse("A user can't follow him/herself!");
 
         // Act
         var result = mockMvc.perform(
@@ -514,13 +513,11 @@ public class UserControllerTest extends BaseControllerTest {
 
         var requestDto = new FollowUnfollowUserRequest(targetUserId);
 
-        var exception = new InvalidInputException("A user can't follow him/herself!");
-
-        doThrow(exception)
+        doCallRealMethod()
                 .when(userService)
                 .unfollowUser(sourceUserId, targetUserId);
 
-        var expectedResponse = createFailApiResponse(exception.getMessage());
+        var expectedResponse = createFailApiResponse("A user can't unfollow him/herself!");
 
         // Act
         var result = mockMvc.perform(
