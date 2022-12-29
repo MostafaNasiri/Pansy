@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -530,6 +531,67 @@ public class UserControllerTest extends BaseControllerTest {
 
         // Assert
         result.andExpect(status().isUnprocessableEntity());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void getFollowers_invalidUserId_returnsError() throws Exception {
+        // Arrange
+        var userId = 1;
+        var exception = new EntityNotFoundException(User.class, userId);
+
+        when(userService.getUser(userId))
+                .thenThrow(exception);
+
+        when(userService.getFollowers(userId))
+                .thenCallRealMethod();
+
+        var expectedResponse = createFailApiResponse(exception.getMessage());
+
+        // Act
+        var result = mockMvc.perform(
+                get("/users/" + userId + "/followers")
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isNotFound());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void getFollowers_validInput_returnsData() throws Exception {
+        // Arrange
+        var userId = 1;
+
+        var users = new ArrayList<User>();
+        users.add(new User("name", "username", "password"));
+
+        when(userService.getFollowers(userId))
+                .thenReturn(users);
+
+        var expectedResponse = createSuccessApiResponse(new GetFollowersResponse(
+                users.stream().map(
+                        (u) -> new GetFollowersResponse.Item(u.getId(), u.getFullName(), null)
+                ).toList()
+        ));
+
+        // Act
+        var result = mockMvc.perform(
+                get("/users/" + userId + "/followers")
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isOk());
 
         assertThat(response)
                 .isEqualToIgnoringWhitespace(expectedResponse);

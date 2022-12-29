@@ -89,7 +89,7 @@ public class UserController {
     @GetMapping("/users/{user_id}/followers")
     @Operation(summary = "Returns a list of users who are followers of the specified user ID")
     public ResponseEntity<ApiResponse<GetFollowersResponse>> getFollowers(@PathVariable(name = "user_id") int userId) {
-        var followers = userService.getFollowers(userId);
+        var followers = userService.getFollowers(userId); // TODO: Add pagination
 
         var response = new GetFollowersResponse(
                 followers.stream()
