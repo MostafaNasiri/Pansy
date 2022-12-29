@@ -36,6 +36,7 @@ public class UserController {
         entity.setPassword(request.getPassword());
 
         var createdUser = userService.createUser(entity);
+
         var response = new CreateUserResponse(createdUser.getId());
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.CREATED);

@@ -1,31 +1,24 @@
 package io.github.mostafanasiri.pansy.features.file;
 
 import io.github.mostafanasiri.pansy.common.exception.InternalErrorException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Component
 public class FileUtils {
-    @Autowired
-    private FileServiceConfig config;
+    public MediaType getMediaType(@NonNull String fileExtension) {
+        return switch (fileExtension) {
+            case "jpeg", "jpg" -> MediaType.IMAGE_JPEG;
 
-    public MediaType getMediaType(String fileExtension) {
-        switch (fileExtension) {
-            case "jpeg":
-            case "jpg":
-                return MediaType.IMAGE_JPEG;
+            case "png" -> MediaType.IMAGE_PNG;
 
-            case "png":
-                return MediaType.IMAGE_PNG;
-
-            default:
-                throw new InternalErrorException("Invalid file extension.");
-        }
+            default -> throw new InternalErrorException("Invalid file extension.");
+        };
     }
 
-    public String createFileUrl(File file) {
+    public String createFileUrl(@NonNull File file) {
         return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/files/")
                 .path(file.getName())
