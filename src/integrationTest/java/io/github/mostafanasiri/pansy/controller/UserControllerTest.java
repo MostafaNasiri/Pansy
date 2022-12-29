@@ -596,4 +596,65 @@ public class UserControllerTest extends BaseControllerTest {
         assertThat(response)
                 .isEqualToIgnoringWhitespace(expectedResponse);
     }
+
+    @Test
+    public void getFollowing_invalidUserId_returnsError() throws Exception {
+        // Arrange
+        var userId = 1;
+        var exception = new EntityNotFoundException(User.class, userId);
+
+        when(userService.getUser(userId))
+                .thenThrow(exception);
+
+        when(userService.getFollowing(userId))
+                .thenCallRealMethod();
+
+        var expectedResponse = createFailApiResponse(exception.getMessage());
+
+        // Act
+        var result = mockMvc.perform(
+                get("/users/" + userId + "/following")
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isNotFound());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void getFollowing_validInput_returnsData() throws Exception {
+        // Arrange
+        var userId = 1;
+
+        var users = new ArrayList<User>();
+        users.add(new User("name", "username", "password"));
+
+        when(userService.getFollowing(userId))
+                .thenReturn(users);
+
+        var expectedResponse = createSuccessApiResponse(new GetFollowersFollowingResponse(
+                users.stream().map(
+                        (u) -> new GetFollowersFollowingResponse.Item(u.getId(), u.getFullName(), null)
+                ).toList()
+        ));
+
+        // Act
+        var result = mockMvc.perform(
+                get("/users/" + userId + "/following")
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isOk());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
 }
