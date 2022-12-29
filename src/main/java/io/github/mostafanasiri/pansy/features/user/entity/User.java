@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.lang.NonNull;
 
 @Entity
 @Table(name = "users")
@@ -15,7 +16,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
     @Column(name = "first_name", nullable = false)
     private String fullName;
@@ -33,7 +34,7 @@ public class User extends BaseEntity {
     @JoinColumn(name = "avatar_id")
     private File avatar;
 
-    public User(String fullName, String username, String password) {
+    public User(@NonNull String fullName, @NonNull String username, @NonNull String password) {
         this.fullName = fullName;
         this.username = username;
         this.password = password;

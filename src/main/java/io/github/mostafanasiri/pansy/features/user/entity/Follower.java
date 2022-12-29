@@ -3,6 +3,7 @@ package io.github.mostafanasiri.pansy.features.user.entity;
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,6 +17,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@EqualsAndHashCode
 public class Follower extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "source_user_id", nullable = false)
