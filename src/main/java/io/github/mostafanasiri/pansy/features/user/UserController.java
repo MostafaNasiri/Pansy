@@ -62,7 +62,7 @@ public class UserController {
                 updatedUser.getId(),
                 updatedUser.getFullName(),
                 updatedUser.getBio(),
-                fileUtils.createFileUrl(updatedUser.getAvatar().getName())
+                updatedUser.getAvatar() != null ? fileUtils.createFileUrl(updatedUser.getAvatar()) : null
         );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -78,7 +78,7 @@ public class UserController {
                 entity.getFullName(),
                 entity.getUsername(),
                 entity.getBio(),
-                fileUtils.createFileUrl(entity.getAvatar().getName())
+                entity.getAvatar() != null ? fileUtils.createFileUrl(entity.getAvatar()) : null
         );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -86,9 +86,24 @@ public class UserController {
 
     // TODO: [GET] /users/me - Returns information about an authorized user.
 
-    // TODO: [GET] /users/{user_id}/following - Returns a list of users the specified user ID is following.
+    @GetMapping("/users/{user_id}/followers")
+    @Operation(summary = "Returns a list of users who are followers of the specified user ID")
+    public ResponseEntity<ApiResponse<GetFollowersResponse>> getFollowers(@PathVariable(name = "user_id") int userId) {
+        var followers = userService.getFollowers(userId);
 
-    // TODO: [GET] /users/{user_id}/followers - Returns a list of users who are followers of the specified user ID.
+        var response = new GetFollowersResponse(
+                followers.stream()
+                        .map((u) -> new GetFollowersResponse.Item(
+                                u.getId(),
+                                u.getFullName(),
+                                u.getAvatar() != null ? fileUtils.createFileUrl(u.getAvatar()) : null
+                        )).toList()
+        );
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
+    }
+
+    // TODO: [GET] /users/{user_id}/following - Returns a list of users the specified user ID is following.
 
     @PostMapping("/users/{user_id}/following")
     @Operation(summary = "Allows a user ID to follow another user")

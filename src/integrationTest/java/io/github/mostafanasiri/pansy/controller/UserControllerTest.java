@@ -203,7 +203,7 @@ public class UserControllerTest extends BaseControllerTest {
                         entity.getFullName(),
                         entity.getUsername(),
                         entity.getBio(),
-                        fileUtils.createFileUrl(avatar.getName())
+                        fileUtils.createFileUrl(avatar)
                 )
         );
 
@@ -335,7 +335,7 @@ public class UserControllerTest extends BaseControllerTest {
                         user.getId(),
                         user.getFullName(),
                         user.getBio(),
-                        fileUtils.createFileUrl(file.getName())
+                        fileUtils.createFileUrl(file)
                 )
         );
 

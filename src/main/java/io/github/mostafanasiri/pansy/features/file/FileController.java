@@ -28,7 +28,7 @@ public class FileController {
 
         var result = new FileUploadResponse(
                 uploadedFile.getId(),
-                fileUtils.createFileUrl(uploadedFile.getName())
+                fileUtils.createFileUrl(uploadedFile)
         );
 
         return new ResponseEntity<>( new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);

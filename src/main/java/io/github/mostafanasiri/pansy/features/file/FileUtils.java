@@ -25,10 +25,10 @@ public class FileUtils {
         }
     }
 
-    public String createFileUrl(String fileName) {
+    public String createFileUrl(File file) {
         return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/files/")
-                .path(fileName)
+                .path(file.getName())
                 .toUriString();
     }
 }

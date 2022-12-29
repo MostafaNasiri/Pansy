@@ -9,6 +9,8 @@ import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
     @Autowired
@@ -36,6 +38,15 @@ public class UserService {
                 .orElseThrow(
                         () -> new EntityNotFoundException(User.class, userId)
                 );
+    }
+
+    public List<User> getFollowers(int userId) {
+        var user = getUser(userId);
+
+        return followerRepository.findAllByTargetUser(user)
+                .stream()
+                .map((f) -> f.getSourceUser())
+                .toList();
     }
 
     public void followUser(int sourceUserId, int targetUserId) {
