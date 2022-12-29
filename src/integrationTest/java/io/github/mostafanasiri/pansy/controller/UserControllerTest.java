@@ -576,9 +576,9 @@ public class UserControllerTest extends BaseControllerTest {
         when(userService.getFollowers(userId))
                 .thenReturn(users);
 
-        var expectedResponse = createSuccessApiResponse(new GetFollowersResponse(
+        var expectedResponse = createSuccessApiResponse(new GetFollowersFollowingResponse(
                 users.stream().map(
-                        (u) -> new GetFollowersResponse.Item(u.getId(), u.getFullName(), null)
+                        (u) -> new GetFollowersFollowingResponse.Item(u.getId(), u.getFullName(), null)
                 ).toList()
         ));
 

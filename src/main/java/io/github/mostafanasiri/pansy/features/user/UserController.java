@@ -87,13 +87,15 @@ public class UserController {
     // TODO: [GET] /users/me - Returns information about an authorized user.
 
     @GetMapping("/users/{user_id}/followers")
-    @Operation(summary = "Returns a list of users who are followers of the specified user ID")
-    public ResponseEntity<ApiResponse<GetFollowersResponse>> getFollowers(@PathVariable(name = "user_id") int userId) {
+    @Operation(summary = "Returns a list of users who are followers of the specified user id")
+    public ResponseEntity<ApiResponse<GetFollowersFollowingResponse>> getFollowers(
+            @PathVariable(name = "user_id") int userId
+    ) {
         var followers = userService.getFollowers(userId); // TODO: Add pagination
 
-        var response = new GetFollowersResponse(
+        var response = new GetFollowersFollowingResponse(
                 followers.stream()
-                        .map((u) -> new GetFollowersResponse.Item(
+                        .map((u) -> new GetFollowersFollowingResponse.Item(
                                 u.getId(),
                                 u.getFullName(),
                                 u.getAvatar() != null ? fileUtils.createFileUrl(u.getAvatar()) : null
@@ -103,10 +105,27 @@ public class UserController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }
 
-    // TODO: [GET] /users/{user_id}/following - Returns a list of users the specified user ID is following.
+    @GetMapping("/users/{user_id}/following")
+    @Operation(summary = "Returns a list of users the specified user id is following")
+    public ResponseEntity<ApiResponse<GetFollowersFollowingResponse>> getFollowing(
+            @PathVariable(name = "user_id") int userId
+    ) {
+        var following = userService.getFollowing(userId); // TODO: Add pagination
+
+        var response = new GetFollowersFollowingResponse(
+                following.stream()
+                        .map((u) -> new GetFollowersFollowingResponse.Item(
+                                u.getId(),
+                                u.getFullName(),
+                                u.getAvatar() != null ? fileUtils.createFileUrl(u.getAvatar()) : null
+                        )).toList()
+        );
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
+    }
 
     @PostMapping("/users/{user_id}/following")
-    @Operation(summary = "Allows a user ID to follow another user")
+    @Operation(summary = "Allows a user id to follow another user")
     public ResponseEntity<ApiResponse<Boolean>> followUser(
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUnfollowUserRequest request
@@ -117,7 +136,7 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{user_id}/following")
-    @Operation(summary = "Allows a user ID to unfollow another user")
+    @Operation(summary = "Allows a user id to unfollow another user")
     public ResponseEntity<ApiResponse<Boolean>> unfollowUser(
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUnfollowUserRequest request

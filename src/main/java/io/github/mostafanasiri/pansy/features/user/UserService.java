@@ -49,6 +49,15 @@ public class UserService {
                 .toList();
     }
 
+    public List<User> getFollowing(int userId) {
+        var user = getUser(userId);
+
+        return followerRepository.findAllBySourceUser(user)
+                .stream()
+                .map((f) -> f.getTargetUser())
+                .toList();
+    }
+
     public void followUser(int sourceUserId, int targetUserId) {
         if (sourceUserId == targetUserId) {
             throw new InvalidInputException("A user can't follow him/herself!");

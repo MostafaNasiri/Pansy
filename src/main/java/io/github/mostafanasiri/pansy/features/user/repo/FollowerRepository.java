@@ -11,5 +11,7 @@ import java.util.List;
 public interface FollowerRepository extends JpaRepository<Follower, Integer> {
     Follower findBySourceUserAndTargetUser(User sourceUser, User targetUser);
 
-    List<Follower> findAllByTargetUser(User sourceUser);
+    List<Follower> findAllByTargetUser(User targetUser);
+
+    List<Follower> findAllBySourceUser(User sourceUser);
 }
