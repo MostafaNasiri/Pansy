@@ -27,8 +27,8 @@ public class UserController {
 
     @PostMapping("/users")
     @Operation(summary = "Creates a new user")
-    public ResponseEntity<ApiResponse<CreateUserResponse>> createUser(
-            @Valid @RequestBody CreateUserRequest request
+    public ResponseEntity<ApiResponse<CreateUserResponse>> createUser( // TODO: Remove
+                                                                       @Valid @RequestBody CreateUserRequest request
     ) {
         var entity = new User();
         entity.setFullName(request.getFullName());

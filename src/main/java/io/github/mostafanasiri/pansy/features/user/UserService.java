@@ -8,6 +8,7 @@ import io.github.mostafanasiri.pansy.features.user.repo.FollowerRepository;
 import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,12 +21,15 @@ public class UserService {
     @Autowired
     private FollowerRepository followerRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public User createUser(@NonNull User user) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new InvalidInputException("Username already exists");
         }
 
-        // TODO hash user's password
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
