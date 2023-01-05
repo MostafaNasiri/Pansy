@@ -5,6 +5,7 @@ import io.github.mostafanasiri.pansy.auth.dto.LoginResponse;
 import io.github.mostafanasiri.pansy.auth.dto.RegisterRequest;
 import io.github.mostafanasiri.pansy.auth.dto.RegisterResponse;
 import io.github.mostafanasiri.pansy.common.ApiResponse;
+import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import io.github.mostafanasiri.pansy.features.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,9 +70,7 @@ public class AuthController {
 
             return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
         } catch (BadCredentialsException e) {
-            // TODO: Throw a new exception type
-            e.printStackTrace();
-            return null;
+            throw new AuthenticationException("Invalid username or password");
         }
     }
 }

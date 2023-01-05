@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.common;
 
+import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InternalErrorException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
@@ -32,6 +33,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = InvalidInputException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public @ResponseBody ApiResponse<String> handleException(InvalidInputException e) {
+        return new ApiResponse<>(ApiResponse.Status.FAIL, e.getMessage());
+    }
+
+    @ExceptionHandler(value = AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public @ResponseBody ApiResponse<String> handleException(AuthenticationException e) {
         return new ApiResponse<>(ApiResponse.Status.FAIL, e.getMessage());
     }
 
