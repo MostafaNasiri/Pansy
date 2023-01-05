@@ -7,6 +7,7 @@ import io.github.mostafanasiri.pansy.auth.dto.RegisterResponse;
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class AuthController {
     private JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("/register")
+    @Operation(summary = "Creates a new user")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
         var entity = new User();
         entity.setFullName(request.getFullName());
@@ -53,6 +55,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Returns an access token for the given username")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         try {
             var authentication = authenticationManager.authenticate(

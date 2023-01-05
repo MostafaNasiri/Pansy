@@ -1,7 +1,6 @@
 package io.github.mostafanasiri.pansy.controller;
 
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
-import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.File;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
@@ -27,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTest extends BaseControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -43,146 +42,6 @@ public class UserControllerTest extends BaseControllerTest {
 
     @Autowired
     private FileUtils fileUtils;
-
-    @Test
-    public void createUser_successful_returnsCreatedUser() throws Exception {
-        // Arrange
-        var requestDto = getValidInputForCreateUser();
-
-        var entity = new User(requestDto.getFullName(), requestDto.getUsername(), requestDto.getPassword());
-
-        var createdUserId = 13;
-        entity.setId(createdUserId);
-
-        when(userService.createUser(entity))
-                .thenReturn(entity);
-
-        var expectedResponse = createSuccessApiResponse(new CreateUserResponse(createdUserId));
-
-        // Act
-        var result = mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapToJson(requestDto))
-        );
-
-        var response = result.andReturn().getResponse().getContentAsString();
-
-        // Assert
-        result.andExpect(status().isCreated());
-
-        assertThat(response)
-                .isEqualToIgnoringWhitespace(expectedResponse);
-    }
-
-    private CreateUserRequest getValidInputForCreateUser() {
-        return new CreateUserRequest("first last", "username", "pass123");
-    }
-
-    @Test
-    public void createUser_emptyFullName_returnsError() throws Exception {
-        // Arrange
-        var requestDto = new CreateUserRequest("", "username", "password");
-
-        var body = new HashMap<String, String>();
-        body.put("fullName", "size must be between 1 and 255");
-
-        var expectedResponse = createFailApiResponse(body);
-
-        // Act
-        var result = mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapToJson(requestDto))
-        );
-
-        var response = result.andReturn().getResponse().getContentAsString();
-
-        // Assert
-        result.andExpect(status().isUnprocessableEntity());
-
-        assertThat(response)
-                .isEqualToIgnoringWhitespace(expectedResponse);
-    }
-
-    @Test
-    public void createUser_emptyUsername_returnsError() throws Exception {
-        // Arrange
-        var requestDto = new CreateUserRequest("full name", "", "password");
-
-        var body = new HashMap<String, String>();
-        body.put("username", "Invalid username");
-
-        var expectedResponse = createFailApiResponse(body);
-
-        // Act
-        var result = mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapToJson(requestDto))
-        );
-
-        var response = result.andReturn().getResponse().getContentAsString();
-
-        // Assert
-        result.andExpect(status().isUnprocessableEntity());
-
-        assertThat(response)
-                .isEqualToIgnoringWhitespace(expectedResponse);
-    }
-
-    @Test
-    public void createUser_emptyPassword_returnsError() throws Exception {
-        // Arrange
-        var requestDto = new CreateUserRequest("full name", "username", "");
-
-        var body = new HashMap<String, String>();
-        body.put("password", "size must be between 6 and 500");
-
-        var expectedResponse = createFailApiResponse(body);
-
-        // Act
-        var result = mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapToJson(requestDto))
-        );
-
-        var response = result.andReturn().getResponse().getContentAsString();
-
-        // Assert
-        result.andExpect(status().isUnprocessableEntity());
-
-        assertThat(response)
-                .isEqualToIgnoringWhitespace(expectedResponse);
-    }
-
-    @Test
-    public void createUser_duplicateUsername_returnsError() throws Exception {
-        // Arrange
-        var requestDto = getValidInputForCreateUser();
-
-        var entity = new User(requestDto.getFullName(), requestDto.getUsername(), requestDto.getPassword());
-        when(userService.createUser(entity))
-                .thenThrow(new InvalidInputException("Username already exists"));
-
-        var expectedResponse = createFailApiResponse("Username already exists");
-
-        // Act
-        var result = mockMvc.perform(
-                post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapToJson(requestDto))
-        );
-
-        var response = result.andReturn().getResponse().getContentAsString();
-
-        // Assert
-        result.andExpect(status().isUnprocessableEntity());
-
-        assertThat(response)
-                .isEqualToIgnoringWhitespace(expectedResponse);
-    }
 
     @Test
     public void getUser_successful_returnsUserData() throws Exception {

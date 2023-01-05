@@ -10,13 +10,13 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.lang.NonNull;
 
-@Entity
-@Table(name = "users")
-@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User extends BaseEntity {
     @Column(name = "first_name", nullable = false)
     private String fullName;
