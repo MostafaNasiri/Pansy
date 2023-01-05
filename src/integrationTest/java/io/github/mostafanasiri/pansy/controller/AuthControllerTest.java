@@ -2,7 +2,9 @@ package io.github.mostafanasiri.pansy.controller;
 
 import io.github.mostafanasiri.pansy.auth.AuthController;
 import io.github.mostafanasiri.pansy.auth.JwtTokenUtil;
+import io.github.mostafanasiri.pansy.auth.dto.LoginRequest;
 import io.github.mostafanasiri.pansy.auth.dto.RegisterRequest;
+import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import io.github.mostafanasiri.pansy.features.user.entity.User;
@@ -12,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashMap;
@@ -19,6 +23,7 @@ import java.util.HashMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,6 +41,9 @@ public class AuthControllerTest extends BaseControllerTest {
 
     @MockBean
     private JwtTokenUtil jwtTokenUtil;
+
+    @MockBean
+    private AuthenticationManager authenticationManager;
 
     @Test
     public void register_successful_returnsToken() throws Exception {
@@ -160,6 +168,103 @@ public class AuthControllerTest extends BaseControllerTest {
         // Act
         var result = mockMvc.perform(
                 post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isUnprocessableEntity());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void login_invalidUsernameOrPassword_throwsAuthenticationException() throws Exception {
+        // Arrange
+        var requestDto = new LoginRequest("user", "password");
+
+        when(authenticationManager.authenticate(any()))
+                .thenThrow(BadCredentialsException.class);
+
+        // Act
+        var result = mockMvc.perform(
+                post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        // Assert
+        result.andExpect(r -> assertTrue(null, r.getResolvedException() instanceof AuthenticationException));
+    }
+
+    @Test
+    public void login_invalidUsernameOrPassword_returnsError() throws Exception {
+        // Arrange
+        var requestDto = new LoginRequest("user", "password");
+
+        when(authenticationManager.authenticate(any()))
+                .thenThrow(BadCredentialsException.class);
+
+        var expectedResponse = createFailApiResponse("Invalid username or password");
+
+        // Act
+        var result = mockMvc.perform(
+                post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isUnauthorized());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void login_emptyUsername_returnsError() throws Exception {
+        // Arrange
+        var requestDto = new LoginRequest("", "password");
+
+        var body = new HashMap<String, String>();
+        body.put("username", "Invalid username");
+
+        var expectedResponse = createFailApiResponse(body);
+
+        // Act
+        var result = mockMvc.perform(
+                post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapToJson(requestDto))
+        );
+
+        var response = result.andReturn().getResponse().getContentAsString();
+
+        // Assert
+        result.andExpect(status().isUnprocessableEntity());
+
+        assertThat(response)
+                .isEqualToIgnoringWhitespace(expectedResponse);
+    }
+
+    @Test
+    public void login_emptyPassword_returnsError() throws Exception {
+        // Arrange
+        var requestDto = new LoginRequest("username", "");
+
+        var body = new HashMap<String, String>();
+        body.put("password", "size must be between 6 and 500");
+
+        var expectedResponse = createFailApiResponse(body);
+
+        // Act
+        var result = mockMvc.perform(
+                post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapToJson(requestDto))
         );

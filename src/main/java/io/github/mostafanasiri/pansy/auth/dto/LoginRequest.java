@@ -12,7 +12,7 @@ public class LoginRequest {
     @Size(min = 6, max = 500)
     private String password;
 
-    public LoginRequest(String fullName, String username, String password) {
+    public LoginRequest(String username, String password) {
         this.username = username.trim();
         this.password = password.trim();
     }
