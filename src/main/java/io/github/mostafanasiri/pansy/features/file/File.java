@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Entity
-@Table(name = "files")
-@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "files")
+@EntityListeners(AuditingEntityListener.class)
 public class File extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
