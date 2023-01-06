@@ -1,5 +1,8 @@
 package io.github.mostafanasiri.pansy.auth;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -44,14 +47,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String username;
         try {
             username = jwtTokenUtil.getUsernameFromToken(token);
-        } catch (MalformedJwtException e) {
-            // TODO return error response
+        } catch (MalformedJwtException | UnsupportedJwtException e) {
+            handleError(response, "Invalid token");
             return;
         } catch (ExpiredJwtException e) {
-            // TODO return error response
-            return;
-        } catch (UnsupportedJwtException e) {
-            // TODO return error response
+            handleError(response, "The token is expired");
             return;
         }
 
@@ -68,6 +68,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private String getToken(HttpServletRequest request) {
         var header = request.getHeader(HttpHeaders.AUTHORIZATION);
         return header.substring(BEARER.length());
+    }
+
+    private void handleError(HttpServletResponse response, String message) throws IOException {
+        try {
+            var errorResponse = new ObjectMapper().writeValueAsString(
+                    new ApiResponse<>(ApiResponse.Status.FAIL, message)
+            );
+
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(errorResponse);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setAuthenticationContext(String username, HttpServletRequest request) {
