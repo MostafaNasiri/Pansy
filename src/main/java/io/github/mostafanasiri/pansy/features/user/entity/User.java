@@ -35,7 +35,7 @@ public class User extends BaseEntity {
     @Column(name = "bio")
     private String bio;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "avatar_id")
     private File avatar;
 
