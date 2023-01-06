@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.controller;
+package io.github.mostafanasiri.pansy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

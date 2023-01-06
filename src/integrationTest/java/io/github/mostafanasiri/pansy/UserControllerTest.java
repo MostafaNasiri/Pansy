@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.controller;
+package io.github.mostafanasiri.pansy;
 
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.features.file.File;

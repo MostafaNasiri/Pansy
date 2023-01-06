@@ -14,7 +14,6 @@ public class PostController {
 
     // TODO - [DELETE] /posts/{post_id} - Deletes a post
 
-    /* Likes */
 
     // TODO - [POST] /posts/{post_id}/likes - Likes the specified post by the authorized user
 
@@ -22,7 +21,6 @@ public class PostController {
 
     // TODO - [DELETE] /posts/{post_id}/likes/{user_id} - Unlikes a post that has already been liked by the authorized user
 
-    /* Comments */
 
     // TODO - [GET] /posts/{post_id}/comments - Returns comments of the specified post id
 
