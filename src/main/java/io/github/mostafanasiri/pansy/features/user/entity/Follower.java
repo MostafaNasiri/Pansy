@@ -17,7 +17,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class Follower extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "source_user_id", nullable = false)
