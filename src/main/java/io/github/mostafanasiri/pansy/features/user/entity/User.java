@@ -15,7 +15,12 @@ import org.springframework.lang.NonNull;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        indexes = {
+                @Index(name = "idx_username", columnList = "username")
+        }
+)
 @EntityListeners(AuditingEntityListener.class)
 public class User extends BaseEntity {
     @Column(name = "first_name", nullable = false)
