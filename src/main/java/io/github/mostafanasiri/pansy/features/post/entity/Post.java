@@ -25,20 +25,20 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User creator;
 
-    @Column(name = "text", nullable = false, length = 1000)
-    private String text;
+    @Column(name = "caption", nullable = false, length = 1000)
+    private String caption;
 
     @OneToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
-            name = "post_images",
+            name = "posts_images",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "file_id")
     )
     private List<File> images;
 
-    public Post(User creator, String text) {
+    public Post(User creator, String caption) {
         this.creator = creator;
-        this.text = text;
+        this.caption = caption;
     }
 
     public void setImages(List<File> images) {

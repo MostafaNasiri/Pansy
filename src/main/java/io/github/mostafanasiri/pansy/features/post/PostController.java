@@ -1,6 +1,14 @@
 package io.github.mostafanasiri.pansy.features.post;
 
+import io.github.mostafanasiri.pansy.common.ApiResponse;
+import io.github.mostafanasiri.pansy.features.post.dto.CreatePostRequest;
+import io.github.mostafanasiri.pansy.features.post.dto.CreatePostResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Post")
@@ -8,7 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostController {
     // TODO - [GET] /users/{user_id}/posts - Returns a user's posts
 
-    // TODO - [POST] /posts - Creates a new post
+    @PostMapping("/posts")
+    @Operation(summary = "Creates a new post for the authorized user")
+    public ResponseEntity<ApiResponse<CreatePostResponse>> createPost(@Valid @RequestBody CreatePostRequest request) {
+        
+        return null;
+    }
 
     // TODO - [PUT] /posts/{post_id} - Edits a post
 
