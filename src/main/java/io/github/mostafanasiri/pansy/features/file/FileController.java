@@ -37,7 +37,7 @@ public class FileController {
     @GetMapping("/files/{file_name}")
     @Operation(summary = "Get a file")
     public ResponseEntity<Resource> get(@PathVariable(name = "file_name") String fileName) {
-        var file = service.getFile(fileName);
+        var file = service.getFileResource(fileName);
 
         var fileExtension = StringUtils.getFilenameExtension(fileName);
 

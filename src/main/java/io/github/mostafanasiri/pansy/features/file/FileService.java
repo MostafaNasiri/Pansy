@@ -6,6 +6,7 @@ import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class FileService {
@@ -39,7 +41,7 @@ public class FileService {
         }
     }
 
-    public File save(MultipartFile file) {
+    public File save(@NonNull MultipartFile file) {
         String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
 
         if (!Arrays.asList(allowedFileExtensions).contains(fileExtension)) {
@@ -57,7 +59,7 @@ public class FileService {
         return repository.save(new File(fileName));
     }
 
-    private void copyFile(MultipartFile file, String fileName) {
+    private void copyFile(@NonNull MultipartFile file, @NonNull String fileName) {
         try {
             Path destinationFile = filesLocation.resolve(fileName);
             Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
@@ -66,7 +68,7 @@ public class FileService {
         }
     }
 
-    public Resource getFile(String fileName) {
+    public Resource getFileResource(@NonNull String fileName) {
         try {
             Path file = filesLocation.resolve(fileName);
             Resource resource = new UrlResource(file.toUri());
@@ -88,5 +90,22 @@ public class FileService {
                 .orElseThrow(() -> {
                     throw new EntityNotFoundException(File.class, fileId);
                 });
+    }
+
+    /**
+     * Returns all files with the given fileIds.
+     *
+     * @throws EntityNotFoundException if there's an invalid id the given fileIds.
+     */
+    public List<File> getFiles(@NonNull List<Integer> fileIds) {
+        var result = repository.findAllById(fileIds);
+
+        result.stream().forEach(file -> {
+            if (!fileIds.contains(file.getId())) {
+                throw new EntityNotFoundException(File.class, file.getId());
+            }
+        });
+
+        return result;
     }
 }

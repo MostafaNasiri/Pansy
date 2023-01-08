@@ -14,8 +14,8 @@ public class PansyUserDetails implements UserDetails {
         this.user = user;
     }
 
-    public int getId() {
-        return user.getId();
+    public User getUser() {
+        return user;
     }
 
     @Override
