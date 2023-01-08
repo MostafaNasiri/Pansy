@@ -1,6 +1,7 @@
 package io.github.mostafanasiri.pansy.features.user;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
+import io.github.mostafanasiri.pansy.common.BaseController;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.user.dto.*;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "User")
 @RestController
 @RequestMapping("/users")
-public class UserController {
+public class UserController extends BaseController {
     @Autowired
     private UserService userService;
 
