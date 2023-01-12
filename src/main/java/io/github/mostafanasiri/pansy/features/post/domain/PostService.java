@@ -79,7 +79,12 @@ public class PostService {
         var pageRequest = PageRequest.of(page, size);
         var result = postRepository.findByAuthorOrderByCreatedAtDesc(userEntity, pageRequest);
 
-        return result.stream().map(this::mapFromPostEntity).toList();
+        return result.stream()
+                .map(pe -> {
+                    var likesCount = (int) likeRepository.countByPostId(pe.getId());
+                    return mapFromPostEntity(pe, likesCount);
+                })
+                .toList();
     }
 
     public Post createPost(Post input) {
@@ -106,11 +111,12 @@ public class PostService {
 
         var postEntity = new PostEntity(userEntity, input.caption(), fileEntities);
         postEntity = postRepository.save(postEntity);
+        var likesCount = (int) likeRepository.countByPostId(postEntity.getId());
 
-        return mapFromPostEntity(postEntity);
+        return mapFromPostEntity(postEntity, likesCount);
     }
 
-    private Post mapFromPostEntity(PostEntity entity) {
+    private Post mapFromPostEntity(PostEntity entity, int likesCount) {
         var avatarUrl = entity.getAuthor().getAvatar() != null ? entity.getAuthor().getAvatar().getName() : null;
         var author = new Author(
                 entity.getAuthor().getId(),
@@ -123,6 +129,6 @@ public class PostService {
                 .map((i) -> new Image(i.getId(), i.getName()))
                 .toList();
 
-        return new Post(entity.getId(), author, entity.getCaption(), images);
+        return new Post(entity.getId(), author, entity.getCaption(), images, likesCount);
     }
 }

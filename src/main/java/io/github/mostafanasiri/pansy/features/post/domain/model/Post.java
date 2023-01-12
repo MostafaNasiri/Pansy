@@ -9,9 +9,10 @@ public record Post(
         @Nullable Integer id,
         @NonNull Author author,
         @NonNull String caption,
-        @NonNull List<Image> images
+        @NonNull List<Image> images,
+        int likesCount
 ) {
     public Post(@NonNull Author author, @NonNull String caption, @NonNull List<Image> images) {
-        this(null, author, caption, images);
+        this(null, author, caption, images, 0);
     }
 }

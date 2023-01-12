@@ -77,7 +77,8 @@ public class PostController extends BaseController {
                 post.id(),
                 authorResponse,
                 post.caption(),
-                imageUrls
+                imageUrls,
+                post.likesCount()
         );
     }
 
