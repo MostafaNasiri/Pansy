@@ -4,10 +4,13 @@ import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.BaseController;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.post.domain.PostService;
+import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
+import io.github.mostafanasiri.pansy.features.post.presentation.request.AddCommentRequest;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.CreatePostRequest;
+import io.github.mostafanasiri.pansy.features.post.presentation.response.CommentResponse;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.PostResponse;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,12 +64,7 @@ public class PostController extends BaseController {
     }
 
     private PostResponse mapFromPostModel(Post post) {
-        var avatarUrl = post.user().avatar() != null ? fileUtils.createFileUrl(post.user().avatar()) : null;
-        var authorResponse = new UserResponse(
-                post.user().id(),
-                post.user().name(),
-                avatarUrl
-        );
+        var userResponse = mapFromUserModel(post.user());
 
         var imageUrls = post.images()
                 .stream()
@@ -75,10 +73,20 @@ public class PostController extends BaseController {
 
         return new PostResponse(
                 post.id(),
-                authorResponse,
+                userResponse,
                 post.caption(),
                 imageUrls,
                 post.likesCount()
+        );
+    }
+
+    private UserResponse mapFromUserModel(User user) {
+        var avatarUrl = user.avatar() != null ? fileUtils.createFileUrl(user.avatar()) : null;
+
+        return new UserResponse(
+                user.id(),
+                user.name(),
+                avatarUrl
         );
     }
 
@@ -111,11 +119,23 @@ public class PostController extends BaseController {
 
     @PostMapping("/posts/{post_id}/comments")
     @Operation(summary = "Adds a comment for the specified post id")
-    public ResponseEntity<ApiResponse<Boolean>> addComment(
-            @PathVariable(name = "post_id") int postId
+    public ResponseEntity<ApiResponse<CommentResponse>> addComment(
+            @PathVariable(name = "post_id") int postId,
+            @Valid @RequestBody AddCommentRequest request
     ) {
-        service.likePost(getCurrentUser().getId(), postId);
-        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
+        var comment = new Comment(new User(getCurrentUser().getId()), request.text());
+        var result = mapFromCommentModel(service.addComment(postId, comment));
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
+    }
+
+    private CommentResponse mapFromCommentModel(Comment comment) {
+        return new CommentResponse(
+                comment.id(),
+                mapFromUserModel(comment.user()),
+                comment.text(),
+                comment.createdAt()
+        );
     }
 
     // TODO - [DELETE] /posts/{post_id}/comments/{comment_id} - Removes a comment from the specified post id

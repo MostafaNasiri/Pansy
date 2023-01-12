@@ -18,7 +18,7 @@ import org.springframework.lang.NonNull;
 @Table(
         name = "users",
         indexes = {
-                @Index(name = "idx_username", columnList = "username")
+                @Index(columnList = "username")
         }
 )
 @EntityListeners(AuditingEntityListener.class)

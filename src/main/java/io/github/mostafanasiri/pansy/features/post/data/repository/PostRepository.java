@@ -15,5 +15,5 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
     )
     List<Integer> getFileIdsThatAreAlreadyAttachedToAPost(List<Integer> fileIds);
 
-    List<PostEntity> findByAuthorOrderByCreatedAtDesc(UserEntity author, Pageable pageable);
+    List<PostEntity> findByUserOrderByCreatedAtDesc(UserEntity author, Pageable pageable);
 }

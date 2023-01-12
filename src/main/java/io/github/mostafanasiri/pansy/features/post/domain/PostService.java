@@ -82,7 +82,7 @@ public class PostService {
         var userEntity = userService.getUser(userId);
 
         var pageRequest = PageRequest.of(page, size);
-        var result = postRepository.findByAuthorOrderByCreatedAtDesc(userEntity, pageRequest);
+        var result = postRepository.findByUserOrderByCreatedAtDesc(userEntity, pageRequest);
 
         return result.stream()
                 .map(pe -> {
@@ -145,7 +145,7 @@ public class PostService {
     private Comment mapFromCommentEntity(CommentEntity entity) {
         var user = mapFromUserEntity(entity.getUser());
 
-        return new Comment(entity.getId(), user, entity.getText());
+        return new Comment(entity.getId(), user, entity.getText(), entity.getCreatedAt());
     }
 
     private User mapFromUserEntity(UserEntity entity) {

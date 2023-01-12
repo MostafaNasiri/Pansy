@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(
         name = "comments",
         indexes = {
-                @Index(name = "idx_post_id", columnList = "post_id")
+                @Index(columnList = "post_id")
         }
 )
 @EntityListeners(AuditingEntityListener.class)
