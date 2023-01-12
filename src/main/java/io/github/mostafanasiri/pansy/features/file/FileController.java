@@ -24,6 +24,8 @@ public class FileController {
     @PostMapping("/files")
     @Operation(summary = "Upload a file")
     public ResponseEntity<ApiResponse<FileUploadResponse>> save(@RequestParam(name = "file") MultipartFile file) {
+        // TODO: Support multiple file upload
+
         var uploadedFile = service.save(file);
 
         var result = new FileUploadResponse(
@@ -31,7 +33,7 @@ public class FileController {
                 fileUtils.createFileUrl(uploadedFile)
         );
 
-        return new ResponseEntity<>( new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
     }
 
     @GetMapping("/files/{file_name}")

@@ -24,4 +24,11 @@ public class FileUtils {
                 .path(file.getName())
                 .toUriString();
     }
+
+    public String createFileUrl(@NonNull String fileName) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/files/")
+                .path(fileName)
+                .toUriString();
+    }
 }

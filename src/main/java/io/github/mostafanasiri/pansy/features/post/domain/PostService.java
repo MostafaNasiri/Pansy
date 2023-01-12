@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features.post.domain;
 
+import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.PostRepository;
@@ -9,6 +10,8 @@ import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -28,24 +31,40 @@ public class PostService {
                 input.images()
                         .stream()
                         .map((i) -> i.id())
-                        .toList()
+                        .collect(Collectors.toSet())
         );
+
+        // Make sure that files are not already attached to any posts
+        var fileIds = fileEntities.stream().map(f -> f.getId()).toList();
+        var fileIdsThatAreAlreadyAttachedToAPost = postRepository.getFileIdsThatAreAlreadyAttachedToAPost(fileIds);
+        if (!fileIdsThatAreAlreadyAttachedToAPost.isEmpty()) {
+            throw new InvalidInputException(
+                    String.format(
+                            "File with id %s is already attached to a post.",
+                            fileIdsThatAreAlreadyAttachedToAPost.get(0)
+                    )
+            );
+        }
 
         var postEntity = new PostEntity(userEntity, input.caption(), fileEntities);
         postEntity = postRepository.save(postEntity);
 
-        var avatarUrl = postEntity.getAuthor().getAvatar() != null ? postEntity.getAuthor().getAvatar().getName() : null;
+        return mapFromPostEntity(postEntity);
+    }
+
+    private Post mapFromPostEntity(PostEntity entity) {
+        var avatarUrl = entity.getAuthor().getAvatar() != null ? entity.getAuthor().getAvatar().getName() : null;
         var author = new Author(
-                postEntity.getAuthor().getId(),
-                postEntity.getAuthor().getFullName(),
+                entity.getAuthor().getId(),
+                entity.getAuthor().getFullName(),
                 avatarUrl
         );
-        var images = postEntity.getImages()
+
+        var images = entity.getImages()
                 .stream()
                 .map((i) -> new Image(i.getId(), i.getName()))
                 .toList();
-        var post = new Post(postEntity.getId(), author, postEntity.getCaption(), images);
 
-        return post;
+        return new Post(entity.getId(), author, entity.getCaption(), images);
     }
 }

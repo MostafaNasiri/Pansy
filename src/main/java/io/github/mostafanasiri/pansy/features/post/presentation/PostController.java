@@ -50,15 +50,16 @@ public class PostController extends BaseController {
     }
 
     private PostResponse mapFromPostModel(Post post) {
+        var avatarUrl = post.author().avatar() != null ? fileUtils.createFileUrl(post.author().avatar()) : null;
         var authorResponse = new PostAuthorResponse(
                 post.author().id(),
                 post.author().name(),
-                fileUtils.createFileUrl(post.author().avatar())
+                avatarUrl
         );
 
         var imageUrls = post.images()
                 .stream()
-                .map((i) -> i.url())
+                .map((i) -> fileUtils.createFileUrl(i.name()))
                 .toList();
 
         return new PostResponse(
