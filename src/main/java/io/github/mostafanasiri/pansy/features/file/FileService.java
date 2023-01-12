@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.nio.file.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FileService {
@@ -87,24 +88,26 @@ public class FileService {
 
     public File getFile(int fileId) {
         return repository.findById(fileId)
-                .orElseThrow(() -> {
-                    throw new EntityNotFoundException(File.class, fileId);
-                });
+                .orElseThrow(() -> new EntityNotFoundException(File.class, fileId));
     }
 
     /**
      * Returns all files with the given fileIds.
      *
-     * @throws EntityNotFoundException if there's an invalid id the given fileIds.
+     * @throws EntityNotFoundException if there's an invalid id in the given fileIds.
      */
-    public List<File> getFiles(@NonNull List<Integer> fileIds) {
+    public List<File> getFiles(@NonNull Set<Integer> fileIds) {
         var result = repository.findAllById(fileIds);
 
-        result.stream().forEach(file -> {
-            if (!fileIds.contains(file.getId())) {
-                throw new EntityNotFoundException(File.class, file.getId());
-            }
-        });
+        if (result.size() < fileIds.size()) {
+            // At least one of the required files was not found
+            fileIds.forEach(id -> {
+                result.stream()
+                        .filter(f -> f.getId() == id)
+                        .findAny()
+                        .orElseThrow(() -> new EntityNotFoundException(File.class, id));
+            });
+        }
 
         return result;
     }
