@@ -16,9 +16,9 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Post")
 @RestController
@@ -29,7 +29,18 @@ public class PostController extends BaseController {
     @Autowired
     private FileUtils fileUtils;
 
-    // TODO - [GET] /users/{user_id}/posts - Returns a user's posts
+    @GetMapping("/users/{user_id}/posts")
+    @Operation(summary = "Returns a user's posts")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getPosts(
+            @PathVariable(name = "user_id") int userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size
+    ) {
+        var posts = service.getUserPosts(userId, page, size);
+        var result = posts.stream().map(this::mapFromPostModel).toList();
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
+    }
 
     @PostMapping("/posts")
     @Operation(summary = "Creates a new post for the authorized user")

@@ -9,8 +9,10 @@ import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +25,15 @@ public class PostService {
 
     @Autowired
     private FileService fileService;
+
+    public List<Post> getUserPosts(int userId, int page, int size) {
+        var userEntity = userService.getUser(userId);
+
+        var pageRequest = PageRequest.of(page, size);
+        var result = postRepository.findByAuthorOrderByCreatedAtDesc(userEntity, pageRequest);
+
+        return result.stream().map(this::mapFromPostEntity).toList();
+    }
 
     public Post createPost(Post input) {
         var userEntity = userService.getUser(input.author().id());
