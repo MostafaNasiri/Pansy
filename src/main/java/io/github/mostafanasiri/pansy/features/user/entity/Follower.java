@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(
         name = "followers",
         uniqueConstraints = @UniqueConstraint(columnNames = {"source_user_id", "target_user_id"})
+        // TODO: Add index
 )
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor

@@ -90,13 +90,21 @@ public class PostController extends BaseController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }
 
-
-    // TODO - [POST] /posts/{post_id}/likes - Likes the specified post by the authorized user
+    @PostMapping("/posts/{post_id}/likes")
+    @Operation(summary = "Likes the specified post by the authorized user")
+    public ResponseEntity<ApiResponse<Boolean>> likePost(@PathVariable(name = "post_id") int postId) {
+        service.likePost(getCurrentUser().getId(), postId);
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
+    }
 
     // TODO - [GET] /posts/{post_id}/likes - Returns a list of users who liked the specified post id
 
-    // TODO - [DELETE] /posts/{post_id}/likes/{user_id} - Unlikes a post that has already been liked by the authorized user
-
+    @DeleteMapping("/posts/{post_id}/likes/{user_id}")
+    @Operation(summary = "Unlikes a post that has already been liked by the authorized user")
+    public ResponseEntity<ApiResponse<Boolean>> unlikePost(@PathVariable(name = "post_id") int postId) {
+        service.unlikePost(getCurrentUser().getId(), postId);
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
+    }
 
     // TODO - [GET] /posts/{post_id}/comments - Returns comments of the specified post id
 

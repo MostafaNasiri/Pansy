@@ -3,12 +3,16 @@ package io.github.mostafanasiri.pansy.features.post.domain;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.FileService;
+import io.github.mostafanasiri.pansy.features.post.data.entity.LikeEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
+import io.github.mostafanasiri.pansy.features.post.data.repository.LikeRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.PostRepository;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Author;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.user.UserService;
+import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,10 +26,37 @@ public class PostService {
     private PostRepository postRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
     private FileService fileService;
+
+    public void likePost(int userId, int postId) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+        var post = getPostEntity(postId);
+
+        var userHasAlreadyLikedThePost = likeRepository.findByUserIdAndPostId(userId, postId).isPresent();
+        if (!userHasAlreadyLikedThePost) {
+            var like = new LikeEntity(user, post);
+            likeRepository.save(like);
+        }
+    }
+
+    public void unlikePost(int userId, int postId) {
+        var likeEntity = likeRepository.findByUserIdAndPostId(userId, postId);
+
+        var userHasLikedThePost = likeEntity.isPresent();
+        if (userHasLikedThePost) {
+            likeRepository.delete(likeEntity.get());
+        }
+    }
 
     public void deletePost(int userId, int postId) {
         var post = getPostEntity(postId);
