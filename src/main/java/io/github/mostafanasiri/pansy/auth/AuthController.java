@@ -7,7 +7,7 @@ import io.github.mostafanasiri.pansy.auth.dto.RegisterResponse;
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
 import io.github.mostafanasiri.pansy.features.user.UserService;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -42,7 +42,7 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Creates a new user")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
-        var entity = new User();
+        var entity = new UserEntity();
         entity.setFullName(request.getFullName());
         entity.setUsername(request.getUsername());
         entity.setPassword(request.getPassword());

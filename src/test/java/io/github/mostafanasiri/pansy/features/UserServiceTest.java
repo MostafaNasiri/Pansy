@@ -4,7 +4,7 @@ import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import io.github.mostafanasiri.pansy.features.user.entity.Follower;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.repo.FollowerRepository;
 import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -36,10 +36,10 @@ public class UserServiceTest {
         // Arrange
         var username = "username";
 
-        var user = new User("f", username, "");
+        var user = new UserEntity("f", username, "");
 
         when(userRepository.findByUsername(username))
-                .thenReturn(new User());
+                .thenReturn(new UserEntity());
 
         // Act & Assert
         InvalidInputException ex = assertThrows(
@@ -54,7 +54,7 @@ public class UserServiceTest {
     @Test
     public void createUser_validInput_returnsCreatedUser() {
         // Arrange
-        var user = new User("name", "username", "pass");
+        var user = new UserEntity("name", "username", "pass");
 
         when(userRepository.save(user))
                 .thenReturn(user);
@@ -69,7 +69,7 @@ public class UserServiceTest {
     @Test
     public void updateUser_validInput_returnsUpdatedUser() {
         // Arrange
-        var user = new User("name", "username", "pass");
+        var user = new UserEntity("name", "username", "pass");
 
         when(userRepository.save(user))
                 .thenReturn(user);
@@ -96,7 +96,7 @@ public class UserServiceTest {
                 ""
         );
 
-        var expectedMessage = new EntityNotFoundException(User.class, userId).getMessage();
+        var expectedMessage = new EntityNotFoundException(UserEntity.class, userId).getMessage();
 
         assertEquals(ex.getMessage(), expectedMessage);
     }
@@ -105,7 +105,7 @@ public class UserServiceTest {
     public void getUser_validInput_returnsUser() {
         // Arrange
         var userId = 13;
-        var user = new User();
+        var user = new UserEntity();
 
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
@@ -132,7 +132,7 @@ public class UserServiceTest {
                 ""
         );
 
-        var expectedMessage = new EntityNotFoundException(User.class, userId).getMessage();
+        var expectedMessage = new EntityNotFoundException(UserEntity.class, userId).getMessage();
 
         assertEquals(ex.getMessage(), expectedMessage);
     }
@@ -142,13 +142,13 @@ public class UserServiceTest {
         // Arrange
         var userId = 13;
 
-        var user = new User();
+        var user = new UserEntity();
 
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
         var followers = new ArrayList<Follower>();
-        followers.add(new Follower(new User("follower1", "", ""), user));
+        followers.add(new Follower(new UserEntity("follower1", "", ""), user));
 
         when(followerRepository.findAllByTargetUser(user))
                 .thenReturn(followers);
@@ -177,7 +177,7 @@ public class UserServiceTest {
                 ""
         );
 
-        var expectedMessage = new EntityNotFoundException(User.class, userId).getMessage();
+        var expectedMessage = new EntityNotFoundException(UserEntity.class, userId).getMessage();
 
         assertEquals(ex.getMessage(), expectedMessage);
     }
@@ -187,13 +187,13 @@ public class UserServiceTest {
         // Arrange
         var userId = 13;
 
-        var user = new User();
+        var user = new UserEntity();
 
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
         var followers = new ArrayList<Follower>();
-        followers.add(new Follower(new User("follower1", "", ""), user));
+        followers.add(new Follower(new UserEntity("follower1", "", ""), user));
 
         when(followerRepository.findAllBySourceUser(user))
                 .thenReturn(followers);
@@ -239,7 +239,7 @@ public class UserServiceTest {
                 ""
         );
 
-        var expectedMessage = new EntityNotFoundException(User.class, sourceUserId).getMessage();
+        var expectedMessage = new EntityNotFoundException(UserEntity.class, sourceUserId).getMessage();
 
         assertEquals(ex.getMessage(), expectedMessage);
     }
@@ -251,7 +251,7 @@ public class UserServiceTest {
         var targetUserId = 2;
 
         when(userRepository.findById(sourceUserId))
-                .thenReturn(Optional.of(new User()));
+                .thenReturn(Optional.of(new UserEntity()));
         when(userRepository.findById(targetUserId))
                 .thenReturn(Optional.empty());
 
@@ -262,7 +262,7 @@ public class UserServiceTest {
                 ""
         );
 
-        var expectedMessage = new EntityNotFoundException(User.class, targetUserId).getMessage();
+        var expectedMessage = new EntityNotFoundException(UserEntity.class, targetUserId).getMessage();
 
         assertEquals(ex.getMessage(), expectedMessage);
     }
@@ -273,10 +273,10 @@ public class UserServiceTest {
         var sourceUserId = 1;
         var targetUserId = 2;
 
-        var sourceUser = new User();
+        var sourceUser = new UserEntity();
         sourceUser.setId(sourceUserId);
 
-        var targetUser = new User();
+        var targetUser = new UserEntity();
         targetUser.setId(targetUserId);
 
         when(userRepository.findById(sourceUserId))
@@ -301,10 +301,10 @@ public class UserServiceTest {
         var sourceUserId = 1;
         var targetUserId = 2;
 
-        var sourceUser = new User();
+        var sourceUser = new UserEntity();
         sourceUser.setId(sourceUserId);
 
-        var targetUser = new User();
+        var targetUser = new UserEntity();
         targetUser.setId(targetUserId);
 
         when(userRepository.findById(sourceUserId))
@@ -356,7 +356,7 @@ public class UserServiceTest {
                 ""
         );
 
-        var expectedMessage = new EntityNotFoundException(User.class, sourceUserId).getMessage();
+        var expectedMessage = new EntityNotFoundException(UserEntity.class, sourceUserId).getMessage();
 
         assertEquals(ex.getMessage(), expectedMessage);
     }
@@ -368,7 +368,7 @@ public class UserServiceTest {
         var targetUserId = 2;
 
         when(userRepository.findById(sourceUserId))
-                .thenReturn(Optional.of(new User()));
+                .thenReturn(Optional.of(new UserEntity()));
         when(userRepository.findById(targetUserId))
                 .thenReturn(Optional.empty());
 
@@ -379,7 +379,7 @@ public class UserServiceTest {
                 ""
         );
 
-        var expectedMessage = new EntityNotFoundException(User.class, targetUserId).getMessage();
+        var expectedMessage = new EntityNotFoundException(UserEntity.class, targetUserId).getMessage();
 
         assertEquals(ex.getMessage(), expectedMessage);
     }
@@ -390,10 +390,10 @@ public class UserServiceTest {
         var sourceUserId = 1;
         var targetUserId = 2;
 
-        var sourceUser = new User();
+        var sourceUser = new UserEntity();
         sourceUser.setId(sourceUserId);
 
-        var targetUser = new User();
+        var targetUser = new UserEntity();
         targetUser.setId(targetUserId);
 
         when(userRepository.findById(sourceUserId))
@@ -418,10 +418,10 @@ public class UserServiceTest {
         var sourceUserId = 1;
         var targetUserId = 2;
 
-        var sourceUser = new User();
+        var sourceUser = new UserEntity();
         sourceUser.setId(sourceUserId);
 
-        var targetUser = new User();
+        var targetUser = new UserEntity();
         targetUser.setId(targetUserId);
 
         when(userRepository.findById(sourceUserId))

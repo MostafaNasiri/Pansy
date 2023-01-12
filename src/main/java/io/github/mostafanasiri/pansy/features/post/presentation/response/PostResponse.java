@@ -4,7 +4,7 @@ import java.util.List;
 
 public record PostResponse(
         int id,
-        PostAuthorResponse author,
+        UserResponse author,
         String caption,
         List<String> imageUrls,
         int likesCount

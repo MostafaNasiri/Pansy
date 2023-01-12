@@ -2,7 +2,7 @@ package io.github.mostafanasiri.pansy.features.post.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.file.File;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +24,7 @@ import java.util.List;
 public class PostEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User author;
+    private UserEntity user;
 
     @Column(name = "caption", nullable = false, length = 1000)
     private String caption;
@@ -37,8 +37,8 @@ public class PostEntity extends BaseEntity {
     )
     private List<File> images;
 
-    public PostEntity(@NonNull User author, @NonNull String caption, @NonNull List<File> images) {
-        this.author = author;
+    public PostEntity(@NonNull UserEntity user, @NonNull String caption, @NonNull List<File> images) {
+        this.user = user;
         this.caption = caption;
         this.images = images;
     }

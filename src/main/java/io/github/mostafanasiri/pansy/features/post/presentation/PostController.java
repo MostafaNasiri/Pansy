@@ -4,12 +4,12 @@ import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.BaseController;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.post.domain.PostService;
-import io.github.mostafanasiri.pansy.features.post.domain.model.Author;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
+import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.CreatePostRequest;
-import io.github.mostafanasiri.pansy.features.post.presentation.response.PostAuthorResponse;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.PostResponse;
+import io.github.mostafanasiri.pansy.features.post.presentation.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -45,7 +45,7 @@ public class PostController extends BaseController {
     @PostMapping("/posts")
     @Operation(summary = "Creates a new post for the authorized user")
     public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody CreatePostRequest request) {
-        var author = new Author(getCurrentUser().getId());
+        var author = new User(getCurrentUser().getId());
         var post = new Post(
                 author,
                 request.caption(),
@@ -61,10 +61,10 @@ public class PostController extends BaseController {
     }
 
     private PostResponse mapFromPostModel(Post post) {
-        var avatarUrl = post.author().avatar() != null ? fileUtils.createFileUrl(post.author().avatar()) : null;
-        var authorResponse = new PostAuthorResponse(
-                post.author().id(),
-                post.author().name(),
+        var avatarUrl = post.user().avatar() != null ? fileUtils.createFileUrl(post.user().avatar()) : null;
+        var authorResponse = new UserResponse(
+                post.user().id(),
+                post.user().name(),
                 avatarUrl
         );
 
@@ -109,7 +109,14 @@ public class PostController extends BaseController {
 
     // TODO - [GET] /posts/{post_id}/comments - Returns comments of the specified post id
 
-    // TODO - [POST] /posts/{post_id}/comments - Adds a comment for the specified post id
+    @PostMapping("/posts/{post_id}/comments")
+    @Operation(summary = "Adds a comment for the specified post id")
+    public ResponseEntity<ApiResponse<Boolean>> addComment(
+            @PathVariable(name = "post_id") int postId
+    ) {
+        service.likePost(getCurrentUser().getId(), postId);
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
+    }
 
     // TODO - [DELETE] /posts/{post_id}/comments/{comment_id} - Removes a comment from the specified post id
 }

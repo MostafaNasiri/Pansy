@@ -1,6 +1,6 @@
 package io.github.mostafanasiri.pansy.auth;
 
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -8,13 +8,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class PansyUserDetails implements UserDetails {
-    private User user;
+    private UserEntity user;
 
-    public PansyUserDetails(User user) {
+    public PansyUserDetails(UserEntity user) {
         this.user = user;
     }
 
-    public User getUser() {
+    public UserEntity getUser() {
         return user;
     }
 

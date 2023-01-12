@@ -22,7 +22,7 @@ import org.springframework.lang.NonNull;
         }
 )
 @EntityListeners(AuditingEntityListener.class)
-public class User extends BaseEntity {
+public class UserEntity extends BaseEntity {
     @Column(name = "first_name", nullable = false)
     private String fullName;
 
@@ -39,7 +39,7 @@ public class User extends BaseEntity {
     @JoinColumn(name = "avatar_id")
     private File avatar;
 
-    public User(@NonNull String fullName, @NonNull String username, @NonNull String password) {
+    public UserEntity(@NonNull String fullName, @NonNull String username, @NonNull String password) {
         this.fullName = fullName;
         this.username = username;
         this.password = password;

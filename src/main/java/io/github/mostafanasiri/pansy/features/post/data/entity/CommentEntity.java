@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.features.post.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class CommentEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
@@ -29,7 +29,7 @@ public class CommentEntity extends BaseEntity {
     @Column(name = "text", nullable = false, length = 500)
     private String text;
 
-    public CommentEntity(User user, PostEntity post, String text) {
+    public CommentEntity(UserEntity user, PostEntity post, String text) {
         this.user = user;
         this.post = post;
         this.text = text;

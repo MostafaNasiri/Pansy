@@ -7,7 +7,7 @@ import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.user.UserController;
 import io.github.mostafanasiri.pansy.features.user.UserService;
 import io.github.mostafanasiri.pansy.features.user.dto.*;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,7 +48,7 @@ public class UserControllerTest extends BaseControllerTest {
         // Arrange
         var userId = 13;
 
-        var entity = new User("test", "user", "pass");
+        var entity = new UserEntity("test", "user", "pass");
         entity.setId(userId);
 
         var avatar = new File("x");
@@ -87,7 +87,7 @@ public class UserControllerTest extends BaseControllerTest {
         // Arrange
         var userId = 13;
 
-        var exception = new EntityNotFoundException(User.class, userId);
+        var exception = new EntityNotFoundException(UserEntity.class, userId);
 
         when(userService.getUser(userId))
                 .thenThrow(exception);
@@ -118,7 +118,7 @@ public class UserControllerTest extends BaseControllerTest {
         var requestDto = new UpdateUserRequest("full", "", fileId);
 
         when(userService.getUser(userId))
-                .thenReturn(new User());
+                .thenReturn(new UserEntity());
 
         var exception = new EntityNotFoundException(File.class, fileId);
         when(fileService.getFile(fileId))
@@ -176,7 +176,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var requestDto = new UpdateUserRequest("full", "bio", fileId);
 
-        var user = new User();
+        var user = new UserEntity();
         user.setId(userId);
         user.setFullName(requestDto.getFullName());
         user.setBio(requestDto.getBio());
@@ -248,7 +248,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var requestDto = new FollowUnfollowUserRequest(targetUserId);
 
-        var exception = new EntityNotFoundException(User.class, targetUserId);
+        var exception = new EntityNotFoundException(UserEntity.class, targetUserId);
 
         when(userService.getUser(targetUserId))
                 .thenThrow(exception);
@@ -338,7 +338,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var requestDto = new FollowUnfollowUserRequest(targetUserId);
 
-        var exception = new EntityNotFoundException(User.class, targetUserId);
+        var exception = new EntityNotFoundException(UserEntity.class, targetUserId);
 
         when(userService.getUser(targetUserId))
                 .thenThrow(exception);
@@ -399,7 +399,7 @@ public class UserControllerTest extends BaseControllerTest {
     public void getFollowers_invalidUserId_returnsError() throws Exception {
         // Arrange
         var userId = 1;
-        var exception = new EntityNotFoundException(User.class, userId);
+        var exception = new EntityNotFoundException(UserEntity.class, userId);
 
         when(userService.getUser(userId))
                 .thenThrow(exception);
@@ -429,8 +429,8 @@ public class UserControllerTest extends BaseControllerTest {
         // Arrange
         var userId = 1;
 
-        var users = new ArrayList<User>();
-        users.add(new User("name", "username", "password"));
+        var users = new ArrayList<UserEntity>();
+        users.add(new UserEntity("name", "username", "password"));
 
         when(userService.getFollowers(userId))
                 .thenReturn(users);
@@ -460,7 +460,7 @@ public class UserControllerTest extends BaseControllerTest {
     public void getFollowing_invalidUserId_returnsError() throws Exception {
         // Arrange
         var userId = 1;
-        var exception = new EntityNotFoundException(User.class, userId);
+        var exception = new EntityNotFoundException(UserEntity.class, userId);
 
         when(userService.getUser(userId))
                 .thenThrow(exception);
@@ -490,8 +490,8 @@ public class UserControllerTest extends BaseControllerTest {
         // Arrange
         var userId = 1;
 
-        var users = new ArrayList<User>();
-        users.add(new User("name", "username", "password"));
+        var users = new ArrayList<UserEntity>();
+        users.add(new UserEntity("name", "username", "password"));
 
         when(userService.getFollowing(userId))
                 .thenReturn(users);

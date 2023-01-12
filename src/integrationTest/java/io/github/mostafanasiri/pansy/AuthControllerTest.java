@@ -7,7 +7,7 @@ import io.github.mostafanasiri.pansy.auth.dto.RegisterRequest;
 import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.user.UserService;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,7 +50,7 @@ public class AuthControllerTest extends BaseControllerTest {
         // Arrange
         var requestDto = getValidInputForRegister();
 
-        var entity = new User(requestDto.getFullName(), requestDto.getUsername(), requestDto.getPassword());
+        var entity = new UserEntity(requestDto.getFullName(), requestDto.getUsername(), requestDto.getPassword());
 
         when(jwtTokenUtil.generateAccessToken(any()))
                 .thenReturn("");
@@ -159,7 +159,7 @@ public class AuthControllerTest extends BaseControllerTest {
         // Arrange
         var requestDto = getValidInputForRegister();
 
-        var entity = new User(requestDto.getFullName(), requestDto.getUsername(), requestDto.getPassword());
+        var entity = new UserEntity(requestDto.getFullName(), requestDto.getUsername(), requestDto.getPassword());
         when(userService.createUser(entity))
                 .thenThrow(new InvalidInputException("Username already exists"));
 

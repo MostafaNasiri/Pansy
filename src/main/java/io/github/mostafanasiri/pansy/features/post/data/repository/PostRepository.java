@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.features.post.data.repository;
 
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,5 +15,5 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
     )
     List<Integer> getFileIdsThatAreAlreadyAttachedToAPost(List<Integer> fileIds);
 
-    List<PostEntity> findByAuthorOrderByCreatedAtDesc(User author, Pageable pageable);
+    List<PostEntity> findByAuthorOrderByCreatedAtDesc(UserEntity author, Pageable pageable);
 }

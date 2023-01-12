@@ -22,9 +22,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Follower extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "source_user_id", nullable = false)
-    private User sourceUser;
+    private UserEntity sourceUser;
 
     @ManyToOne
     @JoinColumn(name = "target_user_id", nullable = false)
-    private User targetUser;
+    private UserEntity targetUser;
 }

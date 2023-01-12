@@ -3,7 +3,7 @@ package io.github.mostafanasiri.pansy.features.user;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.user.entity.Follower;
-import io.github.mostafanasiri.pansy.features.user.entity.User;
+import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.repo.FollowerRepository;
 import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,28 +24,28 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User createUser(@NonNull User user) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
+    public UserEntity createUser(@NonNull UserEntity userEntity) {
+        if (userRepository.findByUsername(userEntity.getUsername()) != null) {
             throw new InvalidInputException("Username already exists");
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
 
-        return userRepository.save(user);
+        return userRepository.save(userEntity);
     }
 
-    public User updateUser(@NonNull User user) {
-        return userRepository.save(user);
+    public UserEntity updateUser(@NonNull UserEntity userEntity) {
+        return userRepository.save(userEntity);
     }
 
-    public User getUser(int userId) {
+    public UserEntity getUser(int userId) {
         return userRepository.findById(userId)
                 .orElseThrow(
-                        () -> new EntityNotFoundException(User.class, userId)
+                        () -> new EntityNotFoundException(UserEntity.class, userId)
                 );
     }
 
-    public List<User> getFollowers(int userId) {
+    public List<UserEntity> getFollowers(int userId) {
         var user = getUser(userId);
 
         return followerRepository.findAllByTargetUser(user)
@@ -54,7 +54,7 @@ public class UserService {
                 .toList();
     }
 
-    public List<User> getFollowing(int userId) {
+    public List<UserEntity> getFollowing(int userId) {
         var user = getUser(userId);
 
         return followerRepository.findAllBySourceUser(user)
