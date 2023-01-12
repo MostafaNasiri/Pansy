@@ -83,7 +83,12 @@ public class PostController extends BaseController {
 
     // TODO - [PUT] /posts/{post_id} - Edits a post
 
-    // TODO - [DELETE] /posts/{post_id} - Deletes a post
+    @DeleteMapping("/posts/{post_id}")
+    @Operation(summary = "Deletes a post")
+    public ResponseEntity<ApiResponse<Boolean>> deletePost(@PathVariable(name = "post_id") int postId) {
+        service.deletePost(getCurrentUser().getId(), postId);
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
+    }
 
 
     // TODO - [POST] /posts/{post_id}/likes - Likes the specified post by the authorized user

@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features.post.domain;
 
+import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
@@ -25,6 +26,21 @@ public class PostService {
 
     @Autowired
     private FileService fileService;
+
+    public void deletePost(int userId, int postId) {
+        var post = getPostEntity(postId);
+
+        if (post.getAuthor().getId() != userId) {
+            throw new InvalidInputException("The post does not belong to the specified user.");
+        }
+
+        postRepository.delete(post);
+    }
+
+    private PostEntity getPostEntity(int postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException(Post.class, postId));
+    }
 
     public List<Post> getUserPosts(int userId, int page, int size) {
         var userEntity = userService.getUser(userId);
