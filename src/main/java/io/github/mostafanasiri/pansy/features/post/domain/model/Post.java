@@ -10,9 +10,13 @@ public record Post(
         @NonNull User user,
         @NonNull String caption,
         @NonNull List<Image> images,
-        int likesCount
+        @Nullable LikeData likeData
 ) {
     public Post(@NonNull User user, @NonNull String caption, @NonNull List<Image> images) {
-        this(null, user, caption, images, 0);
+        this(null, user, caption, images, null);
+    }
+
+    public record LikeData(int likesCount, boolean isLikedByCurrentUser) {
+
     }
 }

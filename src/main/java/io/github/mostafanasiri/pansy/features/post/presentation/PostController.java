@@ -15,6 +15,7 @@ import io.github.mostafanasiri.pansy.features.post.presentation.response.UserRes
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +37,9 @@ public class PostController extends BaseController {
     public ResponseEntity<ApiResponse<List<PostResponse>>> getPosts(
             @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size
+            @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var posts = service.getUserPosts(userId, page, size);
+        var posts = service.getUserPosts(getCurrentUser().getId(), userId, page, size);
         var result = posts.stream().map(mapper::mapFromPostModel).toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -83,7 +84,7 @@ public class PostController extends BaseController {
     public ResponseEntity<ApiResponse<List<UserResponse>>> getPostLikes(
             @PathVariable(name = "post_id") int postId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size
+            @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
         var users = service.getLikes(postId, page, size);
 
@@ -106,7 +107,7 @@ public class PostController extends BaseController {
     public ResponseEntity<ApiResponse<List<CommentResponse>>> getComments(
             @PathVariable(name = "post_id") int postId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size
+            @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
         var comments = service.getComments(postId, page, size);
 

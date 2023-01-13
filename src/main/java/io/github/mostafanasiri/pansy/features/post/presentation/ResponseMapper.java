@@ -24,12 +24,16 @@ public class ResponseMapper {
                 .map((i) -> fileUtils.createFileUrl(i.name()))
                 .toList();
 
+        var likesCount = post.likeData() != null ? post.likeData().likesCount() : 0;
+        var isLikedByCurrentUser = post.likeData() != null ? post.likeData().isLikedByCurrentUser() : false;
+
         return new PostResponse(
                 post.id(),
                 userResponse,
                 post.caption(),
                 imageUrls,
-                post.likesCount()
+                likesCount,
+                isLikedByCurrentUser
         );
     }
 

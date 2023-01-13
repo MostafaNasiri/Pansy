@@ -7,6 +7,7 @@ public record PostResponse(
         UserResponse author,
         String caption,
         List<String> imageUrls,
-        int likesCount
+        int likesCount,
+        boolean isLikedByCurrentUser
 ) {
 }

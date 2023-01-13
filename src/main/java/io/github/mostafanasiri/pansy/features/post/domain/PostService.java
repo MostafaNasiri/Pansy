@@ -122,8 +122,8 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public List<Post> getUserPosts(int userId, int page, int size) {
-        var userEntity = userService.getUser(userId);
+    public List<Post> getUserPosts(int currentUserId, int userId, int page, int size) {
+        var userEntity = getUserEntity(userId);
 
         var pageRequest = PageRequest.of(page, size);
         var result = postRepository.findByUserOrderByCreatedAtDesc(userEntity, pageRequest);
@@ -131,13 +131,17 @@ public class PostService {
         return result.stream()
                 .map(pe -> {
                     var likesCount = (int) likeRepository.countByPostId(pe.getId());
-                    return mapFromPostEntity(pe, likesCount);
+                    var isLikedByCurrentUser = likeRepository.existsByPostIdAndUserId(pe.getId(), currentUserId);
+
+                    var likeData = new Post.LikeData(likesCount, isLikedByCurrentUser);
+
+                    return mapFromPostEntity(pe, likeData);
                 })
                 .toList();
     }
 
     public Post createPost(Post input) {
-        var userEntity = userService.getUser(input.user().id());
+        var userEntity = getUserEntity(input.user().id());
 
         var fileEntities = fileService.getFiles(
                 input.images()
@@ -160,9 +164,8 @@ public class PostService {
 
         var postEntity = new PostEntity(userEntity, input.caption(), fileEntities);
         postEntity = postRepository.save(postEntity);
-        var likesCount = (int) likeRepository.countByPostId(postEntity.getId());
 
-        return mapFromPostEntity(postEntity, likesCount);
+        return mapFromPostEntity(postEntity, null);
     }
 
     private PostEntity getPostEntity(int postId) {
@@ -180,7 +183,7 @@ public class PostService {
                 .orElseThrow(() -> new EntityNotFoundException(Comment.class, commentId));
     }
 
-    private Post mapFromPostEntity(PostEntity entity, int likesCount) {
+    private Post mapFromPostEntity(PostEntity entity, Post.LikeData likeData) {
         var user = mapFromUserEntity(entity.getUser());
 
         var images = entity.getImages()
@@ -188,7 +191,7 @@ public class PostService {
                 .map((i) -> new Image(i.getId(), i.getName()))
                 .toList();
 
-        return new Post(entity.getId(), user, entity.getCaption(), images, likesCount);
+        return new Post(entity.getId(), user, entity.getCaption(), images, likeData);
     }
 
     private Comment mapFromCommentEntity(CommentEntity entity) {
