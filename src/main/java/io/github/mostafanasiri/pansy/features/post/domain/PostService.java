@@ -44,6 +44,17 @@ public class PostService {
     @Autowired
     private FileService fileService;
 
+    public List<Comment> getComments(int postId, int page, int size) {
+        var postEntity = getPostEntity(postId);
+
+        var pageRequest = PageRequest.of(page, size);
+        var entities = commentRepository.getComments(postEntity, pageRequest);
+
+        return entities.stream()
+                .map(this::mapFromCommentEntity)
+                .toList();
+    }
+
     public Comment addComment(int postId, Comment comment) {
         var user = getUserEntity(comment.user().id());
         var post = getPostEntity(postId);

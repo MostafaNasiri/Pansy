@@ -115,7 +115,21 @@ public class PostController extends BaseController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
-    // TODO - [GET] /posts/{post_id}/comments - Returns comments of the specified post id
+    @GetMapping("/posts/{post_id}/comments")
+    @Operation(summary = "Returns comments of the specified post id")
+    public ResponseEntity<ApiResponse<List<CommentResponse>>> getComments(
+            @PathVariable(name = "post_id") int postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size
+    ) {
+        var comments = service.getComments(postId, page, size);
+
+        var result = comments.stream()
+                .map(this::mapFromCommentModel)
+                .toList();
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
+    }
 
     @PostMapping("/posts/{post_id}/comments")
     @Operation(summary = "Adds a comment for the specified post id")
