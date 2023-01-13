@@ -1,11 +1,13 @@
 package io.github.mostafanasiri.pansy.features.post.domain;
 
+import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.CommentEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.LikeEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
+import io.github.mostafanasiri.pansy.features.post.data.repository.CommentRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.LikeRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.PostRepository;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
@@ -34,6 +36,9 @@ public class PostService {
     private LikeRepository likeRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -44,8 +49,25 @@ public class PostService {
         var post = getPostEntity(postId);
 
         var commentEntity = new CommentEntity(user, post, comment.text());
+        commentEntity = commentRepository.save(commentEntity);
 
         return mapFromCommentEntity(commentEntity);
+    }
+
+    public void deleteComment(int userId, int postId, int commentId) {
+        var user = getUserEntity(userId);
+        var post = getPostEntity(postId);
+        var comment = getCommentEntity(commentId);
+
+        if (comment.getUser() != user) {
+            throw new AuthorizationException("Comment does not belong to this user.");
+        }
+
+        if (comment.getPost() != post) {
+            throw new InvalidInputException("Comment does not belong to this post.");
+        }
+
+        commentRepository.delete(comment);
     }
 
     public void likePost(int userId, int postId) {
@@ -72,7 +94,7 @@ public class PostService {
         var post = getPostEntity(postId);
 
         if (post.getUser().getId() != userId) {
-            throw new InvalidInputException("The post does not belong to the specified user.");
+            throw new AuthorizationException("Post does not belong to this user.");
         }
 
         postRepository.delete(post);
@@ -128,7 +150,12 @@ public class PostService {
 
     private UserEntity getUserEntity(int userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(UserEntity.class, userId));
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+    }
+
+    private CommentEntity getCommentEntity(int commentId) {
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException(Comment.class, commentId));
     }
 
     private Post mapFromPostEntity(PostEntity entity, int likesCount) {

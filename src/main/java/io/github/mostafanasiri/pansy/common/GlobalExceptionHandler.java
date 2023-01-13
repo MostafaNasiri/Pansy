@@ -1,9 +1,6 @@
 package io.github.mostafanasiri.pansy.common;
 
-import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
-import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
-import io.github.mostafanasiri.pansy.common.exception.InternalErrorException;
-import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
+import io.github.mostafanasiri.pansy.common.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,6 +38,13 @@ public class GlobalExceptionHandler {
     public @ResponseBody ApiResponse<String> handleException(AuthenticationException e) {
         return new ApiResponse<>(ApiResponse.Status.FAIL, e.getMessage());
     }
+
+    @ExceptionHandler(value = AuthorizationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public @ResponseBody ApiResponse<String> handleException(AuthorizationException e) {
+        return new ApiResponse<>(ApiResponse.Status.FAIL, e.getMessage());
+    }
+
 
     @ExceptionHandler(value = MaxUploadSizeExceededException.class)
     @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)

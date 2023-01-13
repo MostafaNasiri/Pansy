@@ -138,5 +138,13 @@ public class PostController extends BaseController {
         );
     }
 
-    // TODO - [DELETE] /posts/{post_id}/comments/{comment_id} - Removes a comment from the specified post id
+    @DeleteMapping("/posts/{post_id}/comments/{comment_id}")
+    @Operation(summary = "Removes a comment from the specified post id")
+    public ResponseEntity<ApiResponse<Boolean>> deleteComment(
+            @PathVariable(name = "post_id") int postId,
+            @PathVariable(name = "comment_id") int commentId
+    ) {
+        service.deleteComment(getCurrentUser().getId(), postId, commentId);
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
+    }
 }
