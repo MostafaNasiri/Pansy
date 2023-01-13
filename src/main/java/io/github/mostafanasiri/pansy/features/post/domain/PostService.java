@@ -81,6 +81,17 @@ public class PostService {
         commentRepository.delete(comment);
     }
 
+    public List<User> getLikes(int postId, int page, int size) {
+        var post = getPostEntity(postId);
+
+        var pageRequest = PageRequest.of(page, size);
+        var likes = likeRepository.getLikes(post, pageRequest);
+
+        return likes.stream()
+                .map(like -> mapFromUserEntity(like.getUser()))
+                .toList();
+    }
+
     public void likePost(int userId, int postId) {
         var user = getUserEntity(userId);
         var post = getPostEntity(postId);

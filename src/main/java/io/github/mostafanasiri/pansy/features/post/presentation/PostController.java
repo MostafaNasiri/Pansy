@@ -106,7 +106,21 @@ public class PostController extends BaseController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
-    // TODO - [GET] /posts/{post_id}/likes - Returns a list of users who liked the specified post id
+    @GetMapping("/posts/{post_id}/likes")
+    @Operation(summary = "Returns a list of users who liked the specified post id")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getPostLikes(
+            @PathVariable(name = "post_id") int postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size
+    ) {
+        var users = service.getLikes(postId, page, size);
+
+        var result = users.stream()
+                .map(this::mapFromUserModel)
+                .toList();
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
+    }
 
     @DeleteMapping("/posts/{post_id}/likes/{user_id}")
     @Operation(summary = "Unlikes a post that has already been liked by the authorized user")
