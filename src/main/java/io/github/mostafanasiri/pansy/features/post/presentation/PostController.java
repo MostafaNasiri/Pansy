@@ -2,7 +2,6 @@ package io.github.mostafanasiri.pansy.features.post.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.BaseController;
-import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.post.domain.PostService;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
@@ -30,7 +29,7 @@ public class PostController extends BaseController {
     private PostService service;
 
     @Autowired
-    private FileUtils fileUtils;
+    private ResponseMapper mapper;
 
     @GetMapping("/users/{user_id}/posts")
     @Operation(summary = "Returns a user's posts")
@@ -40,7 +39,7 @@ public class PostController extends BaseController {
             @RequestParam(defaultValue = "30") int size
     ) {
         var posts = service.getUserPosts(userId, page, size);
-        var result = posts.stream().map(this::mapFromPostModel).toList();
+        var result = posts.stream().map(mapper::mapFromPostModel).toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
@@ -58,36 +57,9 @@ public class PostController extends BaseController {
                         .toList()
         );
 
-        var result = mapFromPostModel(service.createPost(post));
+        var result = mapper.mapFromPostModel(service.createPost(post));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
-    }
-
-    private PostResponse mapFromPostModel(Post post) {
-        var userResponse = mapFromUserModel(post.user());
-
-        var imageUrls = post.images()
-                .stream()
-                .map((i) -> fileUtils.createFileUrl(i.name()))
-                .toList();
-
-        return new PostResponse(
-                post.id(),
-                userResponse,
-                post.caption(),
-                imageUrls,
-                post.likesCount()
-        );
-    }
-
-    private UserResponse mapFromUserModel(User user) {
-        var avatarUrl = user.avatar() != null ? fileUtils.createFileUrl(user.avatar()) : null;
-
-        return new UserResponse(
-                user.id(),
-                user.name(),
-                avatarUrl
-        );
     }
 
     // TODO - [PUT] /posts/{post_id} - Edits a post
@@ -116,7 +88,7 @@ public class PostController extends BaseController {
         var users = service.getLikes(postId, page, size);
 
         var result = users.stream()
-                .map(this::mapFromUserModel)
+                .map(mapper::mapFromUserModel)
                 .toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -139,7 +111,7 @@ public class PostController extends BaseController {
         var comments = service.getComments(postId, page, size);
 
         var result = comments.stream()
-                .map(this::mapFromCommentModel)
+                .map(mapper::mapFromCommentModel)
                 .toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -152,18 +124,9 @@ public class PostController extends BaseController {
             @Valid @RequestBody AddCommentRequest request
     ) {
         var comment = new Comment(new User(getCurrentUser().getId()), request.text());
-        var result = mapFromCommentModel(service.addComment(postId, comment));
+        var result = mapper.mapFromCommentModel(service.addComment(postId, comment));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
-    }
-
-    private CommentResponse mapFromCommentModel(Comment comment) {
-        return new CommentResponse(
-                comment.id(),
-                mapFromUserModel(comment.user()),
-                comment.text(),
-                comment.createdAt()
-        );
     }
 
     @DeleteMapping("/posts/{post_id}/comments/{comment_id}")
