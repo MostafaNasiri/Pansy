@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features.post.domain;
 
+import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
@@ -143,16 +144,16 @@ public class PostService {
     public Post createPost(Post input) {
         var userEntity = getUserEntity(input.user().id());
 
-        var fileEntities = fileService.getFiles(
+        var imageFileEntities = fileService.getFiles(
                 input.images()
                         .stream()
-                        .map((i) -> i.id())
+                        .map(Image::id)
                         .collect(Collectors.toSet())
         );
 
         // Make sure that files are not already attached to any posts
-        var fileIds = fileEntities.stream().map(f -> f.getId()).toList();
-        var fileIdsThatAreAlreadyAttachedToAPost = postRepository.getFileIdsThatAreAlreadyAttachedToAPost(fileIds);
+        var fileIds = imageFileEntities.stream().map(BaseEntity::getId).toList();
+        var fileIdsThatAreAlreadyAttachedToAPost = postRepository.getFileIdsThatAreAttachedToAPost(fileIds);
         if (!fileIdsThatAreAlreadyAttachedToAPost.isEmpty()) {
             throw new InvalidInputException(
                     String.format(
@@ -162,10 +163,51 @@ public class PostService {
             );
         }
 
-        var postEntity = new PostEntity(userEntity, input.caption(), fileEntities);
+        var postEntity = new PostEntity(userEntity, input.caption(), imageFileEntities);
         postEntity = postRepository.save(postEntity);
 
         return mapFromPostEntity(postEntity, null);
+    }
+
+    public Post updatePost(Post input) {
+        var postEntity = getPostEntity(input.id());
+
+        var imageFileEntities = fileService.getFiles(
+                input.images()
+                        .stream()
+                        .map(Image::id)
+                        .collect(Collectors.toSet())
+        );
+
+        if (input.images().isEmpty()) {
+            throw new InvalidInputException("A post must have at least one image.");
+        }
+
+        // Check if there are any new images added to the post
+        var newImageIds = input.images()
+                .stream()
+                .map(Image::id)
+                .filter(id -> !postEntity.hasImage(id))
+                .toList();
+
+        if (!newImageIds.isEmpty()) {
+            // Make sure that the new files are not already attached to any posts
+            var fileIdsThatAreAlreadyAttachedToAPost =
+                    postRepository.getFileIdsThatAreAttachedToAPost(newImageIds);
+            if (!fileIdsThatAreAlreadyAttachedToAPost.isEmpty()) {
+                throw new InvalidInputException(
+                        String.format(
+                                "File with id %s is already attached to a post.",
+                                fileIdsThatAreAlreadyAttachedToAPost.get(0)
+                        )
+                );
+            }
+        }
+
+        postEntity.setCaption(input.caption());
+        postEntity.setImages(imageFileEntities);
+
+        return mapFromPostEntity(postRepository.save(postEntity), null); // TODO: Pass like data
     }
 
     private PostEntity getPostEntity(int postId) {

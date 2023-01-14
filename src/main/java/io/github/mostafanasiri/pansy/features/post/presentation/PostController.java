@@ -8,7 +8,7 @@ import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.AddCommentRequest;
-import io.github.mostafanasiri.pansy.features.post.presentation.request.CreatePostRequest;
+import io.github.mostafanasiri.pansy.features.post.presentation.request.CreateEditPostRequest;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.CommentResponse;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.PostResponse;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.UserResponse;
@@ -47,23 +47,50 @@ public class PostController extends BaseController {
 
     @PostMapping("/posts")
     @Operation(summary = "Creates a new post for the authorized user")
-    public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody CreatePostRequest request) {
+    public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody CreateEditPostRequest request) {
         var author = new User(getCurrentUser().getId());
         var post = new Post(
+                null,
                 author,
                 request.caption(),
                 request.imageIds()
                         .stream()
                         .map(Image::new)
-                        .toList()
+                        .toList(),
+                null
         );
 
-        var result = mapper.mapFromPostModel(service.createPost(post));
+        var result = mapper.mapFromPostModel(
+                service.createPost(post)
+        );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
     }
 
-    // TODO - [PUT] /posts/{post_id} - Edits a post
+    @PutMapping("/posts/{post_id}")
+    @Operation(summary = "Edits a post")
+    public ResponseEntity<ApiResponse<PostResponse>> editPost(
+            @PathVariable(name = "post_id") int postId,
+            @Valid @RequestBody CreateEditPostRequest request
+    ) {
+        var author = new User(getCurrentUser().getId());
+        var post = new Post(
+                postId,
+                author,
+                request.caption(),
+                request.imageIds()
+                        .stream()
+                        .map(Image::new)
+                        .toList(),
+                null
+        );
+
+        var result = mapper.mapFromPostModel(
+                service.updatePost(post)
+        );
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
+    }
 
     @DeleteMapping("/posts/{post_id}")
     @Operation(summary = "Deletes a post")

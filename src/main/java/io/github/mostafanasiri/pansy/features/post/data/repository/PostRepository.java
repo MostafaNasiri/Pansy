@@ -10,10 +10,10 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<PostEntity, Integer> {
     @Query(
-            value = "SELECT file_id FROM posts_images WHERE file_id IN(?1)",
+            value = "SELECT file_id FROM post_images WHERE file_id IN(?1)",
             nativeQuery = true
     )
-    List<Integer> getFileIdsThatAreAlreadyAttachedToAPost(List<Integer> fileIds);
+    List<Integer> getFileIdsThatAreAttachedToAPost(List<Integer> fileIds);
 
     List<PostEntity> findByUserOrderByCreatedAtDesc(UserEntity author, Pageable pageable);
 }

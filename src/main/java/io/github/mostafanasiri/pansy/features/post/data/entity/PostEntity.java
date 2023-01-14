@@ -33,7 +33,7 @@ public class PostEntity extends BaseEntity {
 
     @OneToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
-            name = "posts_images",
+            name = "post_images",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "file_id")
     )
@@ -45,7 +45,15 @@ public class PostEntity extends BaseEntity {
         this.images = images;
     }
 
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
     public void setImages(List<File> images) {
         this.images = images;
+    }
+
+    public boolean hasImage(int imageId) {
+        return images.stream().anyMatch(i -> i.getId() == imageId);
     }
 }

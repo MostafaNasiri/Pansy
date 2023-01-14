@@ -4,11 +4,11 @@ import jakarta.validation.constraints.Size;
 
 import java.util.Set;
 
-public record CreatePostRequest(
+public record CreateEditPostRequest(
         @Size(min = 1, max = 1000) String caption,
-        @Size(min = 1, max = 3) Set<Integer> imageIds
+        @Size(min = 1, max = 5) Set<Integer> imageIds
 ) {
-    public CreatePostRequest {
+    public CreateEditPostRequest {
         caption = caption.trim();
     }
 }
