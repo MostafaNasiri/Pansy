@@ -5,14 +5,12 @@ import io.github.mostafanasiri.pansy.features.file.File;
 import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
 
-@Getter
 @NoArgsConstructor
 @Entity
 @EqualsAndHashCode(callSuper = true)
@@ -39,10 +37,30 @@ public class PostEntity extends BaseEntity {
     )
     private List<File> images;
 
+    // I added this field so that I can set CascadeType.REMOVE
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "post")
+    private List<LikeEntity> likes;
+
+    // I added this field so that I can set CascadeType.REMOVE
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "post")
+    private List<CommentEntity> comments;
+
     public PostEntity(@NonNull UserEntity user, @NonNull String caption, @NonNull List<File> images) {
         this.user = user;
         this.caption = caption;
         this.images = images;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public String getCaption() {
+        return caption;
+    }
+
+    public List<File> getImages() {
+        return images;
     }
 
     public void setCaption(String caption) {
