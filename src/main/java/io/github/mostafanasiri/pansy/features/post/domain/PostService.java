@@ -45,6 +45,9 @@ public class PostService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     public List<Comment> getComments(int postId, int page, int size) {
         var postEntity = getPostEntity(postId);
 
@@ -52,7 +55,7 @@ public class PostService {
         var entities = commentRepository.getComments(postEntity, pageRequest);
 
         return entities.stream()
-                .map(this::mapFromCommentEntity)
+                .map(modelMapper::mapFromCommentEntity)
                 .toList();
     }
 
@@ -63,7 +66,7 @@ public class PostService {
         var commentEntity = new CommentEntity(user, post, comment.text());
         commentEntity = commentRepository.save(commentEntity);
 
-        return mapFromCommentEntity(commentEntity);
+        return modelMapper.mapFromCommentEntity(commentEntity);
     }
 
     public void deleteComment(int userId, int postId, int commentId) {
@@ -89,7 +92,7 @@ public class PostService {
         var likes = likeRepository.getLikes(post, pageRequest);
 
         return likes.stream()
-                .map(like -> mapFromUserEntity(like.getUser()))
+                .map(like -> modelMapper.mapFromUserEntity(like.getUser()))
                 .toList();
     }
 
@@ -136,7 +139,7 @@ public class PostService {
 
                     var likeData = new Post.LikeData(likesCount, isLikedByCurrentUser);
 
-                    return mapFromPostEntity(pe, likeData);
+                    return modelMapper.mapFromPostEntity(pe, likeData);
                 })
                 .toList();
     }
@@ -166,7 +169,7 @@ public class PostService {
         var postEntity = new PostEntity(userEntity, input.caption(), imageFileEntities);
         postEntity = postRepository.save(postEntity);
 
-        return mapFromPostEntity(postEntity, null);
+        return modelMapper.mapFromPostEntity(postEntity, null);
     }
 
     public Post updatePost(Post input) {
@@ -207,7 +210,7 @@ public class PostService {
         postEntity.setCaption(input.caption());
         postEntity.setImages(imageFileEntities);
 
-        return mapFromPostEntity(postRepository.save(postEntity), null); // TODO: Pass like data
+        return modelMapper.mapFromPostEntity(postRepository.save(postEntity), null); // TODO: Pass like data
     }
 
     private PostEntity getPostEntity(int postId) {
@@ -223,32 +226,5 @@ public class PostService {
     private CommentEntity getCommentEntity(int commentId) {
         return commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException(Comment.class, commentId));
-    }
-
-    private Post mapFromPostEntity(PostEntity entity, Post.LikeData likeData) {
-        var user = mapFromUserEntity(entity.getUser());
-
-        var images = entity.getImages()
-                .stream()
-                .map((i) -> new Image(i.getId(), i.getName()))
-                .toList();
-
-        return new Post(entity.getId(), user, entity.getCaption(), images, likeData);
-    }
-
-    private Comment mapFromCommentEntity(CommentEntity entity) {
-        var user = mapFromUserEntity(entity.getUser());
-
-        return new Comment(entity.getId(), user, entity.getText(), entity.getCreatedAt());
-    }
-
-    private User mapFromUserEntity(UserEntity entity) {
-        var avatarUrl = entity.getAvatar() != null ? entity.getAvatar().getName() : null;
-
-        return new User(
-                entity.getId(),
-                entity.getFullName(),
-                avatarUrl
-        );
     }
 }
