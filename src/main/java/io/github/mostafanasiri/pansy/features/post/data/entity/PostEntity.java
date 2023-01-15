@@ -45,6 +45,9 @@ public class PostEntity extends BaseEntity {
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "post")
     private List<CommentEntity> comments;
 
+    @Column(name = "likes_count", nullable = false)
+    private int likesCount = 0;
+
     public PostEntity(@NonNull UserEntity user, @NonNull String caption, @NonNull List<File> images) {
         this.user = user;
         this.caption = caption;
@@ -61,6 +64,16 @@ public class PostEntity extends BaseEntity {
 
     public List<File> getImages() {
         return images;
+    }
+
+    public void incrementLikesCount() {
+        likesCount++;
+    }
+
+    public void decrementLikesCount() {
+        if (likesCount > 0) {
+            likesCount--;
+        }
     }
 
     public void setCaption(String caption) {

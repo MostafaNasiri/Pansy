@@ -21,6 +21,7 @@ import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,23 +97,34 @@ public class PostService {
                 .toList();
     }
 
+    @Transactional
     public void likePost(int userId, int postId) {
-        var user = getUserEntity(userId);
-        var post = getPostEntity(postId);
-
         var userHasAlreadyLikedThePost = likeRepository.findByUserIdAndPostId(userId, postId).isPresent();
+
         if (!userHasAlreadyLikedThePost) {
+            var user = getUserEntity(userId);
+            var post = getPostEntity(postId);
+
             var like = new LikeEntity(user, post);
             likeRepository.save(like);
+
+            post.incrementLikesCount();
+            postRepository.save(post);
         }
     }
 
+    @Transactional
     public void unlikePost(int userId, int postId) {
-        var likeEntity = likeRepository.findByUserIdAndPostId(userId, postId);
+        var like = likeRepository.findByUserIdAndPostId(userId, postId);
 
-        var userHasLikedThePost = likeEntity.isPresent();
+        var userHasLikedThePost = like.isPresent();
+
         if (userHasLikedThePost) {
-            likeRepository.delete(likeEntity.get());
+            likeRepository.delete(like.get());
+
+            var post = getPostEntity(postId);
+            post.decrementLikesCount();
+            postRepository.save(post);
         }
     }
 
