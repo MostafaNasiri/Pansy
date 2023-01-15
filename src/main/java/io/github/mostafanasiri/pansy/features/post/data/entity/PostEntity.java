@@ -29,7 +29,7 @@ public class PostEntity extends BaseEntity {
     @Column(name = "caption", nullable = false, length = 1000)
     private String caption;
 
-    @OneToMany(cascade = CascadeType.REMOVE)
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     @JoinTable(
             name = "post_images",
             joinColumns = @JoinColumn(name = "post_id"),
@@ -67,6 +67,10 @@ public class PostEntity extends BaseEntity {
 
     public List<File> getImages() {
         return images;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
     }
 
     public void incrementLikeCount() {

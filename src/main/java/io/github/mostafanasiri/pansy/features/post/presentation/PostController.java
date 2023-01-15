@@ -57,6 +57,7 @@ public class PostController extends BaseController {
                         .stream()
                         .map(Image::new)
                         .toList(),
+                null,
                 null
         );
 
@@ -82,6 +83,7 @@ public class PostController extends BaseController {
                         .stream()
                         .map(Image::new)
                         .toList(),
+                null,
                 null
         );
 

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ModelMapper {
-    public Post mapFromPostEntity(PostEntity entity, Post.LikeData likeData) {
+    public Post mapFromPostEntity(PostEntity entity, boolean isLikedByCurrentUser) {
         var user = mapFromUserEntity(entity.getUser());
 
         var images = entity.getImages()
@@ -19,7 +19,14 @@ public class ModelMapper {
                 .map((i) -> new Image(i.getId(), i.getName()))
                 .toList();
 
-        return new Post(entity.getId(), user, entity.getCaption(), images, likeData);
+        return new Post(
+                entity.getId(),
+                user,
+                entity.getCaption(),
+                images,
+                entity.getLikeCount(),
+                isLikedByCurrentUser
+        );
     }
 
     public Comment mapFromCommentEntity(CommentEntity entity) {

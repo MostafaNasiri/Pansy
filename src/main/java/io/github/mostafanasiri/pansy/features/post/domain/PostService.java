@@ -136,16 +136,6 @@ public class PostService {
         }
     }
 
-    public void deletePost(int userId, int postId) {
-        var post = getPostEntity(postId);
-
-        if (post.getUser().getId() != userId) {
-            throw new AuthorizationException("Post does not belong to this user.");
-        }
-
-        postRepository.delete(post);
-    }
-
     public List<Post> getUserPosts(int currentUserId, int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
 
@@ -154,12 +144,9 @@ public class PostService {
 
         return result.stream()
                 .map(pe -> {
-                    var likesCount = (int) likeRepository.countByPostId(pe.getId());
                     var isLikedByCurrentUser = likeRepository.existsByPostIdAndUserId(pe.getId(), currentUserId);
 
-                    var likeData = new Post.LikeData(likesCount, isLikedByCurrentUser);
-
-                    return modelMapper.mapFromPostEntity(pe, likeData);
+                    return modelMapper.mapFromPostEntity(pe, isLikedByCurrentUser);
                 })
                 .toList();
     }
@@ -189,7 +176,7 @@ public class PostService {
         var postEntity = new PostEntity(userEntity, input.caption(), imageFileEntities);
         postEntity = postRepository.save(postEntity);
 
-        return modelMapper.mapFromPostEntity(postEntity, null);
+        return modelMapper.mapFromPostEntity(postEntity, false);
     }
 
     public Post updatePost(Post input) {
@@ -230,7 +217,19 @@ public class PostService {
         postEntity.setCaption(input.caption());
         postEntity.setImages(imageFileEntities);
 
-        return modelMapper.mapFromPostEntity(postRepository.save(postEntity), null); // TODO: Pass like data
+        var isLikedByCurrentUser = likeRepository.existsByPostIdAndUserId(postEntity.getId(), input.user().id());
+
+        return modelMapper.mapFromPostEntity(postRepository.save(postEntity), isLikedByCurrentUser);
+    }
+
+    public void deletePost(int userId, int postId) {
+        var post = getPostEntity(postId);
+
+        if (post.getUser().getId() != userId) {
+            throw new AuthorizationException("Post does not belong to this user.");
+        }
+
+        postRepository.delete(post);
     }
 
     private PostEntity getPostEntity(int postId) {
