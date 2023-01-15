@@ -60,6 +60,7 @@ public class PostService {
                 .toList();
     }
 
+    @Transactional
     public Comment addComment(int postId, Comment comment) {
         var user = getUserEntity(comment.user().id());
         var post = getPostEntity(postId);
@@ -67,9 +68,13 @@ public class PostService {
         var commentEntity = new CommentEntity(user, post, comment.text());
         commentEntity = commentRepository.save(commentEntity);
 
+        post.incrementCommentsCount();
+        postRepository.save(post);
+
         return modelMapper.mapFromCommentEntity(commentEntity);
     }
 
+    @Transactional
     public void deleteComment(int userId, int postId, int commentId) {
         var user = getUserEntity(userId);
         var post = getPostEntity(postId);
@@ -84,6 +89,9 @@ public class PostService {
         }
 
         commentRepository.delete(comment);
+
+        post.decrementCommentsCount();
+        postRepository.save(post);
     }
 
     public List<User> getLikes(int postId, int page, int size) {

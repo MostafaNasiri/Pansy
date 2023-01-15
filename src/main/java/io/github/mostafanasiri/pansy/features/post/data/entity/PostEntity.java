@@ -48,6 +48,9 @@ public class PostEntity extends BaseEntity {
     @Column(name = "likes_count", nullable = false)
     private int likesCount = 0;
 
+    @Column(name = "comments_count", nullable = false)
+    private int commentsCount = 0;
+
     public PostEntity(@NonNull UserEntity user, @NonNull String caption, @NonNull List<File> images) {
         this.user = user;
         this.caption = caption;
@@ -73,6 +76,16 @@ public class PostEntity extends BaseEntity {
     public void decrementLikesCount() {
         if (likesCount > 0) {
             likesCount--;
+        }
+    }
+
+    public void incrementCommentsCount() {
+        commentsCount++;
+    }
+
+    public void decrementCommentsCount() {
+        if (commentsCount > 0) {
+            commentsCount--;
         }
     }
 
