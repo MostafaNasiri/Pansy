@@ -6,12 +6,10 @@ import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.lang.NonNull;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -39,9 +37,55 @@ public class UserEntity extends BaseEntity {
     @JoinColumn(name = "avatar_id")
     private File avatar;
 
+    @Column(name = "follower_count", nullable = false)
+    private int followerCount = 0;
+
+    @Column(name = "following_count", nullable = false)
+    private int followingCount = 0;
+
     public UserEntity(@NonNull String fullName, @NonNull String username, @NonNull String password) {
         this.fullName = fullName;
         this.username = username;
         this.password = password;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public void setAvatar(File avatar) {
+        this.avatar = avatar;
+    }
+
+    public void incrementFollowerCount() {
+        followerCount++;
+    }
+
+    public void decrementFollowerCount() {
+        if (followerCount > 0) {
+            followerCount--;
+        }
+    }
+
+    public void incrementFollowingCount() {
+        followingCount++;
+    }
+
+    public void decrementFollowingCount() {
+        if (followingCount > 0) {
+            followingCount--;
+        }
     }
 }

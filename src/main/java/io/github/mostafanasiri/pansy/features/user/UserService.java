@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features.user;
 
+import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.user.entity.Follower;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,7 +65,12 @@ public class UserService {
                 .toList();
     }
 
-    public void followUser(int sourceUserId, int targetUserId) {
+    @Transactional
+    public void followUser(int currentUserId, int sourceUserId, int targetUserId) {
+        if (currentUserId != sourceUserId) {
+            throw new AuthorizationException("Forbidden action.");
+        }
+
         if (sourceUserId == targetUserId) {
             throw new InvalidInputException("A user can't follow him/herself!");
         }
@@ -71,13 +78,27 @@ public class UserService {
         var sourceUser = getUser(sourceUserId);
         var targetUser = getUser(targetUserId);
 
-        if (followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser) == null) {
+        var sourceUserHasNotFollowedTargetUser =
+                followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser) == null;
+
+        if (sourceUserHasNotFollowedTargetUser) {
             var follower = new Follower(sourceUser, targetUser);
             followerRepository.save(follower);
+
+            sourceUser.incrementFollowingCount();
+            userRepository.save(sourceUser);
+
+            targetUser.incrementFollowerCount();
+            userRepository.save(targetUser);
         }
     }
 
-    public void unfollowUser(int sourceUserId, int targetUserId) {
+    @Transactional
+    public void unfollowUser(int currentUserId, int sourceUserId, int targetUserId) {
+        if (currentUserId != sourceUserId) {
+            throw new AuthorizationException("Forbidden action.");
+        }
+
         if (sourceUserId == targetUserId) {
             throw new InvalidInputException("A user can't unfollow him/herself!");
         }
@@ -86,8 +107,15 @@ public class UserService {
         var targetUser = getUser(targetUserId);
 
         var follower = followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser);
+
         if (follower != null) {
             followerRepository.delete(follower);
+
+            sourceUser.decrementFollowingCount();
+            userRepository.save(sourceUser);
+
+            targetUser.decrementFollowerCount();
+            userRepository.save(targetUser);
         }
     }
 }

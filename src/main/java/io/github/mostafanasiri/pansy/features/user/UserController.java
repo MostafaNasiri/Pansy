@@ -116,7 +116,11 @@ public class UserController extends BaseController {
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
-        userService.followUser(userId, request.targetUserId());
+        userService.followUser(
+                getCurrentUser().getId(),
+                userId,
+                request.targetUserId()
+        );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
@@ -127,7 +131,11 @@ public class UserController extends BaseController {
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
-        userService.unfollowUser(userId, request.targetUserId());
+        userService.unfollowUser(
+                getCurrentUser().getId(),
+                userId,
+                request.targetUserId()
+        );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }

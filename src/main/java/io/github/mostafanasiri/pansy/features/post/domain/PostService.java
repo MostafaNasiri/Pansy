@@ -68,7 +68,7 @@ public class PostService {
         var commentEntity = new CommentEntity(user, post, comment.text());
         commentEntity = commentRepository.save(commentEntity);
 
-        post.incrementCommentsCount();
+        post.incrementCommentCount();
         postRepository.save(post);
 
         return modelMapper.mapFromCommentEntity(commentEntity);
@@ -90,7 +90,7 @@ public class PostService {
 
         commentRepository.delete(comment);
 
-        post.decrementCommentsCount();
+        post.decrementCommentCount();
         postRepository.save(post);
     }
 
@@ -116,7 +116,7 @@ public class PostService {
             var like = new LikeEntity(user, post);
             likeRepository.save(like);
 
-            post.incrementLikesCount();
+            post.incrementLikeCount();
             postRepository.save(post);
         }
     }
@@ -131,7 +131,7 @@ public class PostService {
             likeRepository.delete(like.get());
 
             var post = getPostEntity(postId);
-            post.decrementLikesCount();
+            post.decrementLikeCount();
             postRepository.save(post);
         }
     }
