@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class LoginRequest {
+public class LoginRequest { // TODO: Convert to record
     @Pattern(regexp = "^[a-zA-Z0-9._-]{4,255}$", message = "Invalid username")
     private String username;
 

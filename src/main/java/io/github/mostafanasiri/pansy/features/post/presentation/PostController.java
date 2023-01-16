@@ -88,7 +88,7 @@ public class PostController extends BaseController {
         );
 
         var result = mapper.mapFromPostModel(
-                service.updatePost(post)
+                service.updatePost(getCurrentUser().getId(), post)
         );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);

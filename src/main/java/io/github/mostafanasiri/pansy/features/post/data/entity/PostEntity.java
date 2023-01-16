@@ -2,7 +2,7 @@ package io.github.mostafanasiri.pansy.features.post.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.file.File;
-import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

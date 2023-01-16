@@ -1,6 +1,6 @@
 package io.github.mostafanasiri.pansy.auth;
 
-import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.user.dto;
+package io.github.mostafanasiri.pansy.features.user.presentation.request;
 
 import jakarta.validation.constraints.NotNull;
 

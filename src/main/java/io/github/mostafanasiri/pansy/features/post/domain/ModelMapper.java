@@ -6,10 +6,10 @@ import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("postFeatureModelMapper")
 public class ModelMapper {
     public Post mapFromPostEntity(PostEntity entity, boolean isLikedByCurrentUser) {
         var user = mapFromUserEntity(entity.getUser());
@@ -36,12 +36,12 @@ public class ModelMapper {
     }
 
     public User mapFromUserEntity(UserEntity entity) {
-        var avatarUrl = entity.getAvatar() != null ? entity.getAvatar().getName() : null;
+        var avatarName = entity.getAvatar() != null ? entity.getAvatar().getName() : null;
 
         return new User(
                 entity.getId(),
                 entity.getFullName(),
-                avatarUrl
+                avatarName
         );
     }
 }

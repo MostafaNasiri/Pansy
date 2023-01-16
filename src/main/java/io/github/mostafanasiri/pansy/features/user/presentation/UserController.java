@@ -1,13 +1,16 @@
-package io.github.mostafanasiri.pansy.features.user;
+package io.github.mostafanasiri.pansy.features.user.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.BaseController;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
-import io.github.mostafanasiri.pansy.features.user.dto.FollowUnfollowUserRequest;
-import io.github.mostafanasiri.pansy.features.user.dto.GetFollowersFollowingResponse;
-import io.github.mostafanasiri.pansy.features.user.dto.UpdateUserRequest;
-import io.github.mostafanasiri.pansy.features.user.dto.UserResponse;
+import io.github.mostafanasiri.pansy.features.user.domain.UserService;
+import io.github.mostafanasiri.pansy.features.user.domain.model.Image;
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
+import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
+import io.github.mostafanasiri.pansy.features.user.presentation.request.UpdateUserRequest;
+import io.github.mostafanasiri.pansy.features.user.presentation.response.GetFollowersFollowingResponse;
+import io.github.mostafanasiri.pansy.features.user.presentation.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,52 +32,33 @@ public class UserController extends BaseController {
     @Autowired
     private FileUtils fileUtils;
 
+    @Autowired
+    private ResponseMapper responseMapper;
+
+    @GetMapping("/{user_id}")
+    @Operation(summary = "Returns a user's public data")
+    public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable(name = "user_id") int userId) {
+        var user = userService.getUser(userId);
+
+        var response = responseMapper.fromUserModel(user);
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
+    }
+
     @PutMapping("/{user_id}")
     @Operation(summary = "Updates a user's data")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody UpdateUserRequest request
     ) {
-        var user = userService.getUser(userId);
-        user.setFullName(request.getFullName());
-        user.setBio(request.getBio());
-
+        Image avatarImage = null;
         if (request.getAvatarFileId() != null) {
-            var avatarFile = fileService.getFile(request.getAvatarFileId());
-            user.setAvatar(avatarFile);
+            avatarImage = new Image(request.getAvatarFileId());
         }
+        var user = new User(userId, request.getFullName(), avatarImage);
 
-        var updatedUser = userService.updateUser(user);
-
-        var response = new UserResponse(
-                updatedUser.getId(),
-                updatedUser.getFullName(),
-                updatedUser.getUsername(),
-                updatedUser.getBio(),
-                updatedUser.getAvatar() != null ? fileUtils.createFileUrl(updatedUser.getAvatar()) : null,
-                updatedUser.getPostCount(),
-                updatedUser.getFollowerCount(),
-                updatedUser.getFollowingCount()
-        );
-
-        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
-    }
-
-    @GetMapping("/{user_id}")
-    @Operation(summary = "Returns a user's public data")
-    public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable(name = "user_id") int userId) {
-        var entity = userService.getUser(userId);
-
-        var response = new UserResponse(
-                entity.getId(),
-                entity.getFullName(),
-                entity.getUsername(),
-                entity.getBio(),
-                entity.getAvatar() != null ? fileUtils.createFileUrl(entity.getAvatar()) : null,
-                entity.getPostCount(),
-                entity.getFollowerCount(),
-                entity.getFollowingCount()
-        );
+        var updatedUser = userService.updateUser(getCurrentUser().getId(), user);
+        var response = responseMapper.fromUserModel(updatedUser);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }
@@ -86,14 +70,7 @@ public class UserController extends BaseController {
     ) {
         var followers = userService.getFollowers(userId); // TODO: Add pagination
 
-        var response = new GetFollowersFollowingResponse(
-                followers.stream()
-                        .map((u) -> new GetFollowersFollowingResponse.Item(
-                                u.getId(),
-                                u.getFullName(),
-                                u.getAvatar() != null ? fileUtils.createFileUrl(u.getAvatar()) : null
-                        )).toList()
-        );
+        var response = responseMapper.fromUserModels(followers);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }
@@ -105,14 +82,7 @@ public class UserController extends BaseController {
     ) {
         var following = userService.getFollowing(userId); // TODO: Add pagination
 
-        var response = new GetFollowersFollowingResponse(
-                following.stream()
-                        .map((u) -> new GetFollowersFollowingResponse.Item(
-                                u.getId(),
-                                u.getFullName(),
-                                u.getAvatar() != null ? fileUtils.createFileUrl(u.getAvatar()) : null
-                        )).toList()
-        );
+        var response = responseMapper.fromUserModels(following);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }

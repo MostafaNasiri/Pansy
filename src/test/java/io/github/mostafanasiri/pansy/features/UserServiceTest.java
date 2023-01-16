@@ -2,11 +2,11 @@ package io.github.mostafanasiri.pansy.features;
 
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
-import io.github.mostafanasiri.pansy.features.user.UserService;
-import io.github.mostafanasiri.pansy.features.user.entity.Follower;
-import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.repo.FollowerRepository;
-import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.repo.FollowerRepository;
+import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -147,8 +147,8 @@ public class UserServiceTest {
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
-        var followers = new ArrayList<Follower>();
-        followers.add(new Follower(new UserEntity("follower1", "", ""), user));
+        var followers = new ArrayList<FollowerEntity>();
+        followers.add(new FollowerEntity(new UserEntity("follower1", "", ""), user));
 
         when(followerRepository.findAllByTargetUser(user))
                 .thenReturn(followers);
@@ -192,8 +192,8 @@ public class UserServiceTest {
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
-        var followers = new ArrayList<Follower>();
-        followers.add(new Follower(new UserEntity("follower1", "", ""), user));
+        var followers = new ArrayList<FollowerEntity>();
+        followers.add(new FollowerEntity(new UserEntity("follower1", "", ""), user));
 
         when(followerRepository.findAllBySourceUser(user))
                 .thenReturn(followers);
@@ -285,7 +285,7 @@ public class UserServiceTest {
                 .thenReturn(Optional.of(targetUser));
 
         when(followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
-                .thenReturn(new Follower());
+                .thenReturn(new FollowerEntity());
 
         // Act
         userService.followUser(sourceUserId, targetUserId);
@@ -319,7 +319,7 @@ public class UserServiceTest {
         userService.followUser(sourceUserId, targetUserId);
 
         // Assert
-        var follower = new Follower(sourceUser, targetUser);
+        var follower = new FollowerEntity(sourceUser, targetUser);
         verify(followerRepository, times(1))
                 .save(follower);
     }
@@ -429,7 +429,7 @@ public class UserServiceTest {
         when(userRepository.findById(targetUserId))
                 .thenReturn(Optional.of(targetUser));
 
-        var follower = new Follower(sourceUser, targetUser);
+        var follower = new FollowerEntity(sourceUser, targetUser);
 
         when(followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
                 .thenReturn(follower);

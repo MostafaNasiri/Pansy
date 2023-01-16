@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.user.entity;
+package io.github.mostafanasiri.pansy.features.user.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.file.File;
@@ -21,7 +21,7 @@ import org.springframework.lang.NonNull;
 )
 @EntityListeners(AuditingEntityListener.class)
 public class UserEntity extends BaseEntity {
-    @Column(name = "first_name", nullable = false)
+    @Column(name = "first_name", nullable = false) // TODO: Change column name
     private String fullName;
 
     @Column(name = "username", unique = true, nullable = false)
@@ -34,7 +34,11 @@ public class UserEntity extends BaseEntity {
     private String bio;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "avatar_id")
+    @JoinTable(
+            name = "avatar_images",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "file_id")
+    )
     private File avatar;
 
     @Column(name = "post_count", nullable = false)

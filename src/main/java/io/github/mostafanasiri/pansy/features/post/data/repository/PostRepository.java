@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.features.post.data.repository;
 
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
-import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

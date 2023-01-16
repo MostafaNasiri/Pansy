@@ -6,8 +6,8 @@ import io.github.mostafanasiri.pansy.auth.dto.RegisterRequest;
 import io.github.mostafanasiri.pansy.auth.dto.RegisterResponse;
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
-import io.github.mostafanasiri.pansy.features.user.UserService;
-import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.domain.UserService;
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -42,15 +42,11 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Creates a new user")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
-        var entity = new UserEntity();
-        entity.setFullName(request.getFullName());
-        entity.setUsername(request.getUsername());
-        entity.setPassword(request.getPassword());
+        var user = new User(request.getFullName(), request.getUsername(), request.getPassword());
+        var createdUser = userService.createUser(user);
 
-        var createdUser = userService.createUser(entity);
-
-        var token = jwtTokenUtil.generateAccessToken(createdUser.getUsername());
-        var response = new RegisterResponse(createdUser.getId(), token);
+        var token = jwtTokenUtil.generateAccessToken(createdUser.username());
+        var response = new RegisterResponse(createdUser.id(), token);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.CREATED);
     }

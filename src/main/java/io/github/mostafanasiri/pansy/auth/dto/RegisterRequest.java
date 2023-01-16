@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class RegisterRequest {
+public class RegisterRequest { // TODO: Convert to record
     @Size(min = 1, max = 255)
     private String fullName;
 

@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.user.entity;
+package io.github.mostafanasiri.pansy.features.user.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import jakarta.persistence.*;
@@ -22,7 +22,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
         }
 )
 @EntityListeners(AuditingEntityListener.class)
-public class Follower extends BaseEntity {
+public class FollowerEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "source_user_id", nullable = false)
     private UserEntity sourceUser;

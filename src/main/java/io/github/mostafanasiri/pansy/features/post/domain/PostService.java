@@ -15,11 +15,12 @@ import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.UserService;
-import io.github.mostafanasiri.pansy.features.user.entity.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,7 +62,7 @@ public class PostService {
     }
 
     @Transactional
-    public Comment addComment(int postId, Comment comment) {
+    public Comment addComment(int postId, @NonNull Comment comment) {
         var user = getUserEntity(comment.user().id());
         var post = getPostEntity(postId);
 
@@ -152,7 +153,7 @@ public class PostService {
     }
 
     @Transactional
-    public Post createPost(Post input) {
+    public Post createPost(@NonNull Post input) {
         var userEntity = getUserEntity(input.user().id());
 
         var imageFileEntities = fileService.getFiles(
@@ -183,8 +184,12 @@ public class PostService {
         return modelMapper.mapFromPostEntity(postEntity, false);
     }
 
-    public Post updatePost(Post input) {
+    public Post updatePost(int currentUserId, @NonNull Post input) {
         var postEntity = getPostEntity(input.id());
+
+        if (postEntity.getUser().getId() != currentUserId) {
+            throw new AuthorizationException("Post does not belong to current user.");
+        }
 
         var imageFileEntities = fileService.getFiles(
                 input.images()

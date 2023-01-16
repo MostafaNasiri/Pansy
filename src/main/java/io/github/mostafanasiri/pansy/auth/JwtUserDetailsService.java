@@ -1,6 +1,6 @@
 package io.github.mostafanasiri.pansy.auth;
 
-import io.github.mostafanasiri.pansy.features.user.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

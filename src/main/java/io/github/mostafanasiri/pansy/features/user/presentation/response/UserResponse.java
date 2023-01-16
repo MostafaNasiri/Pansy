@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.user.dto;
+package io.github.mostafanasiri.pansy.features.user.presentation.response;
 
 public record UserResponse(
         int id,
