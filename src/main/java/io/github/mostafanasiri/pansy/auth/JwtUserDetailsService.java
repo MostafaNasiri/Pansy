@@ -14,11 +14,10 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var userEntity = userRepository.findByUsername(username);
-
-        if (userEntity == null) {
-            throw new UsernameNotFoundException(String.format("User with username: %s was not found", username));
-        }
+        var userEntity = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        String.format("User with username: %s was not found", username))
+                );
 
         return new PansyUserDetails(userEntity);
     }

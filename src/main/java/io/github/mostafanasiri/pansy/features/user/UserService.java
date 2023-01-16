@@ -27,7 +27,7 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public UserEntity createUser(@NonNull UserEntity userEntity) {
-        if (userRepository.findByUsername(userEntity.getUsername()) != null) {
+        if (userRepository.findByUsername(userEntity.getUsername()).isPresent()) {
             throw new InvalidInputException("Username already exists");
         }
 
