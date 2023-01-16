@@ -8,17 +8,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Entity
-@Table(
-        name = "followers",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"source_user_id", "target_user_id"})
-        // TODO: Add index
-)
-@EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(
+        name = "followers",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"source_user_id", "target_user_id"}),
+        indexes = {
+                @Index(columnList = "source_user_id"),
+                @Index(columnList = "target_user_id")
+        }
+)
+@EntityListeners(AuditingEntityListener.class)
 public class Follower extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "source_user_id", nullable = false)

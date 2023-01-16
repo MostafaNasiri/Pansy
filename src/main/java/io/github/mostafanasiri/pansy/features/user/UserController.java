@@ -35,7 +35,6 @@ public class UserController extends BaseController {
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody UpdateUserRequest request
     ) {
-        // TODO: Move the logic to the domain layer
         var user = userService.getUser(userId);
         user.setFullName(request.getFullName());
         user.setBio(request.getBio());
@@ -79,8 +78,6 @@ public class UserController extends BaseController {
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }
-
-    // TODO: [GET] /me - Returns information about an authorized user.
 
     @GetMapping("/{user_id}/followers")
     @Operation(summary = "Returns a list of users who are followers of the specified user id")
