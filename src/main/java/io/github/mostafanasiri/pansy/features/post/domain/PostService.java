@@ -151,6 +151,7 @@ public class PostService {
                 .toList();
     }
 
+    @Transactional
     public Post createPost(Post input) {
         var userEntity = getUserEntity(input.user().id());
 
@@ -175,6 +176,9 @@ public class PostService {
 
         var postEntity = new PostEntity(userEntity, input.caption(), imageFileEntities);
         postEntity = postRepository.save(postEntity);
+
+        userEntity.incrementPostCount();
+        userRepository.save(userEntity);
 
         return modelMapper.mapFromPostEntity(postEntity, false);
     }
@@ -222,6 +226,7 @@ public class PostService {
         return modelMapper.mapFromPostEntity(postRepository.save(postEntity), isLikedByCurrentUser);
     }
 
+    @Transactional
     public void deletePost(int userId, int postId) {
         var post = getPostEntity(postId);
 
@@ -230,6 +235,10 @@ public class PostService {
         }
 
         postRepository.delete(post);
+
+        var user = getUserEntity(userId);
+        user.decrementPostCount();
+        userRepository.save(user);
     }
 
     private PostEntity getPostEntity(int postId) {

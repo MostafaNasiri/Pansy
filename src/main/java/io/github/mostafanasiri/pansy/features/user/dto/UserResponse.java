@@ -6,6 +6,7 @@ public record UserResponse(
         String username,
         String bio,
         String avatarUrl,
+        int postCount,
         int followerCount,
         int followingCount
 ) {

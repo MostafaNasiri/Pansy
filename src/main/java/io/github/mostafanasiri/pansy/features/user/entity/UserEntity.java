@@ -37,6 +37,9 @@ public class UserEntity extends BaseEntity {
     @JoinColumn(name = "avatar_id")
     private File avatar;
 
+    @Column(name = "post_count", nullable = false)
+    private int postCount = 0;
+
     @Column(name = "follower_count", nullable = false)
     private int followerCount = 0;
 
@@ -67,6 +70,16 @@ public class UserEntity extends BaseEntity {
 
     public void setAvatar(File avatar) {
         this.avatar = avatar;
+    }
+
+    public void incrementPostCount() {
+        postCount++;
+    }
+
+    public void decrementPostCount() {
+        if (postCount > 0) {
+            postCount--;
+        }
     }
 
     public void incrementFollowerCount() {

@@ -53,6 +53,7 @@ public class UserController extends BaseController {
                 updatedUser.getUsername(),
                 updatedUser.getBio(),
                 updatedUser.getAvatar() != null ? fileUtils.createFileUrl(updatedUser.getAvatar()) : null,
+                updatedUser.getPostCount(),
                 updatedUser.getFollowerCount(),
                 updatedUser.getFollowingCount()
         );
@@ -71,6 +72,7 @@ public class UserController extends BaseController {
                 entity.getUsername(),
                 entity.getBio(),
                 entity.getAvatar() != null ? fileUtils.createFileUrl(entity.getAvatar()) : null,
+                entity.getPostCount(),
                 entity.getFollowerCount(),
                 entity.getFollowingCount()
         );
