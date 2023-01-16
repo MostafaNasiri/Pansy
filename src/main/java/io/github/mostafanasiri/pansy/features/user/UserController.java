@@ -4,7 +4,10 @@ import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.BaseController;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
-import io.github.mostafanasiri.pansy.features.user.dto.*;
+import io.github.mostafanasiri.pansy.features.user.dto.FollowUnfollowUserRequest;
+import io.github.mostafanasiri.pansy.features.user.dto.GetFollowersFollowingResponse;
+import io.github.mostafanasiri.pansy.features.user.dto.UpdateUserRequest;
+import io.github.mostafanasiri.pansy.features.user.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class UserController extends BaseController {
 
     @PutMapping("/{user_id}")
     @Operation(summary = "Updates a user's data")
-    public ResponseEntity<ApiResponse<UpdateUserResponse>> updateUser(
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody UpdateUserRequest request
     ) {
@@ -44,11 +47,14 @@ public class UserController extends BaseController {
 
         var updatedUser = userService.updateUser(user);
 
-        var response = new UpdateUserResponse(
+        var response = new UserResponse(
                 updatedUser.getId(),
                 updatedUser.getFullName(),
+                updatedUser.getUsername(),
                 updatedUser.getBio(),
-                updatedUser.getAvatar() != null ? fileUtils.createFileUrl(updatedUser.getAvatar()) : null
+                updatedUser.getAvatar() != null ? fileUtils.createFileUrl(updatedUser.getAvatar()) : null,
+                updatedUser.getFollowerCount(),
+                updatedUser.getFollowingCount()
         );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -56,15 +62,17 @@ public class UserController extends BaseController {
 
     @GetMapping("/{user_id}")
     @Operation(summary = "Returns a user's public data")
-    public ResponseEntity<ApiResponse<GetUserResponse>> getUser(@PathVariable(name = "user_id") int userId) {
+    public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable(name = "user_id") int userId) {
         var entity = userService.getUser(userId);
 
-        var response = new GetUserResponse(
+        var response = new UserResponse(
                 entity.getId(),
                 entity.getFullName(),
                 entity.getUsername(),
                 entity.getBio(),
-                entity.getAvatar() != null ? fileUtils.createFileUrl(entity.getAvatar()) : null
+                entity.getAvatar() != null ? fileUtils.createFileUrl(entity.getAvatar()) : null,
+                entity.getFollowerCount(),
+                entity.getFollowingCount()
         );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);

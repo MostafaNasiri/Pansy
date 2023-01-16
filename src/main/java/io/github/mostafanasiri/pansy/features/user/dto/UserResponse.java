@@ -1,10 +1,12 @@
 package io.github.mostafanasiri.pansy.features.user.dto;
 
-public record GetUserResponse(
+public record UserResponse(
         int id,
         String fullName,
         String username,
         String bio,
-        String avatar
+        String avatarUrl,
+        int followerCount,
+        int followingCount
 ) {
 }
