@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.post.domain;
+package io.github.mostafanasiri.pansy.features.post.domain.service;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
@@ -11,13 +11,14 @@ import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.CommentRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.LikeRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.PostRepository;
+import io.github.mostafanasiri.pansy.features.post.domain.ModelMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.UserService;
+import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;

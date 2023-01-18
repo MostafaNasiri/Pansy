@@ -14,6 +14,7 @@ import java.util.Date;
 public abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", updatable = false, nullable = false)
     protected int id;
 
     @CreatedDate

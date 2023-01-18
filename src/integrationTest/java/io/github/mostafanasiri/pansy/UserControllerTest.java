@@ -5,7 +5,7 @@ import io.github.mostafanasiri.pansy.features.file.File;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.domain.UserService;
+import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import io.github.mostafanasiri.pansy.features.user.presentation.UserController;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.UpdateUserRequest;

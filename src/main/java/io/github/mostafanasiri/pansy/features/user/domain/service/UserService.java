@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.user.domain;
+package io.github.mostafanasiri.pansy.features.user.domain.service;
 
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
@@ -8,6 +8,7 @@ import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.FollowerRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.domain.ModelMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
