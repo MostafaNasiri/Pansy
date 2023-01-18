@@ -6,7 +6,7 @@ import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.FollowerRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.UserService;
+import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
