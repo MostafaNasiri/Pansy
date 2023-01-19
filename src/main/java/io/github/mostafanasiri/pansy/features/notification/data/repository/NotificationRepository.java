@@ -15,12 +15,11 @@ import java.util.Optional;
 @Repository
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Integer> {
     @Query("""
-            SELECT n, nu, p, pi, c
+            SELECT n, nu, p, c
             FROM NotificationEntity n
             INNER JOIN n.notifierUser nu
             LEFT JOIN nu.avatar
             LEFT JOIN n.post p
-            LEFT JOIN p.images pi
             LEFT JOIN n.comment c
             """)
     List<NotificationEntity> getNotifications(int notifiedUserId, Pageable pageable);
