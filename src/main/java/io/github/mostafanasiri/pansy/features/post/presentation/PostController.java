@@ -47,7 +47,7 @@ public class PostController extends BaseController {
     }
 
     @PostMapping("/posts")
-    @Operation(summary = "Creates a new post for the authorized user")
+    @Operation(summary = "Creates a new post for the authenticated user")
     public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody CreateEditPostRequest request) {
         var author = new User(getCurrentUserId());
         var post = new Post(
@@ -103,7 +103,7 @@ public class PostController extends BaseController {
     }
 
     @PostMapping("/posts/{post_id}/likes")
-    @Operation(summary = "Likes the specified post by the authorized user")
+    @Operation(summary = "Likes the specified post by the authenticated user")
     public ResponseEntity<ApiResponse<Boolean>> likePost(@PathVariable(name = "post_id") int postId) {
         service.likePost(getCurrentUserId(), postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
@@ -126,7 +126,7 @@ public class PostController extends BaseController {
     }
 
     @DeleteMapping("/posts/{post_id}/likes/{user_id}")
-    @Operation(summary = "Unlikes a post that has already been liked by the authorized user")
+    @Operation(summary = "Unlikes a post that has already been liked by the authenticated user")
     public ResponseEntity<ApiResponse<Boolean>> unlikePost(
             @PathVariable(name = "post_id") int postId,
             @PathVariable(name = "user_id") int userId

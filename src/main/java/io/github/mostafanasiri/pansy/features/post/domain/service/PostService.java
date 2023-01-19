@@ -58,113 +58,6 @@ public class PostService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<Comment> getComments(int postId, int page, int size) {
-        var postEntity = getPostEntity(postId);
-
-        var pageRequest = PageRequest.of(page, size);
-        var entities = commentRepository.getComments(postEntity, pageRequest);
-
-        return entities.stream()
-                .map(modelMapper::mapFromCommentEntity)
-                .toList();
-    }
-
-    @Transactional
-    public Comment addComment(int postId, @NonNull Comment comment) {
-        var commentator = getUserEntity(comment.user().id());
-        var post = getPostEntity(postId);
-
-        var commentEntity = new CommentEntity(commentator, post, comment.text());
-        commentEntity = commentRepository.save(commentEntity);
-
-        post.incrementCommentCount();
-        postRepository.save(post);
-
-        // Add new comment notification for the post's author
-        var commentNotification = new CommentNotification(
-                new NotificationUser(commentator.getId()),
-                new NotificationUser(post.getUser().getId()),
-                commentEntity.getId(),
-                postId
-        );
-        notificationService.addCommentNotification(commentNotification);
-
-        return modelMapper.mapFromCommentEntity(commentEntity);
-    }
-
-    @Transactional
-    public void deleteComment(int currentUserId, int postId, int commentId) {
-        var commentator = getUserEntity(currentUserId);
-        var post = getPostEntity(postId);
-        var comment = getCommentEntity(commentId);
-
-        if (comment.getUser() != commentator) {
-            throw new AuthorizationException("Comment does not belong to this user.");
-        }
-
-        if (comment.getPost() != post) {
-            throw new InvalidInputException("Comment does not belong to this post.");
-        }
-
-        commentRepository.delete(comment);
-
-        post.decrementCommentCount();
-        postRepository.save(post);
-
-        notificationService.deleteCommentNotification(comment.getId());
-    }
-
-    public List<User> getLikes(int postId, int page, int size) {
-        var post = getPostEntity(postId);
-
-        var pageRequest = PageRequest.of(page, size);
-        var likes = likeRepository.getLikes(post, pageRequest);
-
-        return likes.stream()
-                .map(like -> modelMapper.mapFromUserEntity(like.getUser()))
-                .toList();
-    }
-
-    @Transactional
-    public void likePost(int currentUserId, int postId) {
-        var userHasAlreadyLikedThePost = likeRepository.findByUserIdAndPostId(currentUserId, postId).isPresent();
-
-        if (!userHasAlreadyLikedThePost) {
-            var user = getUserEntity(currentUserId);
-            var post = getPostEntity(postId);
-
-            var like = new LikeEntity(user, post);
-            likeRepository.save(like);
-
-            post.incrementLikeCount();
-            postRepository.save(post);
-
-            var notification = new LikeNotification(
-                    new NotificationUser(currentUserId),
-                    new NotificationUser(post.getUser().getId()),
-                    postId
-            );
-            notificationService.addLikeNotification(notification);
-        }
-    }
-
-    @Transactional
-    public void unlikePost(int userId, int postId) {
-        var like = likeRepository.findByUserIdAndPostId(userId, postId);
-
-        var userHasLikedThePost = like.isPresent();
-
-        if (userHasLikedThePost) {
-            likeRepository.delete(like.get());
-
-            var post = getPostEntity(postId);
-            post.decrementLikeCount();
-            postRepository.save(post);
-
-            notificationService.deleteLikeNotification(userId, postId);
-        }
-    }
-
     public List<Post> getUserPosts(int currentUserId, int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
 
@@ -272,6 +165,113 @@ public class PostService {
         var user = getUserEntity(userId);
         user.decrementPostCount();
         userRepository.save(user);
+    }
+
+    public List<Comment> getComments(int postId, int page, int size) {
+        var postEntity = getPostEntity(postId);
+
+        var pageRequest = PageRequest.of(page, size);
+        var entities = commentRepository.getComments(postEntity, pageRequest);
+
+        return entities.stream()
+                .map(modelMapper::mapFromCommentEntity)
+                .toList();
+    }
+
+    @Transactional
+    public Comment addComment(int postId, @NonNull Comment comment) {
+        var commentator = getUserEntity(comment.user().id());
+        var post = getPostEntity(postId);
+
+        var commentEntity = new CommentEntity(commentator, post, comment.text());
+        commentEntity = commentRepository.save(commentEntity);
+
+        post.incrementCommentCount();
+        postRepository.save(post);
+
+        // Add new comment notification for the post's author
+        var commentNotification = new CommentNotification(
+                new NotificationUser(commentator.getId()),
+                new NotificationUser(post.getUser().getId()),
+                commentEntity.getId(),
+                postId
+        );
+        notificationService.addCommentNotification(commentNotification);
+
+        return modelMapper.mapFromCommentEntity(commentEntity);
+    }
+
+    @Transactional
+    public void deleteComment(int currentUserId, int postId, int commentId) {
+        var commentator = getUserEntity(currentUserId);
+        var post = getPostEntity(postId);
+        var comment = getCommentEntity(commentId);
+
+        if (comment.getUser() != commentator) {
+            throw new AuthorizationException("Comment does not belong to this user.");
+        }
+
+        if (comment.getPost() != post) {
+            throw new InvalidInputException("Comment does not belong to this post.");
+        }
+
+        commentRepository.delete(comment);
+
+        post.decrementCommentCount();
+        postRepository.save(post);
+
+        notificationService.deleteCommentNotification(comment.getId());
+    }
+
+    public List<User> getLikes(int postId, int page, int size) {
+        var post = getPostEntity(postId);
+
+        var pageRequest = PageRequest.of(page, size);
+        var likes = likeRepository.getLikes(post, pageRequest);
+
+        return likes.stream()
+                .map(like -> modelMapper.mapFromUserEntity(like.getUser()))
+                .toList();
+    }
+
+    @Transactional
+    public void likePost(int currentUserId, int postId) {
+        var userHasAlreadyLikedThePost = likeRepository.findByUserIdAndPostId(currentUserId, postId).isPresent();
+
+        if (!userHasAlreadyLikedThePost) {
+            var user = getUserEntity(currentUserId);
+            var post = getPostEntity(postId);
+
+            var like = new LikeEntity(user, post);
+            likeRepository.save(like);
+
+            post.incrementLikeCount();
+            postRepository.save(post);
+
+            var notification = new LikeNotification(
+                    new NotificationUser(currentUserId),
+                    new NotificationUser(post.getUser().getId()),
+                    postId
+            );
+            notificationService.addLikeNotification(notification);
+        }
+    }
+
+    @Transactional
+    public void unlikePost(int userId, int postId) {
+        var like = likeRepository.findByUserIdAndPostId(userId, postId);
+
+        var userHasLikedThePost = like.isPresent();
+
+        if (userHasLikedThePost) {
+            likeRepository.delete(like.get());
+
+            var post = getPostEntity(postId);
+            post.decrementLikeCount();
+            postRepository.save(post);
+
+            notificationService.deleteLikeNotification(userId, postId);
+        }
     }
 
     private PostEntity getPostEntity(int postId) {

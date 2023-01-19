@@ -39,7 +39,7 @@ public class ResponseMapper {
 
         return new UserResponse(
                 user.id(),
-                user.name(),
+                user.username(),
                 avatarUrl
         );
     }

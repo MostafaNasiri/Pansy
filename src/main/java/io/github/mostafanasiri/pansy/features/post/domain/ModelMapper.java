@@ -40,7 +40,7 @@ public class ModelMapper {
 
         return new User(
                 entity.getId(),
-                entity.getFullName(),
+                entity.getUsername(),
                 avatarName
         );
     }
