@@ -1,7 +1,6 @@
 package io.github.mostafanasiri.pansy.features.post.data.repository;
 
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +16,11 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
     )
     List<Integer> getFileIdsThatAreAttachedToAPost(List<Integer> fileIds);
 
-    // TODO: Join on images
-    List<PostEntity> findByUserOrderByCreatedAtDesc(UserEntity author, Pageable pageable);
+    @Query("""
+            SELECT p
+            FROM PostEntity p
+            INNER JOIN p.images
+            WHERE p.id=?1
+            """)
+    List<PostEntity> getPostsByUser(int userId, Pageable pageable);
 }

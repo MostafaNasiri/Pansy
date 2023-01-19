@@ -62,7 +62,7 @@ public class PostService {
         var userEntity = getUserEntity(userId);
 
         var pageRequest = PageRequest.of(page, size);
-        var result = postRepository.findByUserOrderByCreatedAtDesc(userEntity, pageRequest);
+        var result = postRepository.getPostsByUser(userEntity.getId(), pageRequest);
 
         return result.stream()
                 .map(pe -> {

@@ -28,7 +28,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
     List<NotificationEntity> getNotifications(int notifiedUserId, Pageable pageable);
 
     @Modifying
-    @Query("UPDATE NotificationEntity n SET n.isRead = true WHERE n.id IN(?1) AND n.isRead = false")
+    @Query("UPDATE NotificationEntity n SET n.isRead=true WHERE n.id IN(?1) AND n.isRead=false")
     void markNotificationsAsRead(List<Integer> ids);
 
     int countByNotifiedUserIdAndIsReadIsFalse(int notifiedUserID);
