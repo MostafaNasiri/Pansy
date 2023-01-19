@@ -126,7 +126,10 @@ public class PostController extends BaseController {
 
     @DeleteMapping("/posts/{post_id}/likes/{user_id}")
     @Operation(summary = "Unlikes a post that has already been liked by the authorized user")
-    public ResponseEntity<ApiResponse<Boolean>> unlikePost(@PathVariable(name = "post_id") int postId) {
+    public ResponseEntity<ApiResponse<Boolean>> unlikePost(
+            @PathVariable(name = "post_id") int postId,
+            @PathVariable(name = "user_id") int userId
+    ) {
         service.unlikePost(getCurrentUser().getId(), postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }

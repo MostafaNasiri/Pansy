@@ -6,6 +6,7 @@ import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.FileService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
 import io.github.mostafanasiri.pansy.features.notification.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.CommentEntity;
@@ -125,11 +126,11 @@ public class PostService {
     }
 
     @Transactional
-    public void likePost(int userId, int postId) {
-        var userHasAlreadyLikedThePost = likeRepository.findByUserIdAndPostId(userId, postId).isPresent();
+    public void likePost(int currentUserId, int postId) {
+        var userHasAlreadyLikedThePost = likeRepository.findByUserIdAndPostId(currentUserId, postId).isPresent();
 
         if (!userHasAlreadyLikedThePost) {
-            var user = getUserEntity(userId);
+            var user = getUserEntity(currentUserId);
             var post = getPostEntity(postId);
 
             var like = new LikeEntity(user, post);
@@ -137,6 +138,13 @@ public class PostService {
 
             post.incrementLikeCount();
             postRepository.save(post);
+
+            var notification = new LikeNotification(
+                    new NotificationUser(currentUserId),
+                    new NotificationUser(post.getUser().getId()),
+                    postId
+            );
+            notificationService.addLikeNotification(notification);
         }
     }
 
@@ -152,6 +160,8 @@ public class PostService {
             var post = getPostEntity(postId);
             post.decrementLikeCount();
             postRepository.save(post);
+
+            notificationService.deleteLikeNotification(userId, postId);
         }
     }
 

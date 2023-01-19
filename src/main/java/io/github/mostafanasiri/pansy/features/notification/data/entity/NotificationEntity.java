@@ -3,8 +3,10 @@ package io.github.mostafanasiri.pansy.features.notification.data.entity;
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+@NoArgsConstructor
 @Entity
 @Table(
         name = "notifications",

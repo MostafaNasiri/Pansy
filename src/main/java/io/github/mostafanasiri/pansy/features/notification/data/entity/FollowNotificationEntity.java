@@ -3,8 +3,10 @@ package io.github.mostafanasiri.pansy.features.notification.data.entity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
+@NoArgsConstructor
 @Entity
 @DiscriminatorValue("follow")
 public class FollowNotificationEntity extends NotificationEntity {

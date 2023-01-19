@@ -64,10 +64,6 @@ public class UserEntity extends BaseEntity {
         this.username = username;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public void setBio(String bio) {
         this.bio = bio;
     }
