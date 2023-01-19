@@ -31,7 +31,7 @@ public class NotificationController extends BaseController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(30) int size
     ) {
-        var notifications = service.getNotifications(getCurrentUser().getId(), page, size);
+        var notifications = service.getNotifications(getCurrentUserId(), page, size);
         var result = responseMapper.mapFromNotificationModels(notifications);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -40,7 +40,7 @@ public class NotificationController extends BaseController {
     @GetMapping("/users/me/notifications/unread/count")
     @Operation(summary = "Returns total number of the authorized user's unread notifications")
     public ResponseEntity<ApiResponse<Integer>> getUnreadNotificationCount() {
-        int result = service.getUnreadNotificationsCount(getCurrentUser().getId());
+        int result = service.getUnreadNotificationsCount(getCurrentUserId());
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
 }

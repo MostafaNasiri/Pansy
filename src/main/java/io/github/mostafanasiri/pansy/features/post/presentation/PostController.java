@@ -40,7 +40,7 @@ public class PostController extends BaseController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var posts = service.getUserPosts(getCurrentUser().getId(), userId, page, size);
+        var posts = service.getUserPosts(getCurrentUserId(), userId, page, size);
         var result = posts.stream().map(mapper::mapFromPostModel).toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -49,7 +49,7 @@ public class PostController extends BaseController {
     @PostMapping("/posts")
     @Operation(summary = "Creates a new post for the authorized user")
     public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody CreateEditPostRequest request) {
-        var author = new User(getCurrentUser().getId());
+        var author = new User(getCurrentUserId());
         var post = new Post(
                 null,
                 author,
@@ -75,7 +75,7 @@ public class PostController extends BaseController {
             @PathVariable(name = "post_id") int postId,
             @Valid @RequestBody CreateEditPostRequest request
     ) {
-        var author = new User(getCurrentUser().getId());
+        var author = new User(getCurrentUserId());
         var post = new Post(
                 postId,
                 author,
@@ -89,7 +89,7 @@ public class PostController extends BaseController {
         );
 
         var result = mapper.mapFromPostModel(
-                service.updatePost(getCurrentUser().getId(), post)
+                service.updatePost(getCurrentUserId(), post)
         );
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -98,14 +98,14 @@ public class PostController extends BaseController {
     @DeleteMapping("/posts/{post_id}")
     @Operation(summary = "Deletes a post")
     public ResponseEntity<ApiResponse<Boolean>> deletePost(@PathVariable(name = "post_id") int postId) {
-        service.deletePost(getCurrentUser().getId(), postId);
+        service.deletePost(getCurrentUserId(), postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }
 
     @PostMapping("/posts/{post_id}/likes")
     @Operation(summary = "Likes the specified post by the authorized user")
     public ResponseEntity<ApiResponse<Boolean>> likePost(@PathVariable(name = "post_id") int postId) {
-        service.likePost(getCurrentUser().getId(), postId);
+        service.likePost(getCurrentUserId(), postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
@@ -131,7 +131,7 @@ public class PostController extends BaseController {
             @PathVariable(name = "post_id") int postId,
             @PathVariable(name = "user_id") int userId
     ) {
-        service.unlikePost(getCurrentUser().getId(), postId);
+        service.unlikePost(getCurrentUserId(), postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
@@ -157,7 +157,7 @@ public class PostController extends BaseController {
             @PathVariable(name = "post_id") int postId,
             @Valid @RequestBody AddCommentRequest request
     ) {
-        var comment = new Comment(new User(getCurrentUser().getId()), request.text());
+        var comment = new Comment(new User(getCurrentUserId()), request.text());
         var result = mapper.mapFromCommentModel(service.addComment(postId, comment));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
@@ -169,7 +169,7 @@ public class PostController extends BaseController {
             @PathVariable(name = "post_id") int postId,
             @PathVariable(name = "comment_id") int commentId
     ) {
-        service.deleteComment(getCurrentUser().getId(), postId, commentId);
+        service.deleteComment(getCurrentUserId(), postId, commentId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }
 }

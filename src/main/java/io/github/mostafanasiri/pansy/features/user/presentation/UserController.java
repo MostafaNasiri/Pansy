@@ -49,7 +49,7 @@ public class UserController extends BaseController {
         }
         var user = new User(userId, request.getFullName(), avatarImage);
 
-        var updatedUser = userService.updateUser(getCurrentUser().getId(), user);
+        var updatedUser = userService.updateUser(getCurrentUserId(), user);
         var response = responseMapper.fromUserModel(updatedUser);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -84,7 +84,7 @@ public class UserController extends BaseController {
             @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
         userService.followUser(
-                getCurrentUser().getId(),
+                getCurrentUserId(),
                 userId,
                 request.targetUserId()
         );
@@ -99,7 +99,7 @@ public class UserController extends BaseController {
             @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
         userService.unfollowUser(
-                getCurrentUser().getId(),
+                getCurrentUserId(),
                 userId,
                 request.targetUserId()
         );
