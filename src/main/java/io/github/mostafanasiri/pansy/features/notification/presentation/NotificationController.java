@@ -14,4 +14,6 @@ public class NotificationController {
 
         return null;
     }
+
+    // TODO: Add unread notification count endpoint
 }

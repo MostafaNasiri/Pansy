@@ -2,6 +2,7 @@ package io.github.mostafanasiri.pansy.features.notification.domain.service;
 
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
+import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.repository.NotificationRepository;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
@@ -74,7 +75,19 @@ public class NotificationService {
     }
 
     public void addFollowNotification(FollowNotification notification) {
+        var notifierUser = getUserEntity(notification.getNotifierUser().id());
+        var notifiedUser = getUserEntity(notification.getNotifiedUser().id());
 
+        var notificationEntity = new FollowNotificationEntity(
+                notifierUser,
+                notifiedUser
+        );
+        notificationRepository.save(notificationEntity);
+    }
+
+    public void deleteFollowNotification(int notifierUserId, int notifiedUserId) {
+        notificationRepository.getFollowNotification(notifierUserId, notifiedUserId)
+                .ifPresent(entity -> notificationRepository.delete(entity));
     }
 
     private PostEntity getPostEntity(int postId) {

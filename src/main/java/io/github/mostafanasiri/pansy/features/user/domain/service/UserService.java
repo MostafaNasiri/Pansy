@@ -4,6 +4,9 @@ import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.FileService;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
+import io.github.mostafanasiri.pansy.features.notification.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.FollowerRepository;
@@ -28,6 +31,9 @@ public class UserService {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -118,12 +124,23 @@ public class UserService {
             var follower = new FollowerEntity(sourceUser, targetUser);
             followerRepository.save(follower);
 
-            sourceUser.incrementFollowingCount();
-            userRepository.save(sourceUser);
+            incrementFollowingFollowerCount(sourceUser, targetUser);
 
-            targetUser.incrementFollowerCount();
-            userRepository.save(targetUser);
+            // Add a new notification for the followed user
+            var notification = new FollowNotification(
+                    new NotificationUser(sourceUserId),
+                    new NotificationUser(targetUserId)
+            );
+            notificationService.addFollowNotification(notification);
         }
+    }
+
+    private void incrementFollowingFollowerCount(UserEntity sourceUser, UserEntity targetUser) {
+        sourceUser.incrementFollowingCount();
+        userRepository.save(sourceUser);
+
+        targetUser.incrementFollowerCount();
+        userRepository.save(targetUser);
     }
 
     @Transactional
@@ -143,13 +160,17 @@ public class UserService {
 
         if (follower != null) {
             followerRepository.delete(follower);
-
-            sourceUser.decrementFollowingCount();
-            userRepository.save(sourceUser);
-
-            targetUser.decrementFollowerCount();
-            userRepository.save(targetUser);
+            decrementFollowingFollowerCount(sourceUser, targetUser);
+            notificationService.deleteFollowNotification(sourceUserId, targetUserId);
         }
+    }
+
+    private void decrementFollowingFollowerCount(UserEntity sourceUser, UserEntity targetUser) {
+        sourceUser.decrementFollowingCount();
+        userRepository.save(sourceUser);
+
+        targetUser.decrementFollowerCount();
+        userRepository.save(targetUser);
     }
 
     private UserEntity getUserEntity(int userId) {
