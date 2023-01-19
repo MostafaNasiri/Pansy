@@ -2,6 +2,7 @@ package io.github.mostafanasiri.pansy.features.user.data.repo;
 
 import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,8 +13,8 @@ public interface FollowerRepository extends JpaRepository<FollowerEntity, Intege
     FollowerEntity findBySourceUserAndTargetUser(UserEntity sourceUser, UserEntity targetUser);
 
     // TODO: Use join
-    List<FollowerEntity> findAllByTargetUser(UserEntity targetUser);
+    List<FollowerEntity> findAllByTargetUser(UserEntity targetUser, Pageable pageable);
 
     // TODO: Use join
-    List<FollowerEntity> findAllBySourceUser(UserEntity sourceUser);
+    List<FollowerEntity> findAllBySourceUser(UserEntity sourceUser, Pageable pageable);
 }

@@ -14,6 +14,7 @@ import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.ModelMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -86,19 +87,21 @@ public class UserService {
         return modelMapper.mapFromUserEntity(getUserEntity(userId));
     }
 
-    public List<User> getFollowers(int userId) {
+    public List<User> getFollowers(int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
+        var pageRequest = PageRequest.of(page, size);
 
-        return followerRepository.findAllByTargetUser(userEntity)
+        return followerRepository.findAllByTargetUser(userEntity, pageRequest)
                 .stream()
                 .map((f) -> modelMapper.mapFromUserEntity(f.getSourceUser()))
                 .toList();
     }
 
-    public List<User> getFollowing(int userId) {
+    public List<User> getFollowing(int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
+        var pageRequest = PageRequest.of(page, size);
 
-        return followerRepository.findAllBySourceUser(userEntity)
+        return followerRepository.findAllBySourceUser(userEntity, pageRequest)
                 .stream()
                 .map((f) -> modelMapper.mapFromUserEntity(f.getTargetUser()))
                 .toList();

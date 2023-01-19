@@ -12,6 +12,8 @@ import io.github.mostafanasiri.pansy.features.user.presentation.response.UserRes
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,9 +60,11 @@ public class UserController extends BaseController {
     @GetMapping("/{user_id}/followers")
     @Operation(summary = "Returns a list of users who are followers of the specified user id")
     public ResponseEntity<ApiResponse<GetFollowersFollowingResponse>> getFollowers(
-            @PathVariable(name = "user_id") int userId
+            @PathVariable(name = "user_id") int userId,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+            @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var followers = userService.getFollowers(userId); // TODO: Add pagination
+        var followers = userService.getFollowers(userId, page, size);
         var response = responseMapper.fromUserModels(followers);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -69,9 +73,11 @@ public class UserController extends BaseController {
     @GetMapping("/{user_id}/following")
     @Operation(summary = "Returns a list of users the specified user id is following")
     public ResponseEntity<ApiResponse<GetFollowersFollowingResponse>> getFollowing(
-            @PathVariable(name = "user_id") int userId
+            @PathVariable(name = "user_id") int userId,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+            @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var following = userService.getFollowing(userId); // TODO: Add pagination
+        var following = userService.getFollowing(userId, page, size);
         var response = responseMapper.fromUserModels(following);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
