@@ -12,6 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Integer> {
+    int countByNotifiedUserIdAndIsReadIsFalse(int notifiedUserID);
+
     @Query("SELECT n FROM CommentNotificationEntity n WHERE n.comment.id=?1")
     Optional<CommentNotificationEntity> getCommentNotification(int commentId);
 

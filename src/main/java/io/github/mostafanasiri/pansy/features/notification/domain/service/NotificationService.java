@@ -34,6 +34,10 @@ public class NotificationService {
     @Autowired
     private PostRepository postRepository;
 
+    public int getUnreadNotificationsCount(int userId) {
+        return notificationRepository.countByNotifiedUserIdAndIsReadIsFalse(userId);
+    }
+
     public void addCommentNotification(CommentNotification notification) {
         var notifierUser = getUserEntity(notification.getNotifierUser().id());
         var notifiedUser = getUserEntity(notification.getNotifiedUser().id());

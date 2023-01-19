@@ -2,8 +2,6 @@ package io.github.mostafanasiri.pansy.features.user.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.BaseController;
-import io.github.mostafanasiri.pansy.features.file.FileService;
-import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.user.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
@@ -25,12 +23,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController extends BaseController {
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private FileService fileService;
-
-    @Autowired
-    private FileUtils fileUtils;
 
     @Autowired
     private ResponseMapper responseMapper;
