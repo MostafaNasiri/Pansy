@@ -2,6 +2,8 @@ package io.github.mostafanasiri.pansy.features.post.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.file.File;
+import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
+import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -44,6 +46,14 @@ public class PostEntity extends BaseEntity {
     // I added this field so that I can set CascadeType.REMOVE
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "post")
     private List<CommentEntity> comments;
+
+    // I added this field so that I can set CascadeType.REMOVE
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "post")
+    private List<LikeNotificationEntity> likeNotifications;
+
+    // I added this field so that I can set CascadeType.REMOVE
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "post")
+    private List<CommentNotificationEntity> commentNotifications;
 
     @Column(name = "like_count", nullable = false)
     private int likeCount = 0;

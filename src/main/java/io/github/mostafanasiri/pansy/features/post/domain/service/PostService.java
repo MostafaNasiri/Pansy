@@ -191,7 +191,7 @@ public class PostService {
                         .collect(Collectors.toSet())
         );
 
-        // Make sure that files are not already attached to any posts
+        // Make sure that files are not already attached to any posts TODO: or users
         var fileIds = imageFileEntities.stream().map(BaseEntity::getId).toList();
         var fileIdsThatAreAlreadyAttachedToAPost = postRepository.getFileIdsThatAreAttachedToAPost(fileIds);
         if (!fileIdsThatAreAlreadyAttachedToAPost.isEmpty()) {

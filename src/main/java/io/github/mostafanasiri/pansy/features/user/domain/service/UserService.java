@@ -62,7 +62,7 @@ public class UserService {
         if (user.avatar() != null) {
             var fileEntity = fileService.getFile(user.avatar().id());
 
-            // Make sure that the avatar file does not belong to another user
+            // Make sure that the avatar file does not belong to another user TODO: or post
             var userId = userRepository.getUserIdByAvatarFileId(fileEntity.getId());
             if (userId.isPresent()) {
                 throw new InvalidInputException(

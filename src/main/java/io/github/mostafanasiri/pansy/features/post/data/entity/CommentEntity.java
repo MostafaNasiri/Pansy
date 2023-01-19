@@ -1,13 +1,14 @@
 package io.github.mostafanasiri.pansy.features.post.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
+import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Getter
+import java.util.List;
+
 @NoArgsConstructor
 @Entity
 @Table(
@@ -29,9 +30,25 @@ public class CommentEntity extends BaseEntity {
     @Column(name = "text", nullable = false, length = 500)
     private String text;
 
+    // I added this field so that I can set CascadeType.REMOVE
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "comment")
+    private List<CommentNotificationEntity> notifications;
+
     public CommentEntity(UserEntity user, PostEntity post, String text) {
         this.user = user;
         this.post = post;
         this.text = text;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public PostEntity getPost() {
+        return post;
+    }
+
+    public String getText() {
+        return text;
     }
 }
