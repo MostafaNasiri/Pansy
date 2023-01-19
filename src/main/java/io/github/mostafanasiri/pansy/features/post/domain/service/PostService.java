@@ -84,14 +84,14 @@ public class PostService {
                         .collect(Collectors.toSet())
         );
 
-        // Make sure that files are not already attached to any posts TODO: or users
+        // Make sure that files are not already attached to any entities
         var fileIds = imageFileEntities.stream().map(BaseEntity::getId).toList();
-        var fileIdsThatAreAlreadyAttachedToAPost = postRepository.getFileIdsThatAreAttachedToAPost(fileIds);
-        if (!fileIdsThatAreAlreadyAttachedToAPost.isEmpty()) {
+        var fileIdsThatAreAttachedToAnEntity = fileService.getFileIdsThatAreAttachedToAnEntity(fileIds);
+        if (!fileIdsThatAreAttachedToAnEntity.isEmpty()) {
             throw new InvalidInputException(
                     String.format(
-                            "File with id %s is already attached to a post.",
-                            fileIdsThatAreAlreadyAttachedToAPost.get(0)
+                            "File with id %s is already attached to an entity.",
+                            fileIdsThatAreAttachedToAnEntity.get(0)
                     )
             );
         }
@@ -131,14 +131,13 @@ public class PostService {
                 .toList();
 
         if (!newImageIds.isEmpty()) {
-            // Make sure that the new files are not already attached to any posts
-            var fileIdsThatAreAlreadyAttachedToAPost =
-                    postRepository.getFileIdsThatAreAttachedToAPost(newImageIds);
-            if (!fileIdsThatAreAlreadyAttachedToAPost.isEmpty()) {
+            // Make sure that the new files are not already attached to any entities
+            var fileIdsThatAreAlreadyAttachedToAnEntity = fileService.getFileIdsThatAreAttachedToAnEntity(newImageIds);
+            if (!fileIdsThatAreAlreadyAttachedToAnEntity.isEmpty()) {
                 throw new InvalidInputException(
                         String.format(
-                                "File with id %s is already attached to a post.",
-                                fileIdsThatAreAlreadyAttachedToAPost.get(0)
+                                "File with id %s is already attached to an entity.",
+                                fileIdsThatAreAlreadyAttachedToAnEntity.get(0)
                         )
                 );
             }

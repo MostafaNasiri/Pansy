@@ -63,12 +63,12 @@ public class UserService {
         if (user.avatar() != null) {
             var fileEntity = fileService.getFile(user.avatar().id());
 
-            // Make sure that the avatar file does not belong to another user TODO: or post
-            var userId = userRepository.getUserIdByAvatarFileId(fileEntity.getId());
-            if (userId.isPresent()) {
+            // Make sure that the avatar file is not already attached to an entity
+            var attachedFileIds = fileService.getFileIdsThatAreAttachedToAnEntity(List.of(fileEntity.getId()));
+            if (attachedFileIds.isEmpty()) {
                 throw new InvalidInputException(
                         String.format(
-                                "File with id %s is already set as an avatar.",
+                                "File with id %s is already attached to an entity.",
                                 fileEntity.getId()
                         )
                 );

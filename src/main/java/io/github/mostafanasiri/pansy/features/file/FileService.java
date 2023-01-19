@@ -111,4 +111,8 @@ public class FileService {
 
         return result;
     }
+
+    public List<Integer> getFileIdsThatAreAttachedToAnEntity(List<Integer> fileIds) {
+        return repository.getFileIdsThatAreAttachedToAnEntity(fileIds);
+    }
 }
