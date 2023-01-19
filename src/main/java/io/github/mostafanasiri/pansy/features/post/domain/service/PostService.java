@@ -5,6 +5,9 @@ import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.FileService;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
+import io.github.mostafanasiri.pansy.features.notification.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.CommentEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.LikeEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
@@ -49,6 +52,9 @@ public class PostService {
     private FileService fileService;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     public List<Comment> getComments(int postId, int page, int size) {
@@ -64,25 +70,34 @@ public class PostService {
 
     @Transactional
     public Comment addComment(int postId, @NonNull Comment comment) {
-        var user = getUserEntity(comment.user().id());
+        var commentator = getUserEntity(comment.user().id());
         var post = getPostEntity(postId);
 
-        var commentEntity = new CommentEntity(user, post, comment.text());
+        var commentEntity = new CommentEntity(commentator, post, comment.text());
         commentEntity = commentRepository.save(commentEntity);
 
         post.incrementCommentCount();
         postRepository.save(post);
 
+        // Add new comment notification for the post's author
+        var commentNotification = new CommentNotification(
+                new NotificationUser(commentator.getId()),
+                new NotificationUser(post.getUser().getId()),
+                commentEntity.getId(),
+                postId
+        );
+        notificationService.addCommentNotification(commentNotification);
+
         return modelMapper.mapFromCommentEntity(commentEntity);
     }
 
     @Transactional
-    public void deleteComment(int userId, int postId, int commentId) {
-        var user = getUserEntity(userId);
+    public void deleteComment(int currentUserId, int postId, int commentId) {
+        var commentator = getUserEntity(currentUserId);
         var post = getPostEntity(postId);
         var comment = getCommentEntity(commentId);
 
-        if (comment.getUser() != user) {
+        if (comment.getUser() != commentator) {
             throw new AuthorizationException("Comment does not belong to this user.");
         }
 
@@ -94,6 +109,8 @@ public class PostService {
 
         post.decrementCommentCount();
         postRepository.save(post);
+
+        notificationService.deleteCommentNotification(comment.getId());
     }
 
     public List<User> getLikes(int postId, int page, int size) {

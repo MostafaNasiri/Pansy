@@ -26,4 +26,9 @@ public abstract class NotificationEntity extends BaseEntity {
 
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;
+
+    public NotificationEntity(UserEntity notifierUser, UserEntity notifiedUser) {
+        this.notifierUser = notifierUser;
+        this.notifiedUser = notifiedUser;
+    }
 }

@@ -2,12 +2,12 @@ package io.github.mostafanasiri.pansy.features.notification.domain.model;
 
 import org.springframework.lang.Nullable;
 
-public record User(
+public record NotificationUser(
         int id,
         @Nullable String name,
         @Nullable String avatarUrl
 ) {
-    public User(int id) {
+    public NotificationUser(int id) {
         this(id, null, null);
     }
 }

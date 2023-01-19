@@ -11,10 +11,15 @@ public abstract sealed class Notification
     protected Integer id;
 
     @NonNull
-    protected User notifierUser;
+    protected NotificationUser notifierUser;
 
     @NonNull
-    protected User notifiedUser;
+    protected NotificationUser notifiedUser;
 
     protected boolean isRead;
+
+    public Notification(@NonNull NotificationUser notifierUser, @NonNull NotificationUser notifiedUser) {
+        this.notifierUser = notifierUser;
+        this.notifiedUser = notifiedUser;
+    }
 }
