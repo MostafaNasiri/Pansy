@@ -6,6 +6,7 @@ import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotif
 import io.github.mostafanasiri.pansy.features.notification.data.entity.NotificationEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -21,8 +22,14 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             LEFT JOIN nu.avatar
             LEFT JOIN n.post p
             LEFT JOIN n.comment c
+            WHERE n.notifiedUser.id=?1
+            ORDER BY n.createdAt DESC
             """)
     List<NotificationEntity> getNotifications(int notifiedUserId, Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE NotificationEntity n SET n.isRead = true WHERE n.id IN(?1) AND n.isRead = false")
+    void markNotificationsAsRead(List<Integer> ids);
 
     int countByNotifiedUserIdAndIsReadIsFalse(int notifiedUserID);
 

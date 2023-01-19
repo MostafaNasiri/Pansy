@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features.notification.domain.service;
 
+import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
@@ -22,6 +23,7 @@ import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -42,9 +44,15 @@ public class NotificationService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Transactional
     public List<Notification> getNotifications(int notifiedUserId, int page, int size) {
         var pageRequest = PageRequest.of(page, size);
         var result = notificationRepository.getNotifications(notifiedUserId, pageRequest);
+
+        var notificationIds = result.stream()
+                .map(BaseEntity::getId)
+                .toList();
+        notificationRepository.markNotificationsAsRead(notificationIds);
 
         return modelMapper.mapFromNotificationEntities(result);
     }
