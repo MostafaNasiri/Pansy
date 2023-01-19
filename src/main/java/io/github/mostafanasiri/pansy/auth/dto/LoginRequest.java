@@ -2,18 +2,13 @@ package io.github.mostafanasiri.pansy.auth.dto;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
 
-@Getter
-public class LoginRequest { // TODO: Convert to record
-    @Pattern(regexp = "^[a-zA-Z0-9._-]{4,255}$", message = "Invalid username")
-    private String username;
-
-    @Size(min = 6, max = 500)
-    private String password;
-
-    public LoginRequest(String username, String password) {
-        this.username = username.trim();
-        this.password = password.trim();
+public record LoginRequest(
+        @Pattern(regexp = "^[a-zA-Z0-9._-]{4,255}$", message = "Invalid username") String username,
+        @Size(min = 6, max = 500) String password
+) {
+    public LoginRequest {
+        username = username.trim();
+        password = password.trim();
     }
 }

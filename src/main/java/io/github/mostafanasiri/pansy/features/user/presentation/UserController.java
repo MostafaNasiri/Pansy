@@ -61,7 +61,6 @@ public class UserController extends BaseController {
             @PathVariable(name = "user_id") int userId
     ) {
         var followers = userService.getFollowers(userId); // TODO: Add pagination
-
         var response = responseMapper.fromUserModels(followers);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -73,7 +72,6 @@ public class UserController extends BaseController {
             @PathVariable(name = "user_id") int userId
     ) {
         var following = userService.getFollowing(userId); // TODO: Add pagination
-
         var response = responseMapper.fromUserModels(following);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);

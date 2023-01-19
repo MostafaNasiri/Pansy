@@ -42,7 +42,7 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Creates a new user")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
-        var user = new User(request.getFullName(), request.getUsername(), request.getPassword());
+        var user = new User(request.fullName(), request.username(), request.password());
         var createdUser = userService.createUser(user);
 
         var token = jwtTokenUtil.generateAccessToken(createdUser.username());
@@ -56,7 +56,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         try {
             var authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
 
             var userDetails = (UserDetails) authentication.getPrincipal();
