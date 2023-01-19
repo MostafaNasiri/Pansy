@@ -91,7 +91,7 @@ public class UserService {
         var userEntity = getUserEntity(userId);
         var pageRequest = PageRequest.of(page, size);
 
-        return followerRepository.findAllByTargetUser(userEntity, pageRequest)
+        return followerRepository.getFollowers(userEntity, pageRequest)
                 .stream()
                 .map((f) -> modelMapper.mapFromUserEntity(f.getSourceUser()))
                 .toList();
@@ -101,7 +101,7 @@ public class UserService {
         var userEntity = getUserEntity(userId);
         var pageRequest = PageRequest.of(page, size);
 
-        return followerRepository.findAllBySourceUser(userEntity, pageRequest)
+        return followerRepository.getFollowing(userEntity, pageRequest)
                 .stream()
                 .map((f) -> modelMapper.mapFromUserEntity(f.getTargetUser()))
                 .toList();

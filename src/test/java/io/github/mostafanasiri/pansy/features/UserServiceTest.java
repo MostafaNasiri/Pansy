@@ -150,7 +150,7 @@ public class UserServiceTest {
         var followers = new ArrayList<FollowerEntity>();
         followers.add(new FollowerEntity(new UserEntity("follower1", "", ""), user));
 
-        when(followerRepository.findAllByTargetUser(user))
+        when(followerRepository.getFollowers(user))
                 .thenReturn(followers);
 
         // Act
@@ -195,7 +195,7 @@ public class UserServiceTest {
         var followers = new ArrayList<FollowerEntity>();
         followers.add(new FollowerEntity(new UserEntity("follower1", "", ""), user));
 
-        when(followerRepository.findAllBySourceUser(user))
+        when(followerRepository.getFollowing(user))
                 .thenReturn(followers);
 
         // Act
