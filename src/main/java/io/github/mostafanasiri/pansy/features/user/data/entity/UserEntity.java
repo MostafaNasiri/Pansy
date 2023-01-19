@@ -21,7 +21,7 @@ import org.springframework.lang.NonNull;
 )
 @EntityListeners(AuditingEntityListener.class)
 public class UserEntity extends BaseEntity {
-    @Column(name = "first_name", nullable = false) // TODO: Change column name
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
     @Column(name = "username", unique = true, nullable = false)
