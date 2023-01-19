@@ -7,13 +7,23 @@ import org.springframework.lang.Nullable;
 @Getter
 public final class LikeNotification extends Notification {
     private int postId;
+    private String postThumbnailName;
 
-    @Nullable
-    private String postThumbnailUrl;
+    public LikeNotification(
+            int id,
+            @NonNull NotificationUser notifierUser,
+            @Nullable NotificationUser notifiedUser,
+            int postId,
+            @NonNull String postThumbnailName
+    ) {
+        super(id, notifierUser, notifiedUser);
+        this.postId = postId;
+        this.postThumbnailName = postThumbnailName;
+    }
 
     public LikeNotification(
             @NonNull NotificationUser notifierUser,
-            @NonNull NotificationUser notifiedUser,
+            @Nullable NotificationUser notifiedUser,
             int postId
     ) {
         super(notifierUser, notifiedUser);

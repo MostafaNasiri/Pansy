@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class PostController extends BaseController {
     @Operation(summary = "Returns a user's posts")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getPosts(
             @PathVariable(name = "user_id") int userId,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
         var posts = service.getUserPosts(getCurrentUser().getId(), userId, page, size);
@@ -112,7 +113,7 @@ public class PostController extends BaseController {
     @Operation(summary = "Returns a list of users who liked the specified post id")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getPostLikes(
             @PathVariable(name = "post_id") int postId,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
         var users = service.getLikes(postId, page, size);
@@ -138,7 +139,7 @@ public class PostController extends BaseController {
     @Operation(summary = "Returns comments of the specified post id")
     public ResponseEntity<ApiResponse<List<CommentResponse>>> getComments(
             @PathVariable(name = "post_id") int postId,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
         var comments = service.getComments(postId, page, size);

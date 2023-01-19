@@ -4,9 +4,11 @@ import io.github.mostafanasiri.pansy.features.post.data.entity.CommentEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
+@Getter
 @NoArgsConstructor
 @Entity
 @DiscriminatorValue("comment")

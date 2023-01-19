@@ -5,9 +5,11 @@ import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNo
 import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.repository.NotificationRepository;
+import io.github.mostafanasiri.pansy.features.notification.domain.ModelMapper;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.Notification;
 import io.github.mostafanasiri.pansy.features.post.data.entity.CommentEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.CommentRepository;
@@ -18,7 +20,10 @@ import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class NotificationService {
@@ -33,6 +38,16 @@ public class NotificationService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    public List<Notification> getNotifications(int notifiedUserId, int page, int size) {
+        var pageRequest = PageRequest.of(page, size);
+        var result = notificationRepository.getNotifications(notifiedUserId, pageRequest);
+
+        return modelMapper.mapFromNotificationEntities(result);
+    }
 
     public int getUnreadNotificationsCount(int userId) {
         return notificationRepository.countByNotifiedUserIdAndIsReadIsFalse(userId);

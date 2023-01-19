@@ -4,14 +4,27 @@ import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNo
 import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.NotificationEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Integer> {
+    @Query("""
+            SELECT n, nu, p, pi, c
+            FROM NotificationEntity n
+            INNER JOIN n.notifierUser nu
+            LEFT JOIN nu.avatar
+            LEFT JOIN n.post p
+            LEFT JOIN p.images pi
+            LEFT JOIN n.comment c
+            """)
+    List<NotificationEntity> getNotifications(int notifiedUserId, Pageable pageable);
+
     int countByNotifiedUserIdAndIsReadIsFalse(int notifiedUserID);
 
     @Query("SELECT n FROM CommentNotificationEntity n WHERE n.comment.id=?1")

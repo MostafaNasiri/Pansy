@@ -17,5 +17,6 @@ public interface PostRepository extends JpaRepository<PostEntity, Integer> {
     )
     List<Integer> getFileIdsThatAreAttachedToAPost(List<Integer> fileIds);
 
+    // TODO: Join on images
     List<PostEntity> findByUserOrderByCreatedAtDesc(UserEntity author, Pageable pageable);
 }

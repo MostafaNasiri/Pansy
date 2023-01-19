@@ -7,15 +7,26 @@ import org.springframework.lang.Nullable;
 @Getter
 public final class CommentNotification extends Notification {
     private int commentId;
-
     private int postId;
+    private String postThumbnailName;
 
-    @Nullable
-    private String postThumbnailUrl;
+    public CommentNotification(
+            int id,
+            @NonNull NotificationUser notifierUser,
+            @Nullable NotificationUser notifiedUser,
+            int commentId,
+            int postId,
+            @NonNull String postThumbnailName
+    ) {
+        super(id, notifierUser, notifiedUser);
+        this.commentId = commentId;
+        this.postId = postId;
+        this.postThumbnailName = postThumbnailName;
+    }
 
     public CommentNotification(
             @NonNull NotificationUser notifierUser,
-            @NonNull NotificationUser notifiedUser,
+            @Nullable NotificationUser notifiedUser,
             int commentId,
             int postId
     ) {

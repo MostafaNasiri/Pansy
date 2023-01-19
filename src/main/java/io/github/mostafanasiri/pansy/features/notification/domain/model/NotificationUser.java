@@ -4,8 +4,8 @@ import org.springframework.lang.Nullable;
 
 public record NotificationUser(
         int id,
-        @Nullable String name,
-        @Nullable String avatarUrl
+        @Nullable String username,
+        @Nullable String avatarName
 ) {
     public NotificationUser(int id) {
         this(id, null, null);
