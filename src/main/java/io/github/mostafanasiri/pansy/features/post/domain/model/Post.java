@@ -7,10 +7,17 @@ import java.util.List;
 
 public record Post(
         @Nullable Integer id,
-        @NonNull User user,
+        @Nullable User user,
         @NonNull String caption,
         @NonNull List<Image> images,
         @Nullable Integer likesCount,
         @Nullable Boolean isLikedByCurrentUser
 ) {
+    public Post(@NonNull String caption, @NonNull List<Image> images) {
+        this(null, null, caption, images, null, null);
+    }
+
+    public Post(@Nullable Integer id, @NonNull String caption, @NonNull List<Image> images) {
+        this(id, null, caption, images, null, null);
+    }
 }

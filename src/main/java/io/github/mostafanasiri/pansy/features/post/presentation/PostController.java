@@ -1,11 +1,9 @@
 package io.github.mostafanasiri.pansy.features.post.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
-import io.github.mostafanasiri.pansy.common.BaseController;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.post.domain.service.PostService;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.AddCommentRequest;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.CreateEditPostRequest;
@@ -26,7 +24,7 @@ import java.util.List;
 
 @Tag(name = "Post")
 @RestController
-public class PostController extends BaseController {
+public class PostController {
     @Autowired
     private PostService service;
 
@@ -40,7 +38,7 @@ public class PostController extends BaseController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var posts = service.getUserPosts(getCurrentUserId(), userId, page, size);
+        var posts = service.getUserPosts(userId, page, size);
         var result = posts.stream().map(mapper::mapFromPostModel).toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -49,22 +47,14 @@ public class PostController extends BaseController {
     @PostMapping("/posts")
     @Operation(summary = "Creates a new post for the authenticated user")
     public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody CreateEditPostRequest request) {
-        var author = new User(getCurrentUserId());
         var post = new Post(
-                null,
-                author,
                 request.caption(),
                 request.imageIds()
                         .stream()
                         .map(Image::new)
-                        .toList(),
-                null,
-                null
+                        .toList()
         );
-
-        var result = mapper.mapFromPostModel(
-                service.createPost(post)
-        );
+        var result = mapper.mapFromPostModel(service.createPost(post));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
     }
@@ -75,22 +65,15 @@ public class PostController extends BaseController {
             @PathVariable(name = "post_id") int postId,
             @Valid @RequestBody CreateEditPostRequest request
     ) {
-        var author = new User(getCurrentUserId());
         var post = new Post(
                 postId,
-                author,
                 request.caption(),
                 request.imageIds()
                         .stream()
                         .map(Image::new)
-                        .toList(),
-                null,
-                null
+                        .toList()
         );
-
-        var result = mapper.mapFromPostModel(
-                service.updatePost(getCurrentUserId(), post)
-        );
+        var result = mapper.mapFromPostModel(service.updatePost(post));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
@@ -98,14 +81,14 @@ public class PostController extends BaseController {
     @DeleteMapping("/posts/{post_id}")
     @Operation(summary = "Deletes a post")
     public ResponseEntity<ApiResponse<Boolean>> deletePost(@PathVariable(name = "post_id") int postId) {
-        service.deletePost(getCurrentUserId(), postId);
+        service.deletePost(postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }
 
     @PostMapping("/posts/{post_id}/likes")
     @Operation(summary = "Likes the specified post by the authenticated user")
     public ResponseEntity<ApiResponse<Boolean>> likePost(@PathVariable(name = "post_id") int postId) {
-        service.likePost(getCurrentUserId(), postId);
+        service.likePost(postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
@@ -131,7 +114,7 @@ public class PostController extends BaseController {
             @PathVariable(name = "post_id") int postId,
             @PathVariable(name = "user_id") int userId
     ) {
-        service.unlikePost(getCurrentUserId(), postId);
+        service.unlikePost(userId, postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
@@ -157,7 +140,7 @@ public class PostController extends BaseController {
             @PathVariable(name = "post_id") int postId,
             @Valid @RequestBody AddCommentRequest request
     ) {
-        var comment = new Comment(new User(getCurrentUserId()), request.text());
+        var comment = new Comment(request.text());
         var result = mapper.mapFromCommentModel(service.addComment(postId, comment));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
@@ -169,7 +152,7 @@ public class PostController extends BaseController {
             @PathVariable(name = "post_id") int postId,
             @PathVariable(name = "comment_id") int commentId
     ) {
-        service.deleteComment(getCurrentUserId(), postId, commentId);
+        service.deleteComment(postId, commentId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }
 }

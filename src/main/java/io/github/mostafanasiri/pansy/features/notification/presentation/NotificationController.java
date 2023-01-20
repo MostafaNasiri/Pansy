@@ -1,7 +1,6 @@
 package io.github.mostafanasiri.pansy.features.notification.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
-import io.github.mostafanasiri.pansy.common.BaseController;
 import io.github.mostafanasiri.pansy.features.notification.domain.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +17,7 @@ import java.util.List;
 
 @Tag(name = "Notification")
 @RestController
-public class NotificationController extends BaseController {
+public class NotificationController {
     @Autowired
     private NotificationService service;
 
@@ -31,7 +30,7 @@ public class NotificationController extends BaseController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(30) int size
     ) {
-        var notifications = service.getNotifications(getCurrentUserId(), page, size);
+        var notifications = service.getNotifications(page, size);
         var result = responseMapper.mapFromNotificationModels(notifications);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -40,7 +39,8 @@ public class NotificationController extends BaseController {
     @GetMapping("/users/me/notifications/unread/count")
     @Operation(summary = "Returns total number of the authenticated user's unread notifications")
     public ResponseEntity<ApiResponse<Integer>> getUnreadNotificationCount() {
-        int result = service.getUnreadNotificationsCount(getCurrentUserId());
+        int result = service.getUnreadNotificationsCount();
+
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
 }

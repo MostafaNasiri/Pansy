@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features.user.domain.service;
 
+import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class UserService {
+public class UserService extends BaseService {
     @Autowired
     private UserRepository userRepository;
 
@@ -53,10 +54,10 @@ public class UserService {
         return modelMapper.mapFromUserEntity(userRepository.save(userEntity));
     }
 
-    public User updateUser(int currentUserId, @NonNull User user) {
+    public User updateUser(@NonNull User user) {
         var userEntity = getUserEntity(user.id());
 
-        if (userEntity.getId() != currentUserId) {
+        if (userEntity.getId() != getAuthenticatedUserId()) {
             throw new AuthorizationException("Unauthorized user.");
         }
 
@@ -108,8 +109,8 @@ public class UserService {
     }
 
     @Transactional
-    public void followUser(int currentUserId, int sourceUserId, int targetUserId) {
-        if (currentUserId != sourceUserId) {
+    public void followUser(int sourceUserId, int targetUserId) {
+        if (getAuthenticatedUserId() != sourceUserId) {
             throw new AuthorizationException("Forbidden action.");
         }
 
@@ -147,8 +148,8 @@ public class UserService {
     }
 
     @Transactional
-    public void unfollowUser(int currentUserId, int sourceUserId, int targetUserId) {
-        if (currentUserId != sourceUserId) {
+    public void unfollowUser(int sourceUserId, int targetUserId) {
+        if (getAuthenticatedUserId() != sourceUserId) {
             throw new AuthorizationException("Forbidden action.");
         }
 

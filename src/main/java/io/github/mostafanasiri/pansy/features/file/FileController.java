@@ -22,10 +22,9 @@ public class FileController {
     private FileService service;
 
     @PostMapping("/files")
-    @Operation(summary = "Upload a file")
+    @Operation(summary = "Uploads a file")
     public ResponseEntity<ApiResponse<FileUploadResponse>> save(@RequestParam(name = "file") MultipartFile file) {
         // TODO: Support multiple file upload
-
         var uploadedFile = service.save(file);
 
         var result = new FileUploadResponse(
@@ -37,7 +36,7 @@ public class FileController {
     }
 
     @GetMapping("/files/{file_name}")
-    @Operation(summary = "Get a file")
+    @Operation(summary = "Returns a file")
     public ResponseEntity<Resource> get(@PathVariable(name = "file_name") String fileName) {
         var file = service.getFileResource(fileName);
 

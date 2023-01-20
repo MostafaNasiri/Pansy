@@ -1,6 +1,7 @@
 package io.github.mostafanasiri.pansy.features.notification.domain.service;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
+import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
@@ -28,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class NotificationService {
+public class NotificationService extends BaseService {
     @Autowired
     private NotificationRepository notificationRepository;
 
@@ -45,9 +46,9 @@ public class NotificationService {
     private ModelMapper modelMapper;
 
     @Transactional
-    public List<Notification> getNotifications(int notifiedUserId, int page, int size) {
+    public List<Notification> getNotifications(int page, int size) {
         var pageRequest = PageRequest.of(page, size);
-        var result = notificationRepository.getNotifications(notifiedUserId, pageRequest);
+        var result = notificationRepository.getNotifications(getAuthenticatedUserId(), pageRequest);
 
         var notificationIds = result.stream()
                 .map(BaseEntity::getId)
@@ -57,8 +58,8 @@ public class NotificationService {
         return modelMapper.mapFromNotificationEntities(result);
     }
 
-    public int getUnreadNotificationsCount(int userId) {
-        return notificationRepository.countByNotifiedUserIdAndIsReadIsFalse(userId);
+    public int getUnreadNotificationsCount() {
+        return notificationRepository.countByNotifiedUserIdAndIsReadIsFalse(getAuthenticatedUserId());
     }
 
     public void addCommentNotification(CommentNotification notification) {

@@ -1,7 +1,6 @@
 package io.github.mostafanasiri.pansy.features.user.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
-import io.github.mostafanasiri.pansy.common.BaseController;
 import io.github.mostafanasiri.pansy.features.user.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "User")
 @RestController
 @RequestMapping("/users")
-public class UserController extends BaseController {
+public class UserController {
     @Autowired
     private UserService userService;
 
@@ -51,7 +50,7 @@ public class UserController extends BaseController {
         }
         var user = new User(userId, request.getFullName(), avatarImage);
 
-        var updatedUser = userService.updateUser(getCurrentUserId(), user);
+        var updatedUser = userService.updateUser(user);
         var response = responseMapper.fromUserModel(updatedUser);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -89,11 +88,7 @@ public class UserController extends BaseController {
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
-        userService.followUser(
-                getCurrentUserId(),
-                userId,
-                request.targetUserId()
-        );
+        userService.followUser(userId, request.targetUserId());
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
@@ -104,11 +99,7 @@ public class UserController extends BaseController {
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
-        userService.unfollowUser(
-                getCurrentUserId(),
-                userId,
-                request.targetUserId()
-        );
+        userService.unfollowUser(userId, request.targetUserId());
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }

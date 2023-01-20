@@ -7,10 +7,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class PansyUserDetails implements UserDetails {
+public class AppUserDetails implements UserDetails {
     private UserEntity user;
 
-    public PansyUserDetails(UserEntity user) {
+    public AppUserDetails(UserEntity user) {
         this.user = user;
     }
 

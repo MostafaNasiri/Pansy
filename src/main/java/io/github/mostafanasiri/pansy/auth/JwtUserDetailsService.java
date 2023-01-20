@@ -19,6 +19,6 @@ public class JwtUserDetailsService implements UserDetailsService {
                         String.format("User with username: %s was not found", username))
                 );
 
-        return new PansyUserDetails(userEntity);
+        return new AppUserDetails(userEntity);
     }
 }

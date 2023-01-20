@@ -7,11 +7,11 @@ import java.util.Date;
 
 public record Comment(
         @Nullable Integer id,
-        @NonNull User user,
+        @Nullable User user,
         @NonNull String text,
         @Nullable Date createdAt
 ) {
-    public Comment(@NonNull User user, @NonNull String text) {
-        this(null, user, text, null);
+    public Comment(@NonNull String text) {
+        this(null, null, text, null);
     }
 }
