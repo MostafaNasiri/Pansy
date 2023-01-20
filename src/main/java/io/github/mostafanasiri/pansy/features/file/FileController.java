@@ -12,6 +12,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Tag(name = "File")
 @RestController
 public class FileController {
@@ -23,14 +25,13 @@ public class FileController {
 
     @PostMapping("/files")
     @Operation(summary = "Uploads a file")
-    public ResponseEntity<ApiResponse<FileUploadResponse>> save(@RequestParam(name = "file") MultipartFile file) {
-        // TODO: Support multiple file upload
-        var uploadedFile = service.save(file);
-
-        var result = new FileUploadResponse(
-                uploadedFile.getId(),
-                fileUtils.createFileUrl(uploadedFile)
-        );
+    public ResponseEntity<ApiResponse<List<FileUploadResponse>>> save(
+            @RequestParam(name = "files[]") MultipartFile[] files
+    ) {
+        var uploadedFiles = service.save(files);
+        var result = uploadedFiles.stream()
+                .map(f -> new FileUploadResponse(f.getId(), fileUtils.createFileUrl(f)))
+                .toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
     }
@@ -39,7 +40,6 @@ public class FileController {
     @Operation(summary = "Returns a file")
     public ResponseEntity<Resource> get(@PathVariable(name = "file_name") String fileName) {
         var file = service.getFileResource(fileName);
-
         var fileExtension = StringUtils.getFilenameExtension(fileName);
 
         return ResponseEntity.ok()

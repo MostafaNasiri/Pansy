@@ -34,6 +34,8 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests()
                 .requestMatchers(HttpMethod.POST, "/auth/**")
                 .permitAll()
+                .requestMatchers(HttpMethod.GET, "/files/**")
+                .permitAll()
                 .requestMatchers(
                         "/swagger-ui/**",
                         "/docs",

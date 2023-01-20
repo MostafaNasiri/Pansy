@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -42,22 +43,32 @@ public class FileService {
         }
     }
 
-    public File save(@NonNull MultipartFile file) {
-        String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-
-        if (!Arrays.asList(allowedFileExtensions).contains(fileExtension)) {
-            throw new InvalidInputException("File type is not allowed.");
-        }
-
-        String fileName = String.format(
+    private static String generateFileName(String fileExtension) {
+        return String.format(
                 "file-%s.%s",
                 System.currentTimeMillis(),
                 fileExtension
         );
+    }
 
-        copyFile(file, fileName);
+    public List<File> save(@NonNull MultipartFile[] files) {
+        var fileEntities = new ArrayList<File>();
 
-        return repository.save(new File(fileName));
+        Arrays.stream(files)
+                .forEach(f -> {
+                    String fileExtension = StringUtils.getFilenameExtension(f.getOriginalFilename());
+
+                    if (!Arrays.asList(allowedFileExtensions).contains(fileExtension)) {
+                        throw new InvalidInputException("File type is not allowed.");
+                    }
+
+                    String fileName = generateFileName(fileExtension);
+
+                    copyFile(f, fileName);
+                    fileEntities.add(new File(fileName));
+                });
+
+        return repository.saveAll(fileEntities);
     }
 
     private void copyFile(@NonNull MultipartFile file, @NonNull String fileName) {
