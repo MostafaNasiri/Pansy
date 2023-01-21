@@ -32,7 +32,6 @@ public class UserController {
     @Operation(summary = "Returns a user's public data")
     public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable(name = "user_id") int userId) {
         var user = userService.getUser(userId);
-
         var response = responseMapper.fromUserModel(user);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);

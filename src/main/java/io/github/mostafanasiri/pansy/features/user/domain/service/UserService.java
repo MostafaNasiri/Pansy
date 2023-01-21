@@ -55,11 +55,11 @@ public class UserService extends BaseService {
     }
 
     public User updateUser(@NonNull User user) {
-        var userEntity = getUserEntity(user.id());
-
-        if (userEntity.getId() != getAuthenticatedUserId()) {
-            throw new AuthorizationException("Unauthorized user.");
+        if (getAuthenticatedUserId() != user.id()) {
+            throw new AuthorizationException("Forbidden action.");
         }
+
+        var userEntity = getAuthenticatedUser();
 
         if (user.avatar() != null) {
             var fileEntity = fileService.getFile(user.avatar().id());
@@ -118,7 +118,7 @@ public class UserService extends BaseService {
             throw new InvalidInputException("A user can't follow him/herself!");
         }
 
-        var sourceUser = getUserEntity(sourceUserId);
+        var sourceUser = getAuthenticatedUser();
         var targetUser = getUserEntity(targetUserId);
 
         var sourceUserHasNotFollowedTargetUser =
@@ -157,7 +157,7 @@ public class UserService extends BaseService {
             throw new InvalidInputException("A user can't unfollow him/herself!");
         }
 
-        var sourceUser = getUserEntity(sourceUserId);
+        var sourceUser = getAuthenticatedUser();
         var targetUser = getUserEntity(targetUserId);
 
         var follower = followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser);

@@ -11,10 +11,7 @@ public class ModelMapper {
         Image avatarImage = null;
         var avatarEntity = userEntity.getAvatar();
         if (avatarEntity != null) {
-            avatarImage = new Image(
-                    avatarEntity.getId(),
-                    avatarEntity.getName()
-            );
+            avatarImage = new Image(avatarEntity.getId(), avatarEntity.getName());
         }
 
         return new User(
