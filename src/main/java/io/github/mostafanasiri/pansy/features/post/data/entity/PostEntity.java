@@ -79,6 +79,10 @@ public class PostEntity extends BaseEntity {
         return images;
     }
 
+    public List<LikeEntity> getLikes() {
+        return likes;
+    }
+
     public int getLikeCount() {
         return likeCount;
     }

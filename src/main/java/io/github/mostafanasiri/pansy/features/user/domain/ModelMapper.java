@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 public class ModelMapper {
     public User mapFromUserEntity(UserEntity userEntity) {
         Image avatarImage = null;
+
         var avatarEntity = userEntity.getAvatar();
         if (avatarEntity != null) {
             avatarImage = new Image(avatarEntity.getId(), avatarEntity.getName());

@@ -22,9 +22,10 @@ public interface FollowerRepository extends JpaRepository<FollowerEntity, Intege
     List<FollowerEntity> getFollowers(UserEntity targetUser, Pageable pageable);
 
     @Query("""
-            SELECT f, tu
+            SELECT f, tu, tua
             FROM FollowerEntity f
             INNER JOIN f.targetUser tu
+            LEFT JOIN tu.avatar tua
             WHERE f.sourceUser=?1
             """)
     List<FollowerEntity> getFollowing(UserEntity sourceUser, Pageable pageable);

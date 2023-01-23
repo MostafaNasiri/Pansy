@@ -56,7 +56,7 @@ public class UserControllerTest extends BaseControllerTest {
         var avatar = new File("x");
         entity.setAvatar(avatar);
 
-        when(userService.getUser(userId))
+        when(userService.getPublicUserData(userId))
                 .thenReturn(entity);
 
         var expectedResponse = createSuccessApiResponse(
@@ -91,7 +91,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var exception = new EntityNotFoundException(UserEntity.class, userId);
 
-        when(userService.getUser(userId))
+        when(userService.getPublicUserData(userId))
                 .thenThrow(exception);
 
         var expectedResponse = createFailApiResponse(exception.getMessage());
@@ -119,7 +119,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var requestDto = new UpdateUserRequest("full", "", fileId);
 
-        when(userService.getUser(userId))
+        when(userService.getPublicUserData(userId))
                 .thenReturn(new UserEntity());
 
         var exception = new EntityNotFoundException(File.class, fileId);
@@ -183,7 +183,7 @@ public class UserControllerTest extends BaseControllerTest {
         user.setFullName(requestDto.getFullName());
         user.setBio(requestDto.getBio());
 
-        when(userService.getUser(userId))
+        when(userService.getPublicUserData(userId))
                 .thenReturn(user);
         when(userService.updateUser(user))
                 .thenReturn(user);
@@ -252,7 +252,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var exception = new EntityNotFoundException(UserEntity.class, targetUserId);
 
-        when(userService.getUser(targetUserId))
+        when(userService.getPublicUserData(targetUserId))
                 .thenThrow(exception);
 
         doCallRealMethod()
@@ -342,7 +342,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var exception = new EntityNotFoundException(UserEntity.class, targetUserId);
 
-        when(userService.getUser(targetUserId))
+        when(userService.getPublicUserData(targetUserId))
                 .thenThrow(exception);
 
         doCallRealMethod()
@@ -403,7 +403,7 @@ public class UserControllerTest extends BaseControllerTest {
         var userId = 1;
         var exception = new EntityNotFoundException(UserEntity.class, userId);
 
-        when(userService.getUser(userId))
+        when(userService.getPublicUserData(userId))
                 .thenThrow(exception);
 
         when(userService.getFollowers(userId))
@@ -464,7 +464,7 @@ public class UserControllerTest extends BaseControllerTest {
         var userId = 1;
         var exception = new EntityNotFoundException(UserEntity.class, userId);
 
-        when(userService.getUser(userId))
+        when(userService.getPublicUserData(userId))
                 .thenThrow(exception);
 
         when(userService.getFollowing(userId))

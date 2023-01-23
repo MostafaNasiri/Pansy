@@ -92,7 +92,7 @@ public class UserServiceTest {
         // Act & Assert
         EntityNotFoundException ex = assertThrows(
                 EntityNotFoundException.class,
-                () -> userService.getUser(userId),
+                () -> userService.getPublicUserData(userId),
                 ""
         );
 
@@ -111,7 +111,7 @@ public class UserServiceTest {
                 .thenReturn(Optional.of(user));
 
         // Act
-        var result = userService.getUser(userId);
+        var result = userService.getPublicUserData(userId);
 
         // Assert
         assertEquals(result, user);

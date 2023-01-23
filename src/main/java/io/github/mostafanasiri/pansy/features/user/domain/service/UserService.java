@@ -45,7 +45,7 @@ public class UserService extends BaseService {
 
     public User createUser(@NonNull User user) {
         if (userRepository.findByUsername(user.username()).isPresent()) {
-            throw new InvalidInputException("Username already exists");
+            throw new InvalidInputException("Username already exists.");
         }
 
         var hashedPassword = passwordEncoder.encode(user.password());
@@ -84,13 +84,15 @@ public class UserService extends BaseService {
         return modelMapper.mapFromUserEntity(userRepository.save(userEntity));
     }
 
-    public User getUser(int userId) {
+    public User getPublicUserData(int userId) {
         return modelMapper.mapFromUserEntity(getUserEntity(userId));
     }
 
     public List<User> getFollowers(int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
         var pageRequest = PageRequest.of(page, size);
+
+        System.out.println();
 
         return followerRepository.getFollowers(userEntity, pageRequest)
                 .stream()

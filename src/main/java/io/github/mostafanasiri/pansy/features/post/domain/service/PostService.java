@@ -63,13 +63,12 @@ public class PostService extends BaseService {
         var userEntity = getUserEntity(userId);
 
         var pageRequest = PageRequest.of(page, size);
-        var result = postRepository.getPostsByUser(userEntity.getId(), pageRequest);
+        var result = postRepository.getUserPosts(userEntity, getAuthenticatedUser(), pageRequest);
 
         var authenticatedUserId = getAuthenticatedUserId();
         return result.stream()
                 .map(pe -> {
-                    var isLikedByCurrentUser = likeRepository.existsByPostIdAndUserId(pe.getId(), authenticatedUserId);
-
+                    var isLikedByCurrentUser = !pe.getLikes().isEmpty();
                     return modelMapper.mapFromPostEntity(pe, isLikedByCurrentUser);
                 })
                 .toList();
@@ -136,6 +135,7 @@ public class PostService extends BaseService {
         return modelMapper.mapFromPostEntity(postRepository.save(postEntity), isLikedByCurrentUser);
     }
 
+    // TODO: Move to FileService
     private void checkIfFilesAreAlreadyAttachedToAnEntity(List<Integer> fileIds) {
         var result = fileService.getFileIdsThatAreAttachedToAnEntity(fileIds);
         if (!result.isEmpty()) {
