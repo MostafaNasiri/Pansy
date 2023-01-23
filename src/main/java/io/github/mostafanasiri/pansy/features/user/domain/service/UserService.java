@@ -92,8 +92,6 @@ public class UserService extends BaseService {
         var userEntity = getUserEntity(userId);
         var pageRequest = PageRequest.of(page, size);
 
-        System.out.println();
-
         return followerRepository.getFollowers(userEntity, pageRequest)
                 .stream()
                 .map((f) -> modelMapper.mapFromUserEntity(f.getSourceUser()))
