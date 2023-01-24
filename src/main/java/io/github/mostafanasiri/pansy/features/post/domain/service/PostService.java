@@ -182,7 +182,7 @@ public class PostService extends BaseService {
 
     @Transactional
     public Comment addComment(int postId, @NonNull Comment comment) {
-        var commentator = getUserEntity(getAuthenticatedUserId());
+        var commentator = getAuthenticatedUser();
         var post = getPostEntity(postId);
 
         var commentEntity = new CommentEntity(commentator, post, comment.text());
@@ -205,7 +205,7 @@ public class PostService extends BaseService {
 
     @Transactional
     public void deleteComment(int postId, int commentId) {
-        var commentator = getUserEntity(getAuthenticatedUserId());
+        var commentator = getAuthenticatedUser();
         var comment = getCommentEntity(commentId);
 
         if (comment.getUser() != commentator) {
