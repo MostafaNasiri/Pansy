@@ -12,10 +12,10 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
     @Query("""
-            SELECT c, u
+            SELECT c
             FROM CommentEntity c
-            INNER JOIN UserEntity u
-            ON c.user.id=u.id
+            INNER JOIN FETCH c.user cu
+            LEFT JOIN FETCH cu.avatar
             WHERE c.post=?1
             ORDER BY c.createdAt DESC
             """)

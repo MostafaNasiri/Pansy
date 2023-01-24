@@ -133,13 +133,14 @@ public class PostService extends BaseService {
         postEntity.setCaption(input.caption());
         postEntity.setImages(imageFileEntities);
 
-        var isLikedByAuthenticatedUser = likeRepository.existsByPostIdAndUserId(postEntity.getId(), input.user().id());
+        var isLikedByAuthenticatedUser = likeRepository.findByUserIdAndPostId(
+                getAuthenticatedUserId(), postEntity.getId()
+        ).isPresent();
 
         var user = modelMapper.mapFromUserEntity(getAuthenticatedUser());
         return modelMapper.mapFromPostEntity(user, postRepository.save(postEntity), isLikedByAuthenticatedUser);
     }
 
-    // TODO: Move to FileService
     private void checkIfFilesAreAlreadyAttachedToAnEntity(List<Integer> fileIds) {
         var result = fileService.getFileIdsThatAreAttachedToAnEntity(fileIds);
         if (!result.isEmpty()) {
@@ -162,9 +163,10 @@ public class PostService extends BaseService {
 
         postRepository.delete(post);
 
-        var user = getUserEntity(getAuthenticatedUserId());
-        user.decrementPostCount();
-        userRepository.save(user);
+        var authenticatedUser = getAuthenticatedUser();
+
+        authenticatedUser.decrementPostCount();
+        userRepository.save(authenticatedUser);
     }
 
     public List<Comment> getComments(int postId, int page, int size) {

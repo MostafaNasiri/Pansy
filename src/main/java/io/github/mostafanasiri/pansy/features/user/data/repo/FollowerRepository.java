@@ -20,6 +20,7 @@ public interface FollowerRepository extends JpaRepository<FollowerEntity, Intege
             LEFT JOIN su.avatar sua
             WHERE f.targetUser=?1
             """)
+        // TODO: Remove avatar join if not needed
     List<FollowerEntity> getFollowers(UserEntity targetUser, Pageable pageable);
 
     @Query("""
@@ -29,5 +30,6 @@ public interface FollowerRepository extends JpaRepository<FollowerEntity, Intege
             LEFT JOIN tu.avatar tua
             WHERE f.sourceUser=?1
             """)
+        // TODO: Remove avatar join if not needed
     List<FollowerEntity> getFollowing(UserEntity sourceUser, Pageable pageable);
 }

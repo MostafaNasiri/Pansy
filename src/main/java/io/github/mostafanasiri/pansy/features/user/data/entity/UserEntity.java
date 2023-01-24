@@ -33,7 +33,7 @@ public class UserEntity extends BaseEntity {
     @Column(name = "bio")
     private String bio;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     @JoinTable(
             name = "avatar_images",
             joinColumns = @JoinColumn(name = "user_id"),
