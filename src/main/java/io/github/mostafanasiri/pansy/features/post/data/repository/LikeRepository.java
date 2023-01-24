@@ -16,6 +16,9 @@ public interface LikeRepository extends JpaRepository<LikeEntity, Integer> {
 
     Optional<LikeEntity> findByUserIdAndPostId(int userId, int postId);
 
+    @Query("SELECT l.post.id FROM LikeEntity l WHERE l.post.id IN(?2) AND l.user.id=?1")
+    List<Integer> getLikedPostIds(int user, List<Integer> postIds);
+
     @Query("""
             SELECT l, u
             FROM LikeEntity l

@@ -14,6 +14,7 @@ import org.springframework.lang.NonNull;
 @Table(
         name = "likes",
         indexes = {
+                @Index(columnList = "user_id"),
                 @Index(columnList = "post_id")
         },
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "post_id"})

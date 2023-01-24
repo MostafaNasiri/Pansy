@@ -63,20 +63,22 @@ public class PostService extends BaseService {
         var userEntity = getUserEntity(userId);
 
         var pageRequest = PageRequest.of(page, size);
-        var result = postRepository.getUserPosts(userEntity, getAuthenticatedUser(), pageRequest);
+        var posts = postRepository.getUserPosts(userEntity, pageRequest);
 
-        var authenticatedUserId = getAuthenticatedUserId();
-        return result.stream()
-                .map(pe -> {
-                    var isLikedByCurrentUser = !pe.getLikes().isEmpty();
-                    return modelMapper.mapFromPostEntity(pe, isLikedByCurrentUser);
-                })
-                .toList();
+        // Get ids of the posts that the authenticated user has liked
+        var postIds = posts.stream().map(BaseEntity::getId).toList();
+        var likedPostIds = likeRepository.getLikedPostIds(getAuthenticatedUserId(), postIds);
+
+        return modelMapper.mapUserPosts(userEntity, posts, likedPostIds);
     }
 
     @Transactional
     public Post createPost(@NonNull Post input) {
-        var userEntity = getUserEntity(getAuthenticatedUserId());
+        var authenticatedUserEntity = getAuthenticatedUser();
+
+        if (input.images().isEmpty()) {
+            throw new InvalidInputException("A post must have at least one image.");
+        }
 
         var imageFileEntities = fileService.getFiles(
                 input.images()
@@ -89,13 +91,14 @@ public class PostService extends BaseService {
         var fileIds = imageFileEntities.stream().map(BaseEntity::getId).toList();
         checkIfFilesAreAlreadyAttachedToAnEntity(fileIds);
 
-        var postEntity = new PostEntity(userEntity, input.caption(), imageFileEntities);
+        var postEntity = new PostEntity(authenticatedUserEntity, input.caption(), imageFileEntities);
         postEntity = postRepository.save(postEntity);
 
-        userEntity.incrementPostCount();
-        userRepository.save(userEntity);
+        authenticatedUserEntity.incrementPostCount();
+        userRepository.save(authenticatedUserEntity);
 
-        return modelMapper.mapFromPostEntity(postEntity, false);
+        var user = modelMapper.mapFromUserEntity(authenticatedUserEntity);
+        return modelMapper.mapFromPostEntity(user, postEntity, false);
     }
 
     public Post updatePost(@NonNull Post input) {
@@ -105,16 +108,16 @@ public class PostService extends BaseService {
             throw new AuthorizationException("Post does not belong to authenticated user.");
         }
 
+        if (input.images().isEmpty()) {
+            throw new InvalidInputException("A post must have at least one image.");
+        }
+
         var imageFileEntities = fileService.getFiles(
                 input.images()
                         .stream()
                         .map(Image::id)
                         .collect(Collectors.toSet())
         );
-
-        if (input.images().isEmpty()) {
-            throw new InvalidInputException("A post must have at least one image.");
-        }
 
         // Check if there are any new images added to the post
         // and make sure that they are not already attached to any entities
@@ -130,9 +133,10 @@ public class PostService extends BaseService {
         postEntity.setCaption(input.caption());
         postEntity.setImages(imageFileEntities);
 
-        var isLikedByCurrentUser = likeRepository.existsByPostIdAndUserId(postEntity.getId(), input.user().id());
+        var isLikedByAuthenticatedUser = likeRepository.existsByPostIdAndUserId(postEntity.getId(), input.user().id());
 
-        return modelMapper.mapFromPostEntity(postRepository.save(postEntity), isLikedByCurrentUser);
+        var user = modelMapper.mapFromUserEntity(getAuthenticatedUser());
+        return modelMapper.mapFromPostEntity(user, postRepository.save(postEntity), isLikedByAuthenticatedUser);
     }
 
     // TODO: Move to FileService
