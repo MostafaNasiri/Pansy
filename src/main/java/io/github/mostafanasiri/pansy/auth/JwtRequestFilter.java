@@ -37,7 +37,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         if (!hasAuthHeader(request)) {
-            filterChain.doFilter(request, response);
+            handleError(response, "Access denied", HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
@@ -47,10 +47,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         try {
             username = jwtTokenUtil.getUsernameFromToken(token);
         } catch (MalformedJwtException | UnsupportedJwtException e) {
-            handleError(response, "Invalid token");
+            handleError(response, "Invalid token", HttpServletResponse.SC_BAD_REQUEST);
             return;
         } catch (ExpiredJwtException e) {
-            handleError(response, "The token is expired");
+            handleError(response, "The token is expired", HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
@@ -69,14 +69,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return header.substring(BEARER.length());
     }
 
-    private void handleError(HttpServletResponse response, String message) throws IOException {
+    private void handleError(
+            HttpServletResponse response,
+            String message,
+            int statusCode
+    ) throws IOException {
         try {
             var errorResponse = new ObjectMapper().writeValueAsString(
                     new ApiResponse<>(ApiResponse.Status.FAIL, message)
             );
 
             response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(statusCode);
             response.getWriter().write(errorResponse);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
