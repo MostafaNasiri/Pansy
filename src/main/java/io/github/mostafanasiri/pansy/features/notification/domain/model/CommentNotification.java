@@ -1,8 +1,6 @@
 package io.github.mostafanasiri.pansy.features.notification.domain.model;
 
 import lombok.Getter;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 @Getter
 public final class CommentNotification extends Notification {
@@ -12,11 +10,11 @@ public final class CommentNotification extends Notification {
 
     public CommentNotification(
             int id,
-            @NonNull NotificationUser notifierUser,
-            @Nullable NotificationUser notifiedUser,
+            NotificationUser notifierUser,
+            NotificationUser notifiedUser,
             int commentId,
             int postId,
-            @NonNull String postThumbnailName
+            String postThumbnailName
     ) {
         super(id, notifierUser, notifiedUser);
         this.commentId = commentId;
@@ -25,8 +23,8 @@ public final class CommentNotification extends Notification {
     }
 
     public CommentNotification(
-            @NonNull NotificationUser notifierUser,
-            @Nullable NotificationUser notifiedUser,
+            NotificationUser notifierUser,
+            NotificationUser notifiedUser,
             int commentId,
             int postId
     ) {

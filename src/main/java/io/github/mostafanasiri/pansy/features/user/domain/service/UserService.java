@@ -45,7 +45,7 @@ public class UserService extends BaseService {
 
     public User createUser(@NonNull User user) {
         if (userRepository.findByUsername(user.username()).isPresent()) {
-            throw new InvalidInputException("Username already exists.");
+            throw new InvalidInputException("Username already exists");
         }
 
         var hashedPassword = passwordEncoder.encode(user.password());
@@ -56,7 +56,7 @@ public class UserService extends BaseService {
 
     public User updateUser(@NonNull User user) {
         if (getAuthenticatedUserId() != user.id()) {
-            throw new AuthorizationException("Forbidden action.");
+            throw new AuthorizationException("Forbidden action");
         }
 
         var userEntity = getAuthenticatedUser();
@@ -69,7 +69,7 @@ public class UserService extends BaseService {
             if (attachedFileIds.isEmpty()) {
                 throw new InvalidInputException(
                         String.format(
-                                "File with id %s is already attached to an entity.",
+                                "File with id %s is already attached to an entity",
                                 fileEntity.getId()
                         )
                 );
@@ -111,7 +111,7 @@ public class UserService extends BaseService {
     @Transactional
     public void followUser(int sourceUserId, int targetUserId) {
         if (getAuthenticatedUserId() != sourceUserId) {
-            throw new AuthorizationException("Forbidden action.");
+            throw new AuthorizationException("Forbidden action");
         }
 
         if (sourceUserId == targetUserId) {
@@ -150,7 +150,7 @@ public class UserService extends BaseService {
     @Transactional
     public void unfollowUser(int sourceUserId, int targetUserId) {
         if (getAuthenticatedUserId() != sourceUserId) {
-            throw new AuthorizationException("Forbidden action.");
+            throw new AuthorizationException("Forbidden action");
         }
 
         if (sourceUserId == targetUserId) {

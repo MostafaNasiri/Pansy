@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = MaxUploadSizeExceededException.class)
     @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
     public @ResponseBody ApiResponse<String> handleException(MaxUploadSizeExceededException e) {
-        return new ApiResponse<>(ApiResponse.Status.ERROR, "The file is too large.");
+        return new ApiResponse<>(ApiResponse.Status.ERROR, "The file is too large");
     }
 
     // Handle Spring validation exceptions

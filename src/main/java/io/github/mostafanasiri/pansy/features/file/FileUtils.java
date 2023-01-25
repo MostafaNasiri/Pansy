@@ -14,7 +14,7 @@ public class FileUtils {
 
             case "png" -> MediaType.IMAGE_PNG;
 
-            default -> throw new InternalErrorException("Invalid file extension.");
+            default -> throw new InternalErrorException("Invalid file extension");
         };
     }
 

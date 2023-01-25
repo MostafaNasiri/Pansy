@@ -39,7 +39,7 @@ public class FileService {
         try {
             Files.createDirectories(filesLocation);
         } catch (IOException e) {
-            throw new RuntimeException("Couldn't create 'uploads' folder.");
+            throw new RuntimeException("Couldn't create 'uploads' folder");
         }
     }
 
@@ -59,7 +59,7 @@ public class FileService {
                     String fileExtension = StringUtils.getFilenameExtension(f.getOriginalFilename());
 
                     if (!Arrays.asList(allowedFileExtensions).contains(fileExtension)) {
-                        throw new InvalidInputException("File type is not allowed.");
+                        throw new InvalidInputException("File type is not allowed");
                     }
 
                     String fileName = generateFileName(fileExtension);
@@ -88,10 +88,10 @@ public class FileService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new InternalErrorException("Could not read the file.");
+                throw new InternalErrorException("Could not read the file");
             }
         } catch (InvalidPathException e) {
-            throw new InvalidInputException("Invalid file name.");
+            throw new InvalidInputException("Invalid file name");
         } catch (MalformedURLException e) {
             throw new InternalErrorException(e.getMessage());
         }

@@ -77,7 +77,7 @@ public class PostService extends BaseService {
         var authenticatedUserEntity = getAuthenticatedUser();
 
         if (input.images().isEmpty()) {
-            throw new InvalidInputException("A post must have at least one image.");
+            throw new InvalidInputException("A post must have at least one image");
         }
 
         var imageFileEntities = fileService.getFiles(
@@ -105,11 +105,11 @@ public class PostService extends BaseService {
         var postEntity = getPostEntity(input.id());
 
         if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
-            throw new AuthorizationException("Post does not belong to authenticated user.");
+            throw new AuthorizationException("Post does not belong to authenticated user");
         }
 
         if (input.images().isEmpty()) {
-            throw new InvalidInputException("A post must have at least one image.");
+            throw new InvalidInputException("A post must have at least one image");
         }
 
         var imageFileEntities = fileService.getFiles(
@@ -146,7 +146,7 @@ public class PostService extends BaseService {
         if (!result.isEmpty()) {
             throw new InvalidInputException(
                     String.format(
-                            "File with id %s is already attached to an entity.",
+                            "File with id %s is already attached to an entity",
                             result.get(0)
                     )
             );
@@ -158,7 +158,7 @@ public class PostService extends BaseService {
         var post = getPostEntity(postId);
 
         if (post.getUser().getId() != getAuthenticatedUserId()) {
-            throw new AuthorizationException("Post does not belong to the authenticated user.");
+            throw new AuthorizationException("Post does not belong to the authenticated user");
         }
 
         postRepository.delete(post);
@@ -209,13 +209,13 @@ public class PostService extends BaseService {
         var comment = getCommentEntity(commentId);
 
         if (comment.getUser() != commentator) {
-            throw new AuthorizationException("Comment does not belong to the authenticated user.");
+            throw new AuthorizationException("Comment does not belong to the authenticated user");
         }
 
         var post = getPostEntity(postId);
 
         if (comment.getPost() != post) {
-            throw new InvalidInputException("Comment does not belong to this post.");
+            throw new InvalidInputException("Comment does not belong to this post");
         }
 
         commentRepository.delete(comment);
@@ -266,7 +266,7 @@ public class PostService extends BaseService {
     @Transactional
     public void unlikePost(int userId, int postId) {
         if (getAuthenticatedUserId() != userId) {
-            throw new AuthorizationException("Forbidden action.");
+            throw new AuthorizationException("Forbidden action");
         }
 
         var like = likeRepository.findByUserIdAndPostId(userId, postId);
