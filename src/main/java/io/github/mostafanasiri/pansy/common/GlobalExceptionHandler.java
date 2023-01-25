@@ -15,6 +15,13 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public @ResponseBody ApiResponse<String> handleUncaughtException(Exception e) {
+        e.printStackTrace();
+        return new ApiResponse<>(ApiResponse.Status.ERROR, "Unknown error occurred.");
+    }
+
     @ExceptionHandler(value = InternalErrorException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public @ResponseBody ApiResponse<String> handleException(InternalErrorException e) {
