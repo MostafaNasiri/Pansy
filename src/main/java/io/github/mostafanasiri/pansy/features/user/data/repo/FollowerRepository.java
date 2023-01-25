@@ -14,22 +14,20 @@ public interface FollowerRepository extends JpaRepository<FollowerEntity, Intege
     FollowerEntity findBySourceUserAndTargetUser(UserEntity sourceUser, UserEntity targetUser);
 
     @Query("""
-            SELECT f, su, sua
+            SELECT f
             FROM FollowerEntity f
-            INNER JOIN f.sourceUser su
-            LEFT JOIN su.avatar sua
+            INNER JOIN FETCH f.sourceUser su
+            LEFT JOIN FETCH su.avatar
             WHERE f.targetUser=?1
             """)
-        // TODO: Remove avatar join if not needed
     List<FollowerEntity> getFollowers(UserEntity targetUser, Pageable pageable);
 
     @Query("""
-            SELECT f, tu, tua
+            SELECT f
             FROM FollowerEntity f
-            INNER JOIN f.targetUser tu
-            LEFT JOIN tu.avatar tua
+            INNER JOIN FETCH f.targetUser tu
+            LEFT JOIN FETCH tu.avatar tua
             WHERE f.sourceUser=?1
             """)
-        // TODO: Remove avatar join if not needed
     List<FollowerEntity> getFollowing(UserEntity sourceUser, Pageable pageable);
 }

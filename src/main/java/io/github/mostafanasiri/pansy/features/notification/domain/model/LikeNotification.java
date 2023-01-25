@@ -6,7 +6,7 @@ import org.springframework.lang.Nullable;
 
 @Getter
 public final class LikeNotification extends Notification {
-    private int postId;
+    private final int postId;
     private String postThumbnailName;
 
     public LikeNotification(

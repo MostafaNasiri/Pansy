@@ -6,7 +6,7 @@ import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.UpdateUserRequest;
-import io.github.mostafanasiri.pansy.features.user.presentation.response.GetFollowersFollowingResponse;
+import io.github.mostafanasiri.pansy.features.user.presentation.response.FollowersFollowingResponse;
 import io.github.mostafanasiri.pansy.features.user.presentation.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "User")
 @RestController
@@ -57,7 +59,7 @@ public class UserController {
 
     @GetMapping("/{user_id}/followers")
     @Operation(summary = "Returns a list of users who are followers of the specified user id")
-    public ResponseEntity<ApiResponse<GetFollowersFollowingResponse>> getFollowers(
+    public ResponseEntity<ApiResponse<List<FollowersFollowingResponse>>> getFollowers(
             @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
@@ -70,7 +72,7 @@ public class UserController {
 
     @GetMapping("/{user_id}/following")
     @Operation(summary = "Returns a list of users the specified user id is following")
-    public ResponseEntity<ApiResponse<GetFollowersFollowingResponse>> getFollowing(
+    public ResponseEntity<ApiResponse<List<FollowersFollowingResponse>>> getFollowing(
             @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size

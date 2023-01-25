@@ -9,7 +9,7 @@ import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import io.github.mostafanasiri.pansy.features.user.presentation.UserController;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.UpdateUserRequest;
-import io.github.mostafanasiri.pansy.features.user.presentation.response.GetFollowersFollowingResponse;
+import io.github.mostafanasiri.pansy.features.user.presentation.response.FollowersFollowingResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -437,9 +437,9 @@ public class UserControllerTest extends BaseControllerTest {
         when(userService.getFollowers(userId))
                 .thenReturn(users);
 
-        var expectedResponse = createSuccessApiResponse(new GetFollowersFollowingResponse(
+        var expectedResponse = createSuccessApiResponse(new FollowersFollowingResponse(
                 users.stream().map(
-                        (u) -> new GetFollowersFollowingResponse.Item(u.getId(), u.getFullName(), null)
+                        (u) -> new FollowersFollowingResponse.Item(u.getId(), u.getFullName(), null)
                 ).toList()
         ));
 
@@ -498,9 +498,9 @@ public class UserControllerTest extends BaseControllerTest {
         when(userService.getFollowing(userId))
                 .thenReturn(users);
 
-        var expectedResponse = createSuccessApiResponse(new GetFollowersFollowingResponse(
+        var expectedResponse = createSuccessApiResponse(new FollowersFollowingResponse(
                 users.stream().map(
-                        (u) -> new GetFollowersFollowingResponse.Item(u.getId(), u.getFullName(), null)
+                        (u) -> new FollowersFollowingResponse.Item(u.getId(), u.getFullName(), null)
                 ).toList()
         ));
 

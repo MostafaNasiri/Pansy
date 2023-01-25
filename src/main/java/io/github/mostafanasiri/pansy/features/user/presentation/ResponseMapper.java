@@ -2,7 +2,7 @@ package io.github.mostafanasiri.pansy.features.user.presentation;
 
 import io.github.mostafanasiri.pansy.features.file.FileUtils;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.presentation.response.GetFollowersFollowingResponse;
+import io.github.mostafanasiri.pansy.features.user.presentation.response.FollowersFollowingResponse;
 import io.github.mostafanasiri.pansy.features.user.presentation.response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,20 +29,18 @@ public class ResponseMapper {
         );
     }
 
-    public GetFollowersFollowingResponse fromUserModels(List<User> users) {
-        return new GetFollowersFollowingResponse(
-                users.stream()
-                        .map(u -> {
-                            var avatarUrl = u.avatar() != null ? fileUtils.createFileUrl(u.avatar().name()) : null;
+    public List<FollowersFollowingResponse> fromUserModels(List<User> users) {
+        return users.stream()
+                .map(u -> {
+                    var avatarUrl = u.avatar() != null ? fileUtils.createFileUrl(u.avatar().name()) : null;
 
-                            return new GetFollowersFollowingResponse.Item(
-                                    u.id(),
-                                    u.fullName(),
-                                    u.username(),
-                                    avatarUrl
-                            );
-                        })
-                        .toList()
-        );
+                    return new FollowersFollowingResponse(
+                            u.id(),
+                            u.fullName(),
+                            u.username(),
+                            avatarUrl
+                    );
+                })
+                .toList();
     }
 }

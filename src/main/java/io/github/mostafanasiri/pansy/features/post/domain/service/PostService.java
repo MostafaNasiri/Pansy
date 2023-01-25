@@ -239,13 +239,13 @@ public class PostService extends BaseService {
 
     @Transactional
     public void likePost(int postId) {
-        var userHasAlreadyLikedThePost = likeRepository.findByUserIdAndPostId(
+        var authenticatedUserHasAlreadyLikedThePost = likeRepository.findByUserIdAndPostId(
                 getAuthenticatedUserId(),
                 postId
         ).isPresent();
 
-        if (!userHasAlreadyLikedThePost) {
-            var user = getUserEntity(getAuthenticatedUserId());
+        if (!authenticatedUserHasAlreadyLikedThePost) {
+            var user = getAuthenticatedUser();
             var post = getPostEntity(postId);
 
             var like = new LikeEntity(user, post);
@@ -275,13 +275,15 @@ public class PostService extends BaseService {
 
         if (userHasLikedThePost) {
             likeRepository.delete(like.get());
-
-            var post = getPostEntity(postId);
-            post.decrementLikeCount();
-            postRepository.save(post);
-
+            decrementPostLikeCount(postId);
             notificationService.deleteLikeNotification(userId, postId);
         }
+    }
+
+    private void decrementPostLikeCount(int postId) {
+        var post = getPostEntity(postId);
+        post.decrementLikeCount();
+        postRepository.save(post);
     }
 
     private PostEntity getPostEntity(int postId) {
