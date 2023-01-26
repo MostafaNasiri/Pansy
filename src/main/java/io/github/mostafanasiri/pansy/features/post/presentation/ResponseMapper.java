@@ -1,6 +1,6 @@
 package io.github.mostafanasiri.pansy.features.post.presentation;
 
-import io.github.mostafanasiri.pansy.features.file.FileUtils;
+import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;

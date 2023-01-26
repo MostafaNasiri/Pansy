@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.file;
+package io.github.mostafanasiri.pansy.features.file.presentation;
 
 import io.github.mostafanasiri.pansy.common.exception.InternalErrorException;
 import org.springframework.http.MediaType;
@@ -16,13 +16,6 @@ public class FileUtils {
 
             default -> throw new InternalErrorException("Invalid file extension");
         };
-    }
-
-    public String createFileUrl(@NonNull File file) {
-        return ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/files/")
-                .path(file.getName())
-                .toUriString();
     }
 
     public String createFileUrl(@NonNull String fileName) {

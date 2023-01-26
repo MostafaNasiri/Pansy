@@ -1,11 +1,11 @@
 package io.github.mostafanasiri.pansy;
 
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
-import io.github.mostafanasiri.pansy.features.file.File;
-import io.github.mostafanasiri.pansy.features.file.FileService;
-import io.github.mostafanasiri.pansy.features.file.FileUtils;
+import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
+import io.github.mostafanasiri.pansy.features.file.domain.FileService;
+import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
+import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import io.github.mostafanasiri.pansy.features.user.presentation.UserController;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.UpdateUserRequest;
@@ -53,7 +53,7 @@ public class UserControllerTest extends BaseControllerTest {
         var entity = new UserEntity("test", "user", "pass");
         entity.setId(userId);
 
-        var avatar = new File("x");
+        var avatar = new FileEntity("x");
         entity.setAvatar(avatar);
 
         when(userService.getPublicUserData(userId))
@@ -122,7 +122,7 @@ public class UserControllerTest extends BaseControllerTest {
         when(userService.getPublicUserData(userId))
                 .thenReturn(new UserEntity());
 
-        var exception = new EntityNotFoundException(File.class, fileId);
+        var exception = new EntityNotFoundException(FileEntity.class, fileId);
         when(fileService.getFile(fileId))
                 .thenThrow(exception);
 
@@ -188,7 +188,7 @@ public class UserControllerTest extends BaseControllerTest {
         when(userService.updateUser(user))
                 .thenReturn(user);
 
-        var file = new File("x");
+        var file = new FileEntity("x");
         when(fileService.getFile(fileId))
                 .thenReturn(file);
 

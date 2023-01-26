@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.notification.data.repository;
+package io.github.mostafanasiri.pansy.features.notification.data;
 
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;

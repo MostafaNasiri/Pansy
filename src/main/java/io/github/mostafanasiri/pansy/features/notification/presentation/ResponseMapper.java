@@ -1,6 +1,6 @@
 package io.github.mostafanasiri.pansy.features.notification.presentation;
 
-import io.github.mostafanasiri.pansy.features.file.FileUtils;
+import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;

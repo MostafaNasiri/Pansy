@@ -1,18 +1,20 @@
-package io.github.mostafanasiri.pansy.features.user.domain.service;
+package io.github.mostafanasiri.pansy.features.user.domain;
 
 import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
-import io.github.mostafanasiri.pansy.features.file.FileService;
+import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
+import io.github.mostafanasiri.pansy.features.file.data.FileRepository;
+import io.github.mostafanasiri.pansy.features.file.domain.File;
+import io.github.mostafanasiri.pansy.features.file.domain.FileService;
+import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
-import io.github.mostafanasiri.pansy.features.notification.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.FollowerRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.ModelMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +32,9 @@ public class UserService extends BaseService {
 
     @Autowired
     private FollowerRepository followerRepository;
+
+    @Autowired
+    private FileRepository fileRepository;
 
     @Autowired
     private FileService fileService;
@@ -62,19 +67,8 @@ public class UserService extends BaseService {
         var userEntity = getAuthenticatedUser();
 
         if (user.avatar() != null) {
-            var fileEntity = fileService.getFile(user.avatar().id());
-
-            // Make sure that the avatar file is not already attached to an entity
-            var attachedFileIds = fileService.getFileIdsThatAreAttachedToAnEntity(List.of(fileEntity.getId()));
-            if (attachedFileIds.isEmpty()) {
-                throw new InvalidInputException(
-                        String.format(
-                                "File with id %s is already attached to an entity",
-                                fileEntity.getId()
-                        )
-                );
-            }
-
+            var fileEntity = getFileEntity(user.avatar().id());
+            fileService.checkIfFilesAreAlreadyAttachedToAnEntity(List.of(fileEntity.getId()));
             userEntity.setAvatar(fileEntity);
         }
 
@@ -109,7 +103,7 @@ public class UserService extends BaseService {
     }
 
     @Transactional
-    public void followUser(int sourceUserId, int targetUserId) {
+    public void followUser(int sourceUserId, int targetUserId) { // TODO: Remove sourceUserId
         if (getAuthenticatedUserId() != sourceUserId) {
             throw new AuthorizationException("Forbidden action");
         }
@@ -148,7 +142,7 @@ public class UserService extends BaseService {
     }
 
     @Transactional
-    public void unfollowUser(int sourceUserId, int targetUserId) {
+    public void unfollowUser(int sourceUserId, int targetUserId) { // TODO: Remove sourceUserId
         if (getAuthenticatedUserId() != sourceUserId) {
             throw new AuthorizationException("Forbidden action");
         }
@@ -180,5 +174,10 @@ public class UserService extends BaseService {
     private UserEntity getUserEntity(int userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+    }
+
+    private FileEntity getFileEntity(int fileId) {
+        return fileRepository.findById(fileId)
+                .orElseThrow(() -> new EntityNotFoundException(File.class, fileId));
     }
 }

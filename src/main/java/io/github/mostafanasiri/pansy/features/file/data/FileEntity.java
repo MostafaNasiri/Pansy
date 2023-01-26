@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.file;
+package io.github.mostafanasiri.pansy.features.file.data;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import jakarta.persistence.Column;
@@ -16,11 +16,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @Table(name = "files")
 @EntityListeners(AuditingEntityListener.class)
-public class File extends BaseEntity {
+public class FileEntity extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    public File(String name) {
+    public FileEntity(String name) {
         this.name = name;
     }
 }

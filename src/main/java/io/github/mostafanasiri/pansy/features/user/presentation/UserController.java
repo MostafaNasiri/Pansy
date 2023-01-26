@@ -1,9 +1,9 @@
 package io.github.mostafanasiri.pansy.features.user.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
+import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import io.github.mostafanasiri.pansy.features.user.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.UpdateUserRequest;
 import io.github.mostafanasiri.pansy.features.user.presentation.response.FollowersFollowingResponse;

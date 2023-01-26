@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.features.user.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
-import io.github.mostafanasiri.pansy.features.file.File;
+import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -39,7 +39,7 @@ public class UserEntity extends BaseEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "file_id")
     )
-    private File avatar;
+    private FileEntity avatar;
 
     @Column(name = "post_count", nullable = false)
     private int postCount = 0;
@@ -68,7 +68,7 @@ public class UserEntity extends BaseEntity {
         this.bio = bio;
     }
 
-    public void setAvatar(File avatar) {
+    public void setAvatar(FileEntity avatar) {
         this.avatar = avatar;
     }
 

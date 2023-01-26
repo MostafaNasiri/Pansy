@@ -1,37 +1,37 @@
-package io.github.mostafanasiri.pansy.features.post.domain.service;
+package io.github.mostafanasiri.pansy.features.post.domain;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
-import io.github.mostafanasiri.pansy.features.file.FileService;
+import io.github.mostafanasiri.pansy.features.file.data.FileRepository;
+import io.github.mostafanasiri.pansy.features.file.domain.FileService;
+import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
-import io.github.mostafanasiri.pansy.features.notification.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.CommentEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.LikeEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.CommentRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.LikeRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.PostRepository;
-import io.github.mostafanasiri.pansy.features.post.domain.ModelMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
+import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService extends BaseService {
@@ -46,6 +46,9 @@ public class PostService extends BaseService {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private FileRepository fileRepository;
 
     @Autowired
     private UserService userService;
@@ -74,23 +77,20 @@ public class PostService extends BaseService {
 
     @Transactional
     public Post createPost(@NonNull Post input) {
-        var authenticatedUserEntity = getAuthenticatedUser();
+        var authenticatedUserEntity = getUserEntity(getAuthenticatedUserId());
 
         if (input.images().isEmpty()) {
             throw new InvalidInputException("A post must have at least one image");
         }
 
-        var imageFileEntities = fileService.getFiles(
-                input.images()
-                        .stream()
-                        .map(Image::id)
-                        .collect(Collectors.toSet())
-        );
+        var imageFileIds = input.images().stream().map(Image::id).toList();
 
-        // Make sure that files are not already attached to any entities
-        var fileIds = imageFileEntities.stream().map(BaseEntity::getId).toList();
-        checkIfFilesAreAlreadyAttachedToAnEntity(fileIds);
+        // Check images
+        fileService.checkIfFilesExist(new HashSet<>(imageFileIds));
+        fileService.checkIfFilesAreAlreadyAttachedToAnEntity(imageFileIds);
 
+        // Create post
+        var imageFileEntities = imageFileIds.stream().map(id -> fileRepository.getReferenceById(id)).toList();
         var postEntity = new PostEntity(authenticatedUserEntity, input.caption(), imageFileEntities);
         postEntity = postRepository.save(postEntity);
 
@@ -107,29 +107,24 @@ public class PostService extends BaseService {
         if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
             throw new AuthorizationException("Post does not belong to authenticated user");
         }
-
         if (input.images().isEmpty()) {
             throw new InvalidInputException("A post must have at least one image");
         }
 
-        var imageFileEntities = fileService.getFiles(
-                input.images()
-                        .stream()
-                        .map(Image::id)
-                        .collect(Collectors.toSet())
-        );
+        // Check images
+        var imageFileIds = input.images().stream().map(Image::id).toList();
 
-        // Check if there are any new images added to the post
-        // and make sure that they are not already attached to any entities
-        var newImageIds = input.images()
-                .stream()
-                .map(Image::id)
+        fileService.checkIfFilesExist(new HashSet<>(imageFileIds));
+
+        var newlyAddedImageIds = imageFileIds.stream()
                 .filter(id -> !postEntity.hasImage(id))
                 .toList();
-        if (!newImageIds.isEmpty()) {
-            checkIfFilesAreAlreadyAttachedToAnEntity(newImageIds);
+        if (!newlyAddedImageIds.isEmpty()) {
+            fileService.checkIfFilesAreAlreadyAttachedToAnEntity(newlyAddedImageIds);
         }
 
+        // Update post
+        var imageFileEntities = imageFileIds.stream().map(id -> fileRepository.getReferenceById(id)).toList();
         postEntity.setCaption(input.caption());
         postEntity.setImages(imageFileEntities);
 
@@ -139,18 +134,6 @@ public class PostService extends BaseService {
 
         var user = modelMapper.mapFromUserEntity(getAuthenticatedUser());
         return modelMapper.mapFromPostEntity(user, postRepository.save(postEntity), isLikedByAuthenticatedUser);
-    }
-
-    private void checkIfFilesAreAlreadyAttachedToAnEntity(List<Integer> fileIds) {
-        var result = fileService.getFileIdsThatAreAttachedToAnEntity(fileIds);
-        if (!result.isEmpty()) {
-            throw new InvalidInputException(
-                    String.format(
-                            "File with id %s is already attached to an entity",
-                            result.get(0)
-                    )
-            );
-        }
     }
 
     @Transactional

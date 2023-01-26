@@ -1,13 +1,12 @@
-package io.github.mostafanasiri.pansy.features.notification.domain.service;
+package io.github.mostafanasiri.pansy.features.notification.domain;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
+import io.github.mostafanasiri.pansy.features.notification.data.NotificationRepository;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
-import io.github.mostafanasiri.pansy.features.notification.data.repository.NotificationRepository;
-import io.github.mostafanasiri.pansy.features.notification.domain.ModelMapper;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;

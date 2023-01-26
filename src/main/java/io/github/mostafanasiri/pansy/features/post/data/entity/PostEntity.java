@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.features.post.data.entity;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
-import io.github.mostafanasiri.pansy.features.file.File;
+import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
@@ -37,7 +37,7 @@ public class PostEntity extends BaseEntity {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "file_id")
     )
-    private List<File> images;
+    private List<FileEntity> images;
 
     // I added this field so that I can set CascadeType.REMOVE
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "post")
@@ -61,7 +61,7 @@ public class PostEntity extends BaseEntity {
     @Column(name = "comment_count", nullable = false)
     private int commentCount = 0;
 
-    public PostEntity(@NonNull UserEntity user, @NonNull String caption, @NonNull List<File> images) {
+    public PostEntity(@NonNull UserEntity user, @NonNull String caption, @NonNull List<FileEntity> images) {
         this.user = user;
         this.caption = caption;
         this.images = images;
@@ -75,7 +75,7 @@ public class PostEntity extends BaseEntity {
         return caption;
     }
 
-    public List<File> getImages() {
+    public List<FileEntity> getImages() {
         return images;
     }
 
@@ -111,7 +111,7 @@ public class PostEntity extends BaseEntity {
         this.caption = caption;
     }
 
-    public void setImages(List<File> images) {
+    public void setImages(List<FileEntity> images) {
         this.images = images;
     }
 

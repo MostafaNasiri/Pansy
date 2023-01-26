@@ -1,8 +1,10 @@
-package io.github.mostafanasiri.pansy.features.file;
+package io.github.mostafanasiri.pansy.features.file.domain;
 
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InternalErrorException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
+import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
+import io.github.mostafanasiri.pansy.features.file.data.FileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -14,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -52,10 +53,8 @@ public class FileService {
     }
 
     public List<File> save(@NonNull MultipartFile[] files) {
-        var fileEntities = new ArrayList<File>();
-
-        Arrays.stream(files)
-                .forEach(f -> {
+        var fileEntities = Arrays.stream(files)
+                .map(f -> {
                     String fileExtension = StringUtils.getFilenameExtension(f.getOriginalFilename());
 
                     if (!Arrays.asList(allowedFileExtensions).contains(fileExtension)) {
@@ -63,15 +62,20 @@ public class FileService {
                     }
 
                     String fileName = generateFileName(fileExtension);
+                    copyFileToUploadsFolder(f, fileName);
 
-                    copyFile(f, fileName);
-                    fileEntities.add(new File(fileName));
-                });
+                    return new FileEntity(fileName);
+                })
+                .toList();
 
-        return repository.saveAll(fileEntities);
+        var savedFileEntities = repository.saveAll(fileEntities);
+
+        return savedFileEntities.stream()
+                .map(fileEntity -> new File(fileEntity.getId(), fileEntity.getName()))
+                .toList();
     }
 
-    private void copyFile(@NonNull MultipartFile file, @NonNull String fileName) {
+    private void copyFileToUploadsFolder(@NonNull MultipartFile file, @NonNull String fileName) {
         try {
             Path destinationFile = filesLocation.resolve(fileName);
             Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
@@ -97,17 +101,10 @@ public class FileService {
         }
     }
 
-    public File getFile(int fileId) {
-        return repository.findById(fileId)
-                .orElseThrow(() -> new EntityNotFoundException(File.class, fileId));
-    }
-
     /**
-     * Returns all files with the given fileIds.
-     *
-     * @throws EntityNotFoundException if there's an invalid id in the given fileIds.
+     * @throws EntityNotFoundException if at least one of the given file ids does not exist.
      */
-    public List<File> getFiles(@NonNull Set<Integer> fileIds) {
+    public void checkIfFilesExist(@NonNull Set<Integer> fileIds) {
         var result = repository.findAllById(fileIds);
 
         if (result.size() < fileIds.size()) {
@@ -119,11 +116,21 @@ public class FileService {
                         .orElseThrow(() -> new EntityNotFoundException(File.class, id));
             });
         }
-
-        return result;
     }
 
-    public List<Integer> getFileIdsThatAreAttachedToAnEntity(List<Integer> fileIds) {
-        return repository.getFileIdsThatAreAttachedToAnEntity(fileIds);
+    /**
+     * @throws InvalidInputException if at least one of the given file ids is already attached to an entity.
+     */
+    public void checkIfFilesAreAlreadyAttachedToAnEntity(List<Integer> fileIds) {
+        var result = repository.getFileIdsThatAreAttachedToAnEntity(fileIds);
+
+        if (!result.isEmpty()) {
+            throw new InvalidInputException(
+                    String.format(
+                            "File with id %s is already attached to an entity",
+                            result.get(0)
+                    )
+            );
+        }
     }
 }

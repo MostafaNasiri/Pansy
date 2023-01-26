@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.features.notification.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
-import io.github.mostafanasiri.pansy.features.notification.domain.service.NotificationService;
+import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;

@@ -1,10 +1,10 @@
 package io.github.mostafanasiri.pansy.features.post.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
+import io.github.mostafanasiri.pansy.features.post.domain.PostService;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.post.domain.service.PostService;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.AddCommentRequest;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.CreateEditPostRequest;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.CommentResponse;

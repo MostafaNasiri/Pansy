@@ -1,7 +1,8 @@
-package io.github.mostafanasiri.pansy.features.file;
+package io.github.mostafanasiri.pansy.features.file.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
-import io.github.mostafanasiri.pansy.features.file.dto.FileUploadResponse;
+import io.github.mostafanasiri.pansy.features.file.domain.FileService;
+import io.github.mostafanasiri.pansy.features.file.presentation.response.FileUploadResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,13 @@ public class FileController {
     private FileService service;
 
     @PostMapping("/files")
-    @Operation(summary = "Uploads a file")
+    @Operation(summary = "Uploads a list of files")
     public ResponseEntity<ApiResponse<List<FileUploadResponse>>> save(
             @RequestParam(name = "files[]") MultipartFile[] files
     ) {
         var uploadedFiles = service.save(files);
         var result = uploadedFiles.stream()
-                .map(f -> new FileUploadResponse(f.getId(), fileUtils.createFileUrl(f)))
+                .map(f -> new FileUploadResponse(f.id(), fileUtils.createFileUrl(f.name())))
                 .toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);

@@ -1,6 +1,6 @@
 package io.github.mostafanasiri.pansy.features.user.presentation;
 
-import io.github.mostafanasiri.pansy.features.file.FileUtils;
+import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.presentation.response.FollowersFollowingResponse;
 import io.github.mostafanasiri.pansy.features.user.presentation.response.UserResponse;
