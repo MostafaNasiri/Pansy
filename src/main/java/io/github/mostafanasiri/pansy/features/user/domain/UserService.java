@@ -17,6 +17,8 @@ import io.github.mostafanasiri.pansy.features.user.data.repo.FollowerRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,24 +29,20 @@ import java.util.List;
 
 @Service
 public class UserService extends BaseService {
+    private final static String USERS_CACHE_NAME = "users";
+
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private FollowerRepository followerRepository;
-
     @Autowired
     private FileRepository fileRepository;
-
     @Autowired
     private FileService fileService;
-
     @Autowired
     private NotificationService notificationService;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private ModelMapper modelMapper;
 
@@ -59,6 +57,7 @@ public class UserService extends BaseService {
         return modelMapper.mapFromUserEntity(userRepository.save(userEntity));
     }
 
+    @CachePut(value = USERS_CACHE_NAME, key = "#user.id")
     public User updateUser(@NonNull User user) {
         if (getAuthenticatedUserId() != user.id()) {
             throw new AuthorizationException("Forbidden action");
@@ -78,6 +77,7 @@ public class UserService extends BaseService {
         return modelMapper.mapFromUserEntity(userRepository.save(userEntity));
     }
 
+    @Cacheable(value = USERS_CACHE_NAME, key = "#userId")
     public User getPublicUserData(int userId) {
         return modelMapper.mapFromUserEntity(getUserEntity(userId));
     }

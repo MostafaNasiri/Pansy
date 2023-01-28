@@ -31,16 +31,12 @@ import java.util.List;
 public class NotificationService extends BaseService {
     @Autowired
     private NotificationRepository notificationRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private CommentRepository commentRepository;
-
     @Autowired
     private PostRepository postRepository;
-
     @Autowired
     private ModelMapper modelMapper;
 

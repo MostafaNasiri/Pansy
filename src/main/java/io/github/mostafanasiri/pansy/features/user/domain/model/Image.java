@@ -1,6 +1,8 @@
 package io.github.mostafanasiri.pansy.features.user.domain.model;
 
-public record Image(int id, String name) {
+import java.io.Serializable;
+
+public record Image(int id, String name) implements Serializable {
     public Image(int id) {
         this(id, null);
     }

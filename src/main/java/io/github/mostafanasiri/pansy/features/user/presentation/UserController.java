@@ -49,7 +49,7 @@ public class UserController {
         if (request.getAvatarFileId() != null) {
             avatarImage = new Image(request.getAvatarFileId());
         }
-        var user = new User(userId, request.getFullName(), avatarImage);
+        var user = new User(userId, request.getFullName(), avatarImage, request.getBio());
 
         var updatedUser = userService.updateUser(user);
         var response = responseMapper.fromUserModel(updatedUser);

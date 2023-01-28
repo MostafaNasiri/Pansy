@@ -37,28 +37,20 @@ import java.util.List;
 public class PostService extends BaseService {
     @Autowired
     private PostRepository postRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private LikeRepository likeRepository;
-
     @Autowired
     private CommentRepository commentRepository;
-
     @Autowired
     private FileRepository fileRepository;
-
     @Autowired
     private UserService userService;
-
     @Autowired
     private FileService fileService;
-
     @Autowired
     private NotificationService notificationService;
-
     @Autowired
     private ModelMapper modelMapper;
 

@@ -37,7 +37,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         if (!hasAuthHeader(request)) {
-            handleError(response, "Access denied", HttpServletResponse.SC_FORBIDDEN);
+            filterChain.doFilter(request, response);
             return;
         }
 
