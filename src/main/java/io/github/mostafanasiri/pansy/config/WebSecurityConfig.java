@@ -1,5 +1,7 @@
-package io.github.mostafanasiri.pansy.auth;
+package io.github.mostafanasiri.pansy.config;
 
+import io.github.mostafanasiri.pansy.auth.JwtRequestFilter;
+import io.github.mostafanasiri.pansy.auth.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

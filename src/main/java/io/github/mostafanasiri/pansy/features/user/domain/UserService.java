@@ -29,7 +29,7 @@ import java.util.List;
 
 @Service
 public class UserService extends BaseService {
-    private final static String USERS_CACHE_NAME = "users";
+    public final static String USERS_CACHE_NAME = "users";
 
     @Autowired
     private UserRepository userRepository;
@@ -103,7 +103,7 @@ public class UserService extends BaseService {
     }
 
     @Transactional
-    public void followUser(int sourceUserId, int targetUserId) { // TODO: Remove sourceUserId
+    public void followUser(int sourceUserId, int targetUserId) {
         if (getAuthenticatedUserId() != sourceUserId) {
             throw new AuthorizationException("Forbidden action");
         }
@@ -112,7 +112,7 @@ public class UserService extends BaseService {
             throw new InvalidInputException("A user can't follow him/herself!");
         }
 
-        var sourceUser = getAuthenticatedUser();
+        var sourceUser = getUserEntity(getAuthenticatedUserId());
         var targetUser = getUserEntity(targetUserId);
 
         var sourceUserHasNotFollowedTargetUser =
@@ -122,7 +122,8 @@ public class UserService extends BaseService {
             var follower = new FollowerEntity(sourceUser, targetUser);
             followerRepository.save(follower);
 
-            incrementFollowingFollowerCount(sourceUser, targetUser);
+            incrementFollowerCount(sourceUser);
+            incrementFollowingCount(targetUser);
 
             // Add a new notification for the followed user
             var notification = new FollowNotification(
@@ -133,16 +134,26 @@ public class UserService extends BaseService {
         }
     }
 
-    private void incrementFollowingFollowerCount(UserEntity sourceUser, UserEntity targetUser) {
-        sourceUser.incrementFollowingCount();
-        userRepository.save(sourceUser);
+    @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
+    private User incrementFollowerCount(UserEntity user) {
+        user.incrementFollowerCount();
+        var result = userRepository.save(user);
 
-        targetUser.incrementFollowerCount();
-        userRepository.save(targetUser);
+        // The returned value is only used for updating cache
+        return modelMapper.mapFromUserEntity(result);
+    }
+
+    @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
+    private User incrementFollowingCount(UserEntity user) {
+        user.incrementFollowingCount();
+        var result = userRepository.save(user);
+
+        // The returned value is only used for updating cache
+        return modelMapper.mapFromUserEntity(result);
     }
 
     @Transactional
-    public void unfollowUser(int sourceUserId, int targetUserId) { // TODO: Remove sourceUserId
+    public void unfollowUser(int sourceUserId, int targetUserId) {
         if (getAuthenticatedUserId() != sourceUserId) {
             throw new AuthorizationException("Forbidden action");
         }
@@ -151,24 +162,37 @@ public class UserService extends BaseService {
             throw new InvalidInputException("A user can't unfollow him/herself!");
         }
 
-        var sourceUser = getAuthenticatedUser();
+        var sourceUser = getUserEntity(getAuthenticatedUserId());
         var targetUser = getUserEntity(targetUserId);
 
         var follower = followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser);
 
         if (follower != null) {
             followerRepository.delete(follower);
-            decrementFollowingFollowerCount(sourceUser, targetUser);
+
+            decrementFollowingCount(sourceUser);
+            decrementFollowerCount(targetUser);
+
             notificationService.deleteFollowNotification(sourceUserId, targetUserId);
         }
     }
 
-    private void decrementFollowingFollowerCount(UserEntity sourceUser, UserEntity targetUser) {
-        sourceUser.decrementFollowingCount();
-        userRepository.save(sourceUser);
+    @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
+    private User decrementFollowerCount(UserEntity user) {
+        user.decrementFollowerCount();
+        var result = userRepository.save(user);
 
-        targetUser.decrementFollowerCount();
-        userRepository.save(targetUser);
+        // The returned value is only used for updating cache
+        return modelMapper.mapFromUserEntity(result);
+    }
+
+    @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
+    private User decrementFollowingCount(UserEntity user) {
+        user.decrementFollowingCount();
+        var result = userRepository.save(user);
+
+        // The returned value is only used for updating cache
+        return modelMapper.mapFromUserEntity(result);
     }
 
     private UserEntity getUserEntity(int userId) {
