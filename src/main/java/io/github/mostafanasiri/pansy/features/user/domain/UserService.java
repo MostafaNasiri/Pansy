@@ -134,6 +134,7 @@ public class UserService extends BaseService {
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
     private User incrementFollowerCount(UserEntity user) {
         user.incrementFollowerCount();
@@ -143,6 +144,7 @@ public class UserService extends BaseService {
         return modelMapper.mapFromUserEntity(result);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
     private User incrementFollowingCount(UserEntity user) {
         user.incrementFollowingCount();
@@ -177,6 +179,7 @@ public class UserService extends BaseService {
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
     private User decrementFollowerCount(UserEntity user) {
         user.decrementFollowerCount();
@@ -186,6 +189,7 @@ public class UserService extends BaseService {
         return modelMapper.mapFromUserEntity(result);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
     private User decrementFollowingCount(UserEntity user) {
         user.decrementFollowingCount();
