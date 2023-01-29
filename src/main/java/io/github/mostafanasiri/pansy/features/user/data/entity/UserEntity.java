@@ -72,13 +72,9 @@ public class UserEntity extends BaseEntity {
         this.avatar = avatar;
     }
 
-    public void incrementPostCount() {
-        postCount++;
-    }
-
-    public void decrementPostCount() {
-        if (postCount > 0) {
-            postCount--;
+    public void setPostCount(int postCount) {
+        if (postCount >= 0) {
+            this.postCount = postCount;
         }
     }
 

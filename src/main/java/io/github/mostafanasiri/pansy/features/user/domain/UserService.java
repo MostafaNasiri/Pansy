@@ -29,7 +29,7 @@ import java.util.List;
 
 @Service
 public class UserService extends BaseService {
-    public final static String USERS_CACHE_NAME = "users";
+    private final static String USERS_CACHE_NAME = "users";
 
     @Autowired
     private UserRepository userRepository;
@@ -125,12 +125,7 @@ public class UserService extends BaseService {
             incrementFollowerCount(sourceUser);
             incrementFollowingCount(targetUser);
 
-            // Add a new notification for the followed user
-            var notification = new FollowNotification(
-                    new NotificationUser(sourceUserId),
-                    new NotificationUser(targetUserId)
-            );
-            notificationService.addFollowNotification(notification);
+            createFollowNotification(sourceUserId, targetUserId);
         }
     }
 
@@ -152,6 +147,14 @@ public class UserService extends BaseService {
 
         // The returned value is only used for updating cache
         return modelMapper.mapFromUserEntity(result);
+    }
+
+    private void createFollowNotification(int sourceUserId, int targetUserId) {
+        var notification = new FollowNotification(
+                new NotificationUser(sourceUserId),
+                new NotificationUser(targetUserId)
+        );
+        notificationService.addFollowNotification(notification);
     }
 
     @Transactional
@@ -197,6 +200,18 @@ public class UserService extends BaseService {
 
         // The returned value is only used for updating cache
         return modelMapper.mapFromUserEntity(result);
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    @CachePut(value = USERS_CACHE_NAME, key = "#userId")
+    public User updateUserPostCount(int userId, int count) {
+        var user = getUserEntity(userId);
+        user.setPostCount(count);
+
+        var updatedUser = userRepository.save(user);
+
+        // The returned value is only used for updating cache
+        return modelMapper.mapFromUserEntity(updatedUser);
     }
 
     private UserEntity getUserEntity(int userId) {

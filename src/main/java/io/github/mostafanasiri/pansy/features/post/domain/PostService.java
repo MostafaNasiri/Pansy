@@ -86,8 +86,10 @@ public class PostService extends BaseService {
         var postEntity = new PostEntity(authenticatedUserEntity, input.caption(), imageFileEntities);
         postEntity = postRepository.save(postEntity);
 
-        authenticatedUserEntity.incrementPostCount();
-        userRepository.save(authenticatedUserEntity);
+        userService.updateUserPostCount(
+                authenticatedUserEntity.getId(),
+                authenticatedUserEntity.getPostCount() + 1
+        );
 
         var user = modelMapper.mapFromUserEntity(authenticatedUserEntity);
         return modelMapper.mapFromPostEntity(user, postEntity, false);
@@ -138,10 +140,11 @@ public class PostService extends BaseService {
 
         postRepository.delete(post);
 
-        var authenticatedUser = getAuthenticatedUser();
-
-        authenticatedUser.decrementPostCount();
-        userRepository.save(authenticatedUser);
+        var authenticatedUserEntity = getUserEntity(getAuthenticatedUserId());
+        userService.updateUserPostCount(
+                authenticatedUserEntity.getId(),
+                authenticatedUserEntity.getPostCount() - 1
+        );
     }
 
     public List<Comment> getComments(int postId, int page, int size) {
