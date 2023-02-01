@@ -5,6 +5,7 @@ import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.service.CommentService;
+import io.github.mostafanasiri.pansy.features.post.domain.service.LikeService;
 import io.github.mostafanasiri.pansy.features.post.domain.service.PostService;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.AddCommentRequest;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.CreateEditPostRequest;
@@ -30,6 +31,8 @@ public class PostController {
     private PostService postService;
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private LikeService likeService;
     @Autowired
     private ResponseMapper mapper;
 
@@ -90,7 +93,7 @@ public class PostController {
     @PostMapping("/posts/{post_id}/likes")
     @Operation(summary = "Likes the specified post by the authenticated user")
     public ResponseEntity<ApiResponse<Boolean>> likePost(@PathVariable(name = "post_id") int postId) {
-        postService.likePost(postId);
+        likeService.likePost(postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
@@ -101,7 +104,7 @@ public class PostController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var users = postService.getLikes(postId, page, size);
+        var users = likeService.getLikes(postId, page, size);
 
         var result = users.stream()
                 .map(mapper::mapFromUserModel)
@@ -116,7 +119,7 @@ public class PostController {
             @PathVariable(name = "post_id") int postId,
             @PathVariable(name = "user_id") int userId
     ) {
-        postService.unlikePost(userId, postId);
+        likeService.unlikePost(userId, postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
