@@ -62,7 +62,7 @@ public class UserService extends BaseService {
         logger.info(String.format("getUser - Fetching user %s from database", userId));
         var user = domainMapper.userEntityToUser(getUserEntity(userId));
 
-        addUserToRedis(user);
+        saveUserInRedis(user);
 
         return user;
     }
@@ -76,16 +76,9 @@ public class UserService extends BaseService {
         var userEntity = new UserEntity(user.fullName(), user.username(), hashedPassword);
 
         var createdUser = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
-        addUserToRedis(createdUser);
+        saveUserInRedis(createdUser);
 
         return createdUser;
-    }
-
-    private void addUserToRedis(User user) {
-        logger.info(String.format("Adding user %s to Redis", user.id()));
-
-        var userRedis = domainMapper.userToUserRedis(user);
-        userRedisRepository.save(userRedis);
     }
 
     public User updateUser(@NonNull User user) {
@@ -93,18 +86,28 @@ public class UserService extends BaseService {
             throw new AuthorizationException("Forbidden action");
         }
 
-        var userEntity = getAuthenticatedUser();
+        var authenticatedUserEntity = getUserEntity(getAuthenticatedUserId());
 
         if (user.avatar() != null) {
             var fileEntity = getFileEntity(user.avatar().id());
             fileService.checkIfFilesAreAlreadyAttachedToAnEntity(List.of(fileEntity.getId()));
-            userEntity.setAvatar(fileEntity);
+            authenticatedUserEntity.setAvatar(fileEntity);
         }
 
-        userEntity.setFullName(user.fullName());
-        userEntity.setBio(user.bio());
+        authenticatedUserEntity.setFullName(user.fullName());
+        authenticatedUserEntity.setBio(user.bio());
 
-        return domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        var updatedUser = domainMapper.userEntityToUser(userJpaRepository.save(authenticatedUserEntity));
+        saveUserInRedis(updatedUser);
+
+        return updatedUser;
+    }
+
+    private void saveUserInRedis(User user) {
+        logger.info(String.format("Saving user %s in Redis", user.id()));
+
+        var userRedis = domainMapper.userToUserRedis(user);
+        userRedisRepository.save(userRedis);
     }
 
     public List<User> getFollowers(int userId, int page, int size) {

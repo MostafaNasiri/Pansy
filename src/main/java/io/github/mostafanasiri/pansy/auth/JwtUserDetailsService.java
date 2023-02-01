@@ -14,7 +14,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var userEntity = userJpaRepository.findByUsername(username)
+        var userEntity = userJpaRepository.findByUsername(username) // TODO: Get from UserService
                 .orElseThrow(() -> new UsernameNotFoundException(
                         String.format("User with username: %s was not found", username))
                 );
