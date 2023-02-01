@@ -1,10 +1,11 @@
 package io.github.mostafanasiri.pansy.features.post.presentation;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
-import io.github.mostafanasiri.pansy.features.post.domain.PostService;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
+import io.github.mostafanasiri.pansy.features.post.domain.service.CommentService;
+import io.github.mostafanasiri.pansy.features.post.domain.service.PostService;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.AddCommentRequest;
 import io.github.mostafanasiri.pansy.features.post.presentation.request.CreateEditPostRequest;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.CommentResponse;
@@ -26,8 +27,9 @@ import java.util.List;
 @RestController
 public class PostController {
     @Autowired
-    private PostService service;
-
+    private PostService postService;
+    @Autowired
+    private CommentService commentService;
     @Autowired
     private ResponseMapper mapper;
 
@@ -38,7 +40,7 @@ public class PostController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var posts = service.getUserPosts(userId, page, size);
+        var posts = postService.getUserPosts(userId, page, size);
         var result = posts.stream().map(mapper::mapFromPostModel).toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
@@ -54,7 +56,7 @@ public class PostController {
                         .map(Image::new)
                         .toList()
         );
-        var result = mapper.mapFromPostModel(service.createPost(post));
+        var result = mapper.mapFromPostModel(postService.createPost(post));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
     }
@@ -73,7 +75,7 @@ public class PostController {
                         .map(Image::new)
                         .toList()
         );
-        var result = mapper.mapFromPostModel(service.updatePost(post));
+        var result = mapper.mapFromPostModel(postService.updatePost(post));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
@@ -81,14 +83,14 @@ public class PostController {
     @DeleteMapping("/posts/{post_id}")
     @Operation(summary = "Deletes a post")
     public ResponseEntity<ApiResponse<Boolean>> deletePost(@PathVariable(name = "post_id") int postId) {
-        service.deletePost(postId);
+        postService.deletePost(postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }
 
     @PostMapping("/posts/{post_id}/likes")
     @Operation(summary = "Likes the specified post by the authenticated user")
     public ResponseEntity<ApiResponse<Boolean>> likePost(@PathVariable(name = "post_id") int postId) {
-        service.likePost(postId);
+        postService.likePost(postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
@@ -99,7 +101,7 @@ public class PostController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var users = service.getLikes(postId, page, size);
+        var users = postService.getLikes(postId, page, size);
 
         var result = users.stream()
                 .map(mapper::mapFromUserModel)
@@ -114,7 +116,7 @@ public class PostController {
             @PathVariable(name = "post_id") int postId,
             @PathVariable(name = "user_id") int userId
     ) {
-        service.unlikePost(userId, postId);
+        postService.unlikePost(userId, postId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
@@ -125,7 +127,7 @@ public class PostController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var comments = service.getComments(postId, page, size);
+        var comments = commentService.getComments(postId, page, size);
 
         var result = comments.stream()
                 .map(mapper::mapFromCommentModel)
@@ -141,7 +143,7 @@ public class PostController {
             @Valid @RequestBody AddCommentRequest request
     ) {
         var comment = new Comment(request.text());
-        var result = mapper.mapFromCommentModel(service.addComment(postId, comment));
+        var result = mapper.mapFromCommentModel(commentService.addComment(postId, comment));
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
     }
@@ -152,7 +154,7 @@ public class PostController {
             @PathVariable(name = "post_id") int postId,
             @PathVariable(name = "comment_id") int commentId
     ) {
-        service.deleteComment(postId, commentId);
+        commentService.deleteComment(postId, commentId);
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }
 }
