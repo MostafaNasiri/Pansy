@@ -15,8 +15,10 @@ import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntit
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
+import io.github.mostafanasiri.pansy.features.user.data.repo.redis.RedisUserRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.PageRequest;
@@ -29,12 +31,14 @@ import java.util.List;
 
 @Service
 public class UserService extends BaseService {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private final static String USERS_CACHE_NAME = "users";
 
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
-    private UserRedisRepository userRedisRepository;
+    private RedisUserRepository redisUserRepository;
     @Autowired
     private FollowerJpaRepository followerJpaRepository;
     @Autowired
@@ -46,10 +50,26 @@ public class UserService extends BaseService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
-    private ModelMapper modelMapper;
+    private DomainMapper domainMapper;
 
     public User getUser(int userId) {
-        return modelMapper.mapFromUserEntity(getUserEntity(userId));
+        var redisUserOptional = redisUserRepository.findById(userId);
+        if (redisUserOptional.isPresent()) {
+            logger.debug(String.format("getUser - Fetching user %s from Redis", userId));
+            return domainMapper.redisUserToUser(redisUserOptional.get());
+        }
+
+        logger.debug(String.format("getUser - Fetching user %s from database", userId));
+        var user = domainMapper.userEntityToUser(getUserEntity(userId));
+
+        addUserToRedis(user);
+
+        return user;
+    }
+
+    private void addUserToRedis(User user) {
+        var redisUser = domainMapper.userToRedisUser(user);
+        redisUserRepository.save(redisUser);
     }
 
     public User createUser(@NonNull User user) {
@@ -60,7 +80,7 @@ public class UserService extends BaseService {
         var hashedPassword = passwordEncoder.encode(user.password());
         var userEntity = new UserEntity(user.fullName(), user.username(), hashedPassword);
 
-        return modelMapper.mapFromUserEntity(userJpaRepository.save(userEntity));
+        return domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
     }
 
     @CachePut(value = USERS_CACHE_NAME, key = "#user.id")
@@ -80,7 +100,7 @@ public class UserService extends BaseService {
         userEntity.setFullName(user.fullName());
         userEntity.setBio(user.bio());
 
-        return modelMapper.mapFromUserEntity(userJpaRepository.save(userEntity));
+        return domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
     }
 
     public List<User> getFollowers(int userId, int page, int size) {
@@ -89,7 +109,7 @@ public class UserService extends BaseService {
 
         return followerJpaRepository.getFollowers(userEntity, pageRequest)
                 .stream()
-                .map((f) -> modelMapper.mapFromUserEntity(f.getSourceUser()))
+                .map((f) -> domainMapper.userEntityToUser(f.getSourceUser()))
                 .toList();
     }
 
@@ -99,7 +119,7 @@ public class UserService extends BaseService {
 
         return followerJpaRepository.getFollowing(userEntity, pageRequest)
                 .stream()
-                .map((f) -> modelMapper.mapFromUserEntity(f.getTargetUser()))
+                .map((f) -> domainMapper.userEntityToUser(f.getTargetUser()))
                 .toList();
     }
 
@@ -137,7 +157,7 @@ public class UserService extends BaseService {
         var result = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
-        return modelMapper.mapFromUserEntity(result);
+        return domainMapper.userEntityToUser(result);
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -147,7 +167,7 @@ public class UserService extends BaseService {
         var result = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
-        return modelMapper.mapFromUserEntity(result);
+        return domainMapper.userEntityToUser(result);
     }
 
     private void createFollowNotification(int sourceUserId, int targetUserId) {
@@ -190,7 +210,7 @@ public class UserService extends BaseService {
         var result = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
-        return modelMapper.mapFromUserEntity(result);
+        return domainMapper.userEntityToUser(result);
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -200,7 +220,7 @@ public class UserService extends BaseService {
         var result = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
-        return modelMapper.mapFromUserEntity(result);
+        return domainMapper.userEntityToUser(result);
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -212,7 +232,7 @@ public class UserService extends BaseService {
         var updatedUser = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
-        return modelMapper.mapFromUserEntity(updatedUser);
+        return domainMapper.userEntityToUser(updatedUser);
     }
 
     private UserEntity getUserEntity(int userId) {

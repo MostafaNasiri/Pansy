@@ -9,13 +9,13 @@ import org.springframework.data.redis.core.index.Indexed;
 @Getter
 @AllArgsConstructor
 @RedisHash("user")
-public class UserRedisEntity {
+public class RedisUser {
     @Id
     private int id;
     @Indexed
     private String username;
     private String fullName;
-    private String avatarUrl;
+    private String avatarName;
     private String bio;
     private int postCount;
     private int followerCount;
