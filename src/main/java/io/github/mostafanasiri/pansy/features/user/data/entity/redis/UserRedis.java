@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.index.Indexed;
 @Getter
 @AllArgsConstructor
 @RedisHash("user")
-public class RedisUser {
+public class UserRedis {
     @Id
     private int id;
     @Indexed

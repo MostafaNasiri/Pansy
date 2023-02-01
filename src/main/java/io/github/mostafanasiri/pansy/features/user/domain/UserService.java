@@ -15,7 +15,7 @@ import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntit
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.redis.RedisUserRepository;
+import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,14 +31,14 @@ import java.util.List;
 
 @Service
 public class UserService extends BaseService {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
     private final static String USERS_CACHE_NAME = "users";
 
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
-    private RedisUserRepository redisUserRepository;
+    private UserRedisRepository userRedisRepository;
     @Autowired
     private FollowerJpaRepository followerJpaRepository;
     @Autowired
@@ -53,23 +53,18 @@ public class UserService extends BaseService {
     private DomainMapper domainMapper;
 
     public User getUser(int userId) {
-        var redisUserOptional = redisUserRepository.findById(userId);
-        if (redisUserOptional.isPresent()) {
-            logger.debug(String.format("getUser - Fetching user %s from Redis", userId));
-            return domainMapper.redisUserToUser(redisUserOptional.get());
+        var userRedis = userRedisRepository.findById(userId);
+        if (userRedis.isPresent()) {
+            logger.info(String.format("getUser - Fetching user %s from Redis", userId));
+            return domainMapper.userRedisToUser(userRedis.get());
         }
 
-        logger.debug(String.format("getUser - Fetching user %s from database", userId));
+        logger.info(String.format("getUser - Fetching user %s from database", userId));
         var user = domainMapper.userEntityToUser(getUserEntity(userId));
 
         addUserToRedis(user);
 
         return user;
-    }
-
-    private void addUserToRedis(User user) {
-        var redisUser = domainMapper.userToRedisUser(user);
-        redisUserRepository.save(redisUser);
     }
 
     public User createUser(@NonNull User user) {
@@ -80,10 +75,19 @@ public class UserService extends BaseService {
         var hashedPassword = passwordEncoder.encode(user.password());
         var userEntity = new UserEntity(user.fullName(), user.username(), hashedPassword);
 
-        return domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        var createdUser = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        addUserToRedis(createdUser);
+
+        return createdUser;
     }
 
-    @CachePut(value = USERS_CACHE_NAME, key = "#user.id")
+    private void addUserToRedis(User user) {
+        logger.info(String.format("Adding user %s to Redis", user.id()));
+
+        var userRedis = domainMapper.userToUserRedis(user);
+        userRedisRepository.save(userRedis);
+    }
+
     public User updateUser(@NonNull User user) {
         if (getAuthenticatedUserId() != user.id()) {
             throw new AuthorizationException("Forbidden action");
