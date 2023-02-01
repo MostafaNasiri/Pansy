@@ -11,14 +11,14 @@ import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
-import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.data.repo.FollowerRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
+import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,9 +32,11 @@ public class UserService extends BaseService {
     private final static String USERS_CACHE_NAME = "users";
 
     @Autowired
-    private UserRepository userRepository;
+    private UserJpaRepository userJpaRepository;
     @Autowired
-    private FollowerRepository followerRepository;
+    private UserRedisRepository userRedisRepository;
+    @Autowired
+    private FollowerJpaRepository followerJpaRepository;
     @Autowired
     private FileRepository fileRepository;
     @Autowired
@@ -46,15 +48,19 @@ public class UserService extends BaseService {
     @Autowired
     private ModelMapper modelMapper;
 
+    public User getUser(int userId) {
+        return modelMapper.mapFromUserEntity(getUserEntity(userId));
+    }
+
     public User createUser(@NonNull User user) {
-        if (userRepository.findByUsername(user.username()).isPresent()) {
+        if (userJpaRepository.findByUsername(user.username()).isPresent()) {
             throw new InvalidInputException("Username already exists");
         }
 
         var hashedPassword = passwordEncoder.encode(user.password());
         var userEntity = new UserEntity(user.fullName(), user.username(), hashedPassword);
 
-        return modelMapper.mapFromUserEntity(userRepository.save(userEntity));
+        return modelMapper.mapFromUserEntity(userJpaRepository.save(userEntity));
     }
 
     @CachePut(value = USERS_CACHE_NAME, key = "#user.id")
@@ -74,19 +80,14 @@ public class UserService extends BaseService {
         userEntity.setFullName(user.fullName());
         userEntity.setBio(user.bio());
 
-        return modelMapper.mapFromUserEntity(userRepository.save(userEntity));
-    }
-
-    @Cacheable(value = USERS_CACHE_NAME, key = "#userId")
-    public User getPublicUserData(int userId) {
-        return modelMapper.mapFromUserEntity(getUserEntity(userId));
+        return modelMapper.mapFromUserEntity(userJpaRepository.save(userEntity));
     }
 
     public List<User> getFollowers(int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
         var pageRequest = PageRequest.of(page, size);
 
-        return followerRepository.getFollowers(userEntity, pageRequest)
+        return followerJpaRepository.getFollowers(userEntity, pageRequest)
                 .stream()
                 .map((f) -> modelMapper.mapFromUserEntity(f.getSourceUser()))
                 .toList();
@@ -96,7 +97,7 @@ public class UserService extends BaseService {
         var userEntity = getUserEntity(userId);
         var pageRequest = PageRequest.of(page, size);
 
-        return followerRepository.getFollowing(userEntity, pageRequest)
+        return followerJpaRepository.getFollowing(userEntity, pageRequest)
                 .stream()
                 .map((f) -> modelMapper.mapFromUserEntity(f.getTargetUser()))
                 .toList();
@@ -116,11 +117,11 @@ public class UserService extends BaseService {
         var targetUser = getUserEntity(targetUserId);
 
         var sourceUserHasNotFollowedTargetUser =
-                followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser) == null;
+                followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser) == null;
 
         if (sourceUserHasNotFollowedTargetUser) {
             var follower = new FollowerEntity(sourceUser, targetUser);
-            followerRepository.save(follower);
+            followerJpaRepository.save(follower);
 
             incrementFollowerCount(sourceUser);
             incrementFollowingCount(targetUser);
@@ -133,7 +134,7 @@ public class UserService extends BaseService {
     @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
     private User incrementFollowerCount(UserEntity user) {
         user.incrementFollowerCount();
-        var result = userRepository.save(user);
+        var result = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
         return modelMapper.mapFromUserEntity(result);
@@ -143,7 +144,7 @@ public class UserService extends BaseService {
     @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
     private User incrementFollowingCount(UserEntity user) {
         user.incrementFollowingCount();
-        var result = userRepository.save(user);
+        var result = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
         return modelMapper.mapFromUserEntity(result);
@@ -170,10 +171,10 @@ public class UserService extends BaseService {
         var sourceUser = getUserEntity(getAuthenticatedUserId());
         var targetUser = getUserEntity(targetUserId);
 
-        var follower = followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser);
+        var follower = followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser);
 
         if (follower != null) {
-            followerRepository.delete(follower);
+            followerJpaRepository.delete(follower);
 
             decrementFollowingCount(sourceUser);
             decrementFollowerCount(targetUser);
@@ -186,7 +187,7 @@ public class UserService extends BaseService {
     @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
     private User decrementFollowerCount(UserEntity user) {
         user.decrementFollowerCount();
-        var result = userRepository.save(user);
+        var result = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
         return modelMapper.mapFromUserEntity(result);
@@ -196,7 +197,7 @@ public class UserService extends BaseService {
     @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
     private User decrementFollowingCount(UserEntity user) {
         user.decrementFollowingCount();
-        var result = userRepository.save(user);
+        var result = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
         return modelMapper.mapFromUserEntity(result);
@@ -208,14 +209,14 @@ public class UserService extends BaseService {
         var user = getUserEntity(userId);
         user.setPostCount(count);
 
-        var updatedUser = userRepository.save(user);
+        var updatedUser = userJpaRepository.save(user);
 
         // The returned value is only used for updating cache
         return modelMapper.mapFromUserEntity(updatedUser);
     }
 
     private UserEntity getUserEntity(int userId) {
-        return userRepository.findById(userId)
+        return userJpaRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
     }
 

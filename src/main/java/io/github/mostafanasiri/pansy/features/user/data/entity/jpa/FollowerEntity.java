@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.user.data.entity;
+package io.github.mostafanasiri.pansy.features.user.data.entity.jpa;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import jakarta.persistence.*;

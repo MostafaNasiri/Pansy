@@ -6,7 +6,7 @@ import io.github.mostafanasiri.pansy.auth.dto.LoginRequest;
 import io.github.mostafanasiri.pansy.auth.dto.RegisterRequest;
 import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

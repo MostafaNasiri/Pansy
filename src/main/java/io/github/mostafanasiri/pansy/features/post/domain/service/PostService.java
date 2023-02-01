@@ -15,8 +15,8 @@ import io.github.mostafanasiri.pansy.features.post.domain.ModelMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +32,7 @@ public class PostService extends BaseService {
     @Autowired
     private PostRepository postRepository;
     @Autowired
-    private UserRepository userRepository;
+    private UserJpaRepository userJpaRepository;
     @Autowired
     private LikeRepository likeRepository;
     @Autowired
@@ -145,7 +145,7 @@ public class PostService extends BaseService {
     }
 
     private UserEntity getUserEntity(int userId) {
-        return userRepository.findById(userId)
+        return userJpaRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
     }
 }

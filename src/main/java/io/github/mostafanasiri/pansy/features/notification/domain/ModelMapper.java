@@ -5,7 +5,7 @@ import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNot
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.NotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.*;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

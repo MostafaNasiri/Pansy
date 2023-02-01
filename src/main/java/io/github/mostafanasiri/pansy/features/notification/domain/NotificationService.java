@@ -18,8 +18,8 @@ import io.github.mostafanasiri.pansy.features.post.data.repository.PostRepositor
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class NotificationService extends BaseService {
     @Autowired
     private NotificationRepository notificationRepository;
     @Autowired
-    private UserRepository userRepository;
+    private UserJpaRepository userJpaRepository;
     @Autowired
     private CommentRepository commentRepository;
     @Autowired
@@ -119,7 +119,7 @@ public class NotificationService extends BaseService {
     }
 
     private UserEntity getUserEntity(int userId) {
-        return userRepository.findById(userId)
+        return userJpaRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
     }
 

@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.common;
 
 import io.github.mostafanasiri.pansy.auth.AppUserDetails;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class BaseService {

@@ -2,10 +2,10 @@ package io.github.mostafanasiri.pansy.features;
 
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
-import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.data.repo.FollowerRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.UserRepository;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +23,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
     @Mock
-    private UserRepository userRepository;
+    private UserJpaRepository userJpaRepository;
 
     @Mock
-    private FollowerRepository followerRepository;
+    private FollowerJpaRepository followerJpaRepository;
 
     @InjectMocks
     private UserService userService;
@@ -38,7 +38,7 @@ public class UserServiceTest {
 
         var user = new UserEntity("f", username, "");
 
-        when(userRepository.findByUsername(username))
+        when(userJpaRepository.findByUsername(username))
                 .thenReturn(new UserEntity());
 
         // Act & Assert
@@ -56,7 +56,7 @@ public class UserServiceTest {
         // Arrange
         var user = new UserEntity("name", "username", "pass");
 
-        when(userRepository.save(user))
+        when(userJpaRepository.save(user))
                 .thenReturn(user);
 
         // Act
@@ -71,7 +71,7 @@ public class UserServiceTest {
         // Arrange
         var user = new UserEntity("name", "username", "pass");
 
-        when(userRepository.save(user))
+        when(userJpaRepository.save(user))
                 .thenReturn(user);
 
         // Act
@@ -86,13 +86,13 @@ public class UserServiceTest {
         // Arrange
         var userId = 13;
 
-        when(userRepository.findById(userId))
+        when(userJpaRepository.findById(userId))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
         EntityNotFoundException ex = assertThrows(
                 EntityNotFoundException.class,
-                () -> userService.getPublicUserData(userId),
+                () -> userService.getUser(userId),
                 ""
         );
 
@@ -107,11 +107,11 @@ public class UserServiceTest {
         var userId = 13;
         var user = new UserEntity();
 
-        when(userRepository.findById(userId))
+        when(userJpaRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
         // Act
-        var result = userService.getPublicUserData(userId);
+        var result = userService.getUser(userId);
 
         // Assert
         assertEquals(result, user);
@@ -122,7 +122,7 @@ public class UserServiceTest {
         // Arrange
         var userId = 13;
 
-        when(userRepository.findById(userId))
+        when(userJpaRepository.findById(userId))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
@@ -144,13 +144,13 @@ public class UserServiceTest {
 
         var user = new UserEntity();
 
-        when(userRepository.findById(userId))
+        when(userJpaRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
         var followers = new ArrayList<FollowerEntity>();
         followers.add(new FollowerEntity(new UserEntity("follower1", "", ""), user));
 
-        when(followerRepository.getFollowers(user))
+        when(followerJpaRepository.getFollowers(user))
                 .thenReturn(followers);
 
         // Act
@@ -167,7 +167,7 @@ public class UserServiceTest {
         // Arrange
         var userId = 13;
 
-        when(userRepository.findById(userId))
+        when(userJpaRepository.findById(userId))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
@@ -189,13 +189,13 @@ public class UserServiceTest {
 
         var user = new UserEntity();
 
-        when(userRepository.findById(userId))
+        when(userJpaRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
         var followers = new ArrayList<FollowerEntity>();
         followers.add(new FollowerEntity(new UserEntity("follower1", "", ""), user));
 
-        when(followerRepository.getFollowing(user))
+        when(followerJpaRepository.getFollowing(user))
                 .thenReturn(followers);
 
         // Act
@@ -229,7 +229,7 @@ public class UserServiceTest {
         var sourceUserId = 1;
         var targetUserId = 2;
 
-        when(userRepository.findById(sourceUserId))
+        when(userJpaRepository.findById(sourceUserId))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
@@ -250,9 +250,9 @@ public class UserServiceTest {
         var sourceUserId = 1;
         var targetUserId = 2;
 
-        when(userRepository.findById(sourceUserId))
+        when(userJpaRepository.findById(sourceUserId))
                 .thenReturn(Optional.of(new UserEntity()));
-        when(userRepository.findById(targetUserId))
+        when(userJpaRepository.findById(targetUserId))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
@@ -279,19 +279,19 @@ public class UserServiceTest {
         var targetUser = new UserEntity();
         targetUser.setId(targetUserId);
 
-        when(userRepository.findById(sourceUserId))
+        when(userJpaRepository.findById(sourceUserId))
                 .thenReturn(Optional.of(sourceUser));
-        when(userRepository.findById(targetUserId))
+        when(userJpaRepository.findById(targetUserId))
                 .thenReturn(Optional.of(targetUser));
 
-        when(followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
                 .thenReturn(new FollowerEntity());
 
         // Act
         userService.followUser(sourceUserId, targetUserId);
 
         // Assert
-        verify(followerRepository, never())
+        verify(followerJpaRepository, never())
                 .save(any());
     }
 
@@ -307,12 +307,12 @@ public class UserServiceTest {
         var targetUser = new UserEntity();
         targetUser.setId(targetUserId);
 
-        when(userRepository.findById(sourceUserId))
+        when(userJpaRepository.findById(sourceUserId))
                 .thenReturn(Optional.of(sourceUser));
-        when(userRepository.findById(targetUserId))
+        when(userJpaRepository.findById(targetUserId))
                 .thenReturn(Optional.of(targetUser));
 
-        when(followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
                 .thenReturn(null);
 
         // Act
@@ -320,7 +320,7 @@ public class UserServiceTest {
 
         // Assert
         var follower = new FollowerEntity(sourceUser, targetUser);
-        verify(followerRepository, times(1))
+        verify(followerJpaRepository, times(1))
                 .save(follower);
     }
 
@@ -346,7 +346,7 @@ public class UserServiceTest {
         var sourceUserId = 1;
         var targetUserId = 2;
 
-        when(userRepository.findById(sourceUserId))
+        when(userJpaRepository.findById(sourceUserId))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
@@ -367,9 +367,9 @@ public class UserServiceTest {
         var sourceUserId = 1;
         var targetUserId = 2;
 
-        when(userRepository.findById(sourceUserId))
+        when(userJpaRepository.findById(sourceUserId))
                 .thenReturn(Optional.of(new UserEntity()));
-        when(userRepository.findById(targetUserId))
+        when(userJpaRepository.findById(targetUserId))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
@@ -396,19 +396,19 @@ public class UserServiceTest {
         var targetUser = new UserEntity();
         targetUser.setId(targetUserId);
 
-        when(userRepository.findById(sourceUserId))
+        when(userJpaRepository.findById(sourceUserId))
                 .thenReturn(Optional.of(sourceUser));
-        when(userRepository.findById(targetUserId))
+        when(userJpaRepository.findById(targetUserId))
                 .thenReturn(Optional.of(targetUser));
 
-        when(followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
                 .thenReturn(null);
 
         // Act
         userService.unfollowUser(sourceUserId, targetUserId);
 
         // Assert
-        verify(followerRepository, never())
+        verify(followerJpaRepository, never())
                 .delete(any());
     }
 
@@ -424,21 +424,21 @@ public class UserServiceTest {
         var targetUser = new UserEntity();
         targetUser.setId(targetUserId);
 
-        when(userRepository.findById(sourceUserId))
+        when(userJpaRepository.findById(sourceUserId))
                 .thenReturn(Optional.of(sourceUser));
-        when(userRepository.findById(targetUserId))
+        when(userJpaRepository.findById(targetUserId))
                 .thenReturn(Optional.of(targetUser));
 
         var follower = new FollowerEntity(sourceUser, targetUser);
 
-        when(followerRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
                 .thenReturn(follower);
 
         // Act
         userService.unfollowUser(sourceUserId, targetUserId);
 
         // Assert
-        verify(followerRepository, times(1))
+        verify(followerJpaRepository, times(1))
                 .delete(follower);
     }
 }

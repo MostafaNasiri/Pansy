@@ -1,6 +1,6 @@
 package io.github.mostafanasiri.pansy.features.user.domain;
 
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.stereotype.Component;

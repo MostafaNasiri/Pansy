@@ -4,7 +4,7 @@ import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.domain.UserService;
 import io.github.mostafanasiri.pansy.features.user.presentation.UserController;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
@@ -56,7 +56,7 @@ public class UserControllerTest extends BaseControllerTest {
         var avatar = new FileEntity("x");
         entity.setAvatar(avatar);
 
-        when(userService.getPublicUserData(userId))
+        when(userService.getUser(userId))
                 .thenReturn(entity);
 
         var expectedResponse = createSuccessApiResponse(
@@ -91,7 +91,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var exception = new EntityNotFoundException(UserEntity.class, userId);
 
-        when(userService.getPublicUserData(userId))
+        when(userService.getUser(userId))
                 .thenThrow(exception);
 
         var expectedResponse = createFailApiResponse(exception.getMessage());
@@ -119,7 +119,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var requestDto = new UpdateUserRequest("full", "", fileId);
 
-        when(userService.getPublicUserData(userId))
+        when(userService.getUser(userId))
                 .thenReturn(new UserEntity());
 
         var exception = new EntityNotFoundException(FileEntity.class, fileId);
@@ -183,7 +183,7 @@ public class UserControllerTest extends BaseControllerTest {
         user.setFullName(requestDto.getFullName());
         user.setBio(requestDto.getBio());
 
-        when(userService.getPublicUserData(userId))
+        when(userService.getUser(userId))
                 .thenReturn(user);
         when(userService.updateUser(user))
                 .thenReturn(user);
@@ -252,7 +252,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var exception = new EntityNotFoundException(UserEntity.class, targetUserId);
 
-        when(userService.getPublicUserData(targetUserId))
+        when(userService.getUser(targetUserId))
                 .thenThrow(exception);
 
         doCallRealMethod()
@@ -342,7 +342,7 @@ public class UserControllerTest extends BaseControllerTest {
 
         var exception = new EntityNotFoundException(UserEntity.class, targetUserId);
 
-        when(userService.getPublicUserData(targetUserId))
+        when(userService.getUser(targetUserId))
                 .thenThrow(exception);
 
         doCallRealMethod()
@@ -403,7 +403,7 @@ public class UserControllerTest extends BaseControllerTest {
         var userId = 1;
         var exception = new EntityNotFoundException(UserEntity.class, userId);
 
-        when(userService.getPublicUserData(userId))
+        when(userService.getUser(userId))
                 .thenThrow(exception);
 
         when(userService.getFollowers(userId))
@@ -464,7 +464,7 @@ public class UserControllerTest extends BaseControllerTest {
         var userId = 1;
         var exception = new EntityNotFoundException(UserEntity.class, userId);
 
-        when(userService.getPublicUserData(userId))
+        when(userService.getUser(userId))
                 .thenThrow(exception);
 
         when(userService.getFollowing(userId))

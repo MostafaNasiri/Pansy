@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.features.notification.data.entity;
 
 import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

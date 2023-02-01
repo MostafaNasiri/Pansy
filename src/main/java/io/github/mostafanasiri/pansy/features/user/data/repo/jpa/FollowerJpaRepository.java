@@ -1,7 +1,7 @@
-package io.github.mostafanasiri.pansy.features.user.data.repo;
+package io.github.mostafanasiri.pansy.features.user.data.repo.jpa;
 
-import io.github.mostafanasiri.pansy.features.user.data.entity.FollowerEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface FollowerRepository extends JpaRepository<FollowerEntity, Integer> {
+public interface FollowerJpaRepository extends JpaRepository<FollowerEntity, Integer> {
     FollowerEntity findBySourceUserAndTargetUser(UserEntity sourceUser, UserEntity targetUser);
 
     @Query("""

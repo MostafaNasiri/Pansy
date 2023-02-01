@@ -4,7 +4,7 @@ import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
