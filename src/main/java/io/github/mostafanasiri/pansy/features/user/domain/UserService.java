@@ -20,7 +20,6 @@ import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -103,13 +102,6 @@ public class UserService extends BaseService {
         return updatedUser;
     }
 
-    private void saveUserInRedis(User user) {
-        logger.info(String.format("Saving user %s in Redis", user.id()));
-
-        var userRedis = domainMapper.userToUserRedis(user);
-        userRedisRepository.save(userRedis);
-    }
-
     public List<User> getFollowers(int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
         var pageRequest = PageRequest.of(page, size);
@@ -150,31 +142,25 @@ public class UserService extends BaseService {
             var follower = new FollowerEntity(sourceUser, targetUser);
             followerJpaRepository.save(follower);
 
-            incrementFollowerCount(sourceUser);
-            incrementFollowingCount(targetUser);
+            incrementFollowingCount(sourceUser);
+            incrementFollowerCount(targetUser);
 
             createFollowNotification(sourceUserId, targetUserId);
         }
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
-    private User incrementFollowerCount(UserEntity user) {
-        user.incrementFollowerCount();
-        var result = userJpaRepository.save(user);
+    private void incrementFollowingCount(UserEntity userEntity) {
+        userEntity.incrementFollowingCount();
 
-        // The returned value is only used for updating cache
-        return domainMapper.userEntityToUser(result);
+        var user = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        saveUserInRedis(user);
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
-    private User incrementFollowingCount(UserEntity user) {
-        user.incrementFollowingCount();
-        var result = userJpaRepository.save(user);
+    private void incrementFollowerCount(UserEntity userEntity) {
+        userEntity.incrementFollowerCount();
 
-        // The returned value is only used for updating cache
-        return domainMapper.userEntityToUser(result);
+        var user = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        saveUserInRedis(user);
     }
 
     private void createFollowNotification(int sourceUserId, int targetUserId) {
@@ -210,36 +196,33 @@ public class UserService extends BaseService {
         }
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
-    private User decrementFollowerCount(UserEntity user) {
-        user.decrementFollowerCount();
-        var result = userJpaRepository.save(user);
+    private void decrementFollowingCount(UserEntity userEntity) {
+        userEntity.decrementFollowingCount();
 
-        // The returned value is only used for updating cache
-        return domainMapper.userEntityToUser(result);
+        var user = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        saveUserInRedis(user);
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    @CachePut(value = USERS_CACHE_NAME, key = "#user.getId")
-    private User decrementFollowingCount(UserEntity user) {
-        user.decrementFollowingCount();
-        var result = userJpaRepository.save(user);
+    private void decrementFollowerCount(UserEntity userEntity) {
+        userEntity.decrementFollowerCount();
 
-        // The returned value is only used for updating cache
-        return domainMapper.userEntityToUser(result);
+        var user = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        saveUserInRedis(user);
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    @CachePut(value = USERS_CACHE_NAME, key = "#userId")
-    public User updateUserPostCount(int userId, int count) {
+    public void updateUserPostCount(int userId, int count) {
         var user = getUserEntity(userId);
         user.setPostCount(count);
 
-        var updatedUser = userJpaRepository.save(user);
+        var updatedUser = domainMapper.userEntityToUser(userJpaRepository.save(user));
+        saveUserInRedis(updatedUser);
+    }
 
-        // The returned value is only used for updating cache
-        return domainMapper.userEntityToUser(updatedUser);
+    private void saveUserInRedis(User user) {
+        logger.info(String.format("Saving user %s in Redis", user.id()));
+
+        var userRedis = domainMapper.userToUserRedis(user);
+        userRedisRepository.save(userRedis);
     }
 
     private UserEntity getUserEntity(int userId) {

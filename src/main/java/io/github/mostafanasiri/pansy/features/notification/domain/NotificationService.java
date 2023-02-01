@@ -101,10 +101,7 @@ public class NotificationService extends BaseService {
         var notifierUser = getUserEntity(notification.getNotifierUser().id());
         var notifiedUser = getUserEntity(notification.getNotifiedUser().id());
 
-        var notificationEntity = new FollowNotificationEntity(
-                notifierUser,
-                notifiedUser
-        );
+        var notificationEntity = new FollowNotificationEntity(notifierUser, notifiedUser);
         notificationRepository.save(notificationEntity);
     }
 
