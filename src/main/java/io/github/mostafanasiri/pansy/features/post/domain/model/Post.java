@@ -7,14 +7,15 @@ public record Post(
         User user,
         String caption,
         List<Image> images,
-        Integer likesCount,
+        Integer likeCount,
+        Integer commentCount,
         Boolean isLikedByCurrentUser
 ) {
     public Post(String caption, List<Image> images) {
-        this(null, null, caption, images, null, null);
+        this(null, null, caption, images, null, null, null);
     }
 
     public Post(Integer id, String caption, List<Image> images) {
-        this(id, null, caption, images, null, null);
+        this(id, null, caption, images, null, null, null);
     }
 }

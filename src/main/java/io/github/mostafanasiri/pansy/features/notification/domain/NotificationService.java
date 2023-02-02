@@ -11,10 +11,10 @@ import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentN
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.Notification;
-import io.github.mostafanasiri.pansy.features.post.data.entity.CommentEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
-import io.github.mostafanasiri.pansy.features.post.data.repository.CommentRepository;
-import io.github.mostafanasiri.pansy.features.post.data.repository.PostRepository;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.CommentEntity;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
+import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.CommentJpaRepository;
+import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
@@ -34,9 +34,9 @@ public class NotificationService extends BaseService {
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
-    private CommentRepository commentRepository;
+    private CommentJpaRepository commentJpaRepository;
     @Autowired
-    private PostRepository postRepository;
+    private PostJpaRepository postJpaRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -111,7 +111,7 @@ public class NotificationService extends BaseService {
     }
 
     private PostEntity getPostEntity(int postId) {
-        return postRepository.findById(postId)
+        return postJpaRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(Post.class, postId));
     }
 
@@ -121,7 +121,7 @@ public class NotificationService extends BaseService {
     }
 
     private CommentEntity getCommentEntity(int commentId) {
-        return commentRepository.findById(commentId)
+        return commentJpaRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException(Comment.class, commentId));
     }
 }

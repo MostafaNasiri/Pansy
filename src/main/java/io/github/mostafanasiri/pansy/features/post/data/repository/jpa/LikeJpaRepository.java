@@ -1,7 +1,7 @@
-package io.github.mostafanasiri.pansy.features.post.data.repository;
+package io.github.mostafanasiri.pansy.features.post.data.repository.jpa;
 
-import io.github.mostafanasiri.pansy.features.post.data.entity.LikeEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.LikeEntity;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface LikeRepository extends JpaRepository<LikeEntity, Integer> {
+public interface LikeJpaRepository extends JpaRepository<LikeEntity, Integer> {
     Optional<LikeEntity> findByUserIdAndPostId(int userId, int postId);
 
     @Query("""

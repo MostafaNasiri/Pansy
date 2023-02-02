@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.post.data.entity;
+package io.github.mostafanasiri.pansy.features.post.data.entity.jpa;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
@@ -79,12 +79,12 @@ public class PostEntity extends BaseEntity {
         return images;
     }
 
-    public List<LikeEntity> getLikes() {
-        return likes;
-    }
-
     public int getLikeCount() {
         return likeCount;
+    }
+
+    public int getCommentCount() {
+        return commentCount;
     }
 
     public void incrementLikeCount() {

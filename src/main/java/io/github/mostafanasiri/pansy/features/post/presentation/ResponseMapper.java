@@ -29,7 +29,7 @@ public class ResponseMapper {
                 userResponse,
                 post.caption(),
                 imageUrls,
-                post.likesCount() != null ? post.likesCount() : 0,
+                post.likeCount() != null ? post.likeCount() : 0,
                 post.isLikedByCurrentUser() != null ? post.isLikedByCurrentUser() : false
         );
     }

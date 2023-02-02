@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.post.data.entity;
+package io.github.mostafanasiri.pansy.features.post.data.entity.jpa;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;

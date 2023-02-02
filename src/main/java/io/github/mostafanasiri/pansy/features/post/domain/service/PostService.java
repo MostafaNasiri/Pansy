@@ -7,17 +7,20 @@ import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.data.FileRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
-import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
-import io.github.mostafanasiri.pansy.features.post.data.entity.PostEntity;
-import io.github.mostafanasiri.pansy.features.post.data.repository.LikeRepository;
-import io.github.mostafanasiri.pansy.features.post.data.repository.PostRepository;
-import io.github.mostafanasiri.pansy.features.post.domain.ModelMapper;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
+import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.LikeJpaRepository;
+import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
+import io.github.mostafanasiri.pansy.features.post.data.repository.redis.PostRedisRepository;
+import io.github.mostafanasiri.pansy.features.post.domain.DomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
+import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
@@ -29,12 +32,18 @@ import java.util.List;
 
 @Service
 public class PostService extends BaseService {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+
     @Autowired
-    private PostRepository postRepository;
+    private PostJpaRepository postJpaRepository;
+    @Autowired
+    private PostRedisRepository postRedisRepository;
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
-    private LikeRepository likeRepository;
+    private UserRedisRepository userRedisRepository;
+    @Autowired
+    private LikeJpaRepository likeJpaRepository;
     @Autowired
     private FileRepository fileRepository;
     @Autowired
@@ -42,21 +51,19 @@ public class PostService extends BaseService {
     @Autowired
     private FileService fileService;
     @Autowired
-    private NotificationService notificationService;
-    @Autowired
-    private ModelMapper modelMapper;
+    private DomainMapper domainMapper;
 
     public List<Post> getUserPosts(int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
 
         var pageRequest = PageRequest.of(page, size);
-        var posts = postRepository.getUserPosts(userEntity, pageRequest);
+        var posts = postJpaRepository.getUserPosts(userEntity, pageRequest);
 
         // Get ids of the posts that the authenticated user has liked
         var postIds = posts.stream().map(BaseEntity::getId).toList();
-        var likedPostIds = likeRepository.getLikedPostIds(getAuthenticatedUserId(), postIds);
+        var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), postIds);
 
-        return modelMapper.mapUserPosts(userEntity, posts, likedPostIds);
+        return domainMapper.postEntitiesToPosts(userEntity, posts, likedPostIds);
     }
 
     @Transactional
@@ -69,37 +76,69 @@ public class PostService extends BaseService {
 
         var imageFileIds = input.images().stream().map(Image::id).toList();
 
-        // Check images
-        fileService.checkIfFilesExist(new HashSet<>(imageFileIds));
-        fileService.checkIfFilesAreAlreadyAttachedToAnEntity(imageFileIds);
+        checkImagesForCreatePost(imageFileIds);
 
         // Create post
         var imageFileEntities = imageFileIds.stream().map(id -> fileRepository.getReferenceById(id)).toList();
         var postEntity = new PostEntity(authenticatedUserEntity, input.caption(), imageFileEntities);
-        postEntity = postRepository.save(postEntity);
+        postEntity = postJpaRepository.save(postEntity);
 
         userService.updateUserPostCount(
                 authenticatedUserEntity.getId(),
                 authenticatedUserEntity.getPostCount() + 1
         );
 
-        var user = modelMapper.mapFromUserEntity(authenticatedUserEntity);
-        return modelMapper.mapFromPostEntity(user, postEntity, false);
+        var user = domainMapper.userEntityToUser(authenticatedUserEntity);
+        var post = domainMapper.postEntityToPost(user, postEntity, false);
+
+        savePostInRedis(post);
+
+        return post;
     }
 
+    private void checkImagesForCreatePost(List<Integer> imageFileIds) {
+        fileService.checkIfFilesExist(new HashSet<>(imageFileIds));
+        fileService.checkIfFilesAreAlreadyAttachedToAnEntity(imageFileIds);
+    }
+
+    @Transactional
     public Post updatePost(@NonNull Post input) {
         var postEntity = getPostEntity(input.id());
 
+        validateUpdatePostInput(input, postEntity);
+
+        var imageFileIds = input.images().stream().map(Image::id).toList();
+
+        checkImagesForUpdatePost(postEntity, imageFileIds);
+
+        // Update post
+        var imageFileEntities = imageFileIds.stream().map(id -> fileRepository.getReferenceById(id)).toList();
+        postEntity.setCaption(input.caption());
+        postEntity.setImages(imageFileEntities);
+
+        var isLikedByAuthenticatedUser = likeJpaRepository.findByUserIdAndPostId(
+                getAuthenticatedUserId(), postEntity.getId()
+        ).isPresent();
+
+        var user = domainMapper.userEntityToUser(getAuthenticatedUser());
+        var post = domainMapper.postEntityToPost(user, postJpaRepository.save(postEntity), isLikedByAuthenticatedUser);
+
+        savePostInRedis(post);
+
+        return post;
+    }
+
+    private void validateUpdatePostInput(Post input, PostEntity postEntity) {
         if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
             throw new AuthorizationException("Post does not belong to authenticated user");
         }
+
         if (input.images().isEmpty()) {
             throw new InvalidInputException("A post must have at least one image");
         }
+    }
 
-        // Check images
-        var imageFileIds = input.images().stream().map(Image::id).toList();
-
+    private void checkImagesForUpdatePost(PostEntity postEntity, List<Integer> imageFileIds) {
         fileService.checkIfFilesExist(new HashSet<>(imageFileIds));
 
         var newlyAddedImageIds = imageFileIds.stream()
@@ -108,18 +147,16 @@ public class PostService extends BaseService {
         if (!newlyAddedImageIds.isEmpty()) {
             fileService.checkIfFilesAreAlreadyAttachedToAnEntity(newlyAddedImageIds);
         }
+    }
 
-        // Update post
-        var imageFileEntities = imageFileIds.stream().map(id -> fileRepository.getReferenceById(id)).toList();
-        postEntity.setCaption(input.caption());
-        postEntity.setImages(imageFileEntities);
+    private void savePostInRedis(Post post) {
+        logger.info(String.format("Saving post %s in Redis", post.id()));
 
-        var isLikedByAuthenticatedUser = likeRepository.findByUserIdAndPostId(
-                getAuthenticatedUserId(), postEntity.getId()
-        ).isPresent();
-
-        var user = modelMapper.mapFromUserEntity(getAuthenticatedUser());
-        return modelMapper.mapFromPostEntity(user, postRepository.save(postEntity), isLikedByAuthenticatedUser);
+        userRedisRepository.findById(post.user().id())
+                .ifPresent(userRedis -> {
+                    var postRedis = domainMapper.postToPostRedis(userRedis, post);
+                    postRedisRepository.save(postRedis);
+                });
     }
 
     @Transactional
@@ -130,17 +167,22 @@ public class PostService extends BaseService {
             throw new AuthorizationException("Post does not belong to the authenticated user");
         }
 
-        postRepository.delete(post);
+        postJpaRepository.delete(post);
 
-        var authenticatedUserEntity = getUserEntity(getAuthenticatedUserId());
+        // Update authenticated user's postCount field
+        var authenticatedUserEntity = getAuthenticatedUser();
         userService.updateUserPostCount(
                 authenticatedUserEntity.getId(),
                 authenticatedUserEntity.getPostCount() - 1
         );
+
+        // Remove post from redis
+        postRedisRepository.findById(postId)
+                .ifPresent(p -> postRedisRepository.delete(p));
     }
 
     private PostEntity getPostEntity(int postId) {
-        return postRepository.findById(postId)
+        return postJpaRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(Post.class, postId));
     }
 
