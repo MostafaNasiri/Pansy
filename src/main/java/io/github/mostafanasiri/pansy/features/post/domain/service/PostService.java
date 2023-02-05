@@ -1,6 +1,5 @@
 package io.github.mostafanasiri.pansy.features.post.domain.service;
 
-import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
@@ -8,6 +7,7 @@ import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.data.FileRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
+import io.github.mostafanasiri.pansy.features.post.data.entity.redis.PostRedis;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.LikeJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.redis.PostRedisRepository;
@@ -27,6 +27,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -54,17 +55,63 @@ public class PostService extends BaseService {
     private DomainMapper domainMapper;
 
     public List<Post> getUserPosts(int userId, int page, int size) {
-        var userEntity = getUserEntity(userId);
+        var user = userService.getUser(userId);
+        var userEntity = userJpaRepository.getReferenceById(user.id());
 
         var pageRequest = PageRequest.of(page, size);
-        var posts = postJpaRepository.getUserPosts(userEntity, pageRequest);
+        var userPostIds = postJpaRepository.getUserPostIds(userEntity, pageRequest);
 
         // Get ids of the posts that the authenticated user has liked
-        var postIds = posts.stream().map(BaseEntity::getId).toList();
-        var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), postIds);
+        var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), userPostIds);
 
-        return domainMapper.postEntitiesToPosts(userEntity, posts, likedPostIds);
+        return fetchPosts(userEntity, userPostIds, likedPostIds);
     }
+
+    private List<Post> fetchPosts(UserEntity userEntity, List<Integer> userPostIds, List<Integer> likedPostIds) {
+        var postsRedis = new ArrayList<PostRedis>();
+        var unCachedPostIds = new ArrayList<Integer>();
+
+        // Find cached and uncached posts
+        userPostIds.forEach(id -> {
+            var postRedis = postRedisRepository.findById(id);
+
+            if (postRedis.isPresent()) {
+                logger.info(String.format("getUserPosts - Fetched post %s from Redis", id));
+                postsRedis.add(postRedis.get());
+            } else {
+                logger.info(String.format(
+                        "getUserPosts - User %s doesn't exist in Redis. Must fetch it from the database",
+                        id
+                ));
+                unCachedPostIds.add(id);
+            }
+        });
+
+        // Get uncached posts from the database
+        List<Post> unCachedPosts = new ArrayList<>();
+        if (!unCachedPostIds.isEmpty()) {
+            var unCachedPostEntities = postJpaRepository.getUserPosts(userEntity, unCachedPostIds);
+
+            // Map cached and uncached posts to Post models
+            unCachedPosts = domainMapper.postEntitiesToPosts(userEntity, unCachedPostEntities, likedPostIds);
+
+            // Save uncached posts in Redis
+            unCachedPosts.forEach(this::savePostInRedis);
+        }
+
+        var cachedPosts = domainMapper.postsRedisToPosts(postsRedis, likedPostIds);
+
+        // Combine all posts
+        var result = new ArrayList<Post>();
+        result.addAll(unCachedPosts);
+        result.addAll(cachedPosts);
+
+        // Order posts by creation date (descending)
+        result.sort((p1, p2) -> ((-1) * p1.createdAt().compareTo(p2.createdAt())));
+
+        return result;
+    }
+
 
     @Transactional
     public Post createPost(@NonNull Post input) {
@@ -176,7 +223,7 @@ public class PostService extends BaseService {
                 authenticatedUserEntity.getPostCount() - 1
         );
 
-        // Remove post from redis
+        // Delete post from redis
         postRedisRepository.findById(postId)
                 .ifPresent(p -> postRedisRepository.delete(p));
     }

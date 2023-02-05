@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Reference;
 import org.springframework.data.redis.core.RedisHash;
 
+import java.util.Date;
 import java.util.List;
 
 @RedisHash("post")
@@ -14,7 +15,8 @@ public record PostRedis(
         String caption,
         List<String> imageNames,
         int likeCount,
-        int commentCount
+        int commentCount,
+        Date createdAt
 ) {
 
 }

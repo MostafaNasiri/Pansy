@@ -15,8 +15,16 @@ public interface PostJpaRepository extends JpaRepository<PostEntity, Integer> {
             SELECT p
             FROM PostEntity p
             INNER JOIN FETCH p.images
+            WHERE p.user=?1 AND p.id IN (?2)
+            ORDER BY p.createdAt DESC
+            """)
+    List<PostEntity> getUserPosts(UserEntity user, List<Integer> postIds);
+
+    @Query("""
+            SELECT p.id
+            FROM PostEntity p
             WHERE p.user=?1
             ORDER BY p.createdAt DESC
             """)
-    List<PostEntity> getUserPosts(UserEntity user, Pageable pageable);
+    List<Integer> getUserPostIds(UserEntity user, Pageable pageable);
 }

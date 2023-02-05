@@ -43,8 +43,41 @@ public class DomainMapper {
                 images,
                 entity.getLikeCount(),
                 entity.getCommentCount(),
-                isLiked
+                isLiked,
+                entity.getCreatedAt()
         );
+    }
+
+    public List<Post> postsRedisToPosts(List<PostRedis> postRedis, List<Integer> likedPostIds) {
+        return postRedis.stream()
+                .map(p -> {
+                    var isLiked = likedPostIds.contains(p.id());
+                    return postRedisToPost(p, isLiked);
+                })
+                .toList();
+    }
+
+    public Post postRedisToPost(PostRedis postRedis, boolean isLiked) {
+        var user = userRedisToUser(postRedis.user());
+        var images = postRedis.imageNames()
+                .stream()
+                .map(n -> new Image(0, n))
+                .toList();
+
+        return new Post(
+                postRedis.id(),
+                user,
+                postRedis.caption(),
+                images,
+                postRedis.likeCount(),
+                postRedis.commentCount(),
+                isLiked,
+                postRedis.createdAt()
+        );
+    }
+
+    private User userRedisToUser(UserRedis userRedis) {
+        return new User(userRedis.getId(), userRedis.getUsername(), userRedis.getAvatarName());
     }
 
     public PostRedis postToPostRedis(UserRedis userRedis, Post post) {
@@ -56,7 +89,8 @@ public class DomainMapper {
                 post.caption(),
                 imageUrls,
                 post.likeCount(),
-                post.commentCount()
+                post.commentCount(),
+                post.createdAt()
         );
     }
 

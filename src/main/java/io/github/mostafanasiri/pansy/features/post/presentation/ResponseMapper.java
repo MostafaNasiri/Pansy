@@ -30,7 +30,8 @@ public class ResponseMapper {
                 post.caption(),
                 imageUrls,
                 post.likeCount() != null ? post.likeCount() : 0,
-                post.isLikedByCurrentUser() != null ? post.isLikedByCurrentUser() : false
+                post.isLikedByAuthenticatedUser() != null ? post.isLikedByAuthenticatedUser() : false,
+                post.createdAt()
         );
     }
 

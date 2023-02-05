@@ -47,8 +47,8 @@ public class UserService extends BaseService {
         }
 
         logger.info(String.format("getUser - Fetching user %s from database", userId));
-        var user = domainMapper.userEntityToUser(getUserEntity(userId));
-
+        var userEntity = getUserEntity(userId);
+        var user = domainMapper.userEntityToUser(userEntity);
         saveUserInRedis(user);
 
         return user;
