@@ -25,6 +25,8 @@ import java.util.List;
 @Service
 public class CommentService extends BaseService {
     @Autowired
+    private PostService postService;
+    @Autowired
     private CommentJpaRepository commentJpaRepository;
     @Autowired
     private PostJpaRepository postJpaRepository;
@@ -47,18 +49,17 @@ public class CommentService extends BaseService {
     @Transactional
     public Comment addComment(int postId, @NonNull Comment comment) {
         var commentator = getAuthenticatedUser();
-        var post = getPostEntity(postId);
+        var postEntity = getPostEntity(postId);
 
-        var commentEntity = new CommentEntity(commentator, post, comment.text());
+        var commentEntity = new CommentEntity(commentator, postEntity, comment.text());
         commentEntity = commentJpaRepository.save(commentEntity);
 
-        post.incrementCommentCount();
-        postJpaRepository.save(post);
+        postService.updatePostCommentCount(postId, postEntity.getCommentCount() + 1);
 
         // Add new comment notification for the post's author
         var commentNotification = new CommentNotification(
                 new NotificationUser(commentator.getId()),
-                new NotificationUser(post.getUser().getId()),
+                new NotificationUser(postEntity.getUser().getId()),
                 commentEntity.getId(),
                 postId
         );
@@ -70,24 +71,21 @@ public class CommentService extends BaseService {
     @Transactional
     public void deleteComment(int postId, int commentId) {
         var commentator = getAuthenticatedUser();
-        var comment = getCommentEntity(commentId);
+        var commentEntity = getCommentEntity(commentId);
 
-        if (comment.getUser() != commentator) {
+        if (commentEntity.getUser() != commentator) {
             throw new AuthorizationException("Comment does not belong to the authenticated user");
         }
 
-        var post = getPostEntity(postId);
+        var postEntity = getPostEntity(postId);
 
-        if (comment.getPost() != post) {
+        if (commentEntity.getPost() != postEntity) {
             throw new InvalidInputException("Comment does not belong to this post");
         }
 
-        commentJpaRepository.delete(comment);
-
-        post.decrementCommentCount();
-        postJpaRepository.save(post);
-
-        notificationService.deleteCommentNotification(comment.getId());
+        commentJpaRepository.delete(commentEntity);
+        postService.updatePostCommentCount(postId, postEntity.getCommentCount() - 1);
+        notificationService.deleteCommentNotification(commentEntity.getId());
     }
 
     private CommentEntity getCommentEntity(int commentId) {

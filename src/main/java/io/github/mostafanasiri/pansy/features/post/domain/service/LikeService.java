@@ -23,6 +23,8 @@ import java.util.List;
 @Service
 public class LikeService extends BaseService {
     @Autowired
+    private PostService postService;
+    @Autowired
     private LikeJpaRepository likeJpaRepository;
     @Autowired
     private PostJpaRepository postJpaRepository;
@@ -50,18 +52,17 @@ public class LikeService extends BaseService {
         ).isPresent();
 
         if (!authenticatedUserHasAlreadyLikedThePost) {
-            var user = getAuthenticatedUser();
-            var post = getPostEntity(postId);
+            var userEntity = getAuthenticatedUser();
+            var postEntity = getPostEntity(postId);
 
-            var like = new LikeEntity(user, post);
+            var like = new LikeEntity(userEntity, postEntity);
             likeJpaRepository.save(like);
 
-            post.incrementLikeCount();
-            postJpaRepository.save(post);
+            postService.updatePostLikeCount(postId, postEntity.getLikeCount() + 1);
 
             var notification = new LikeNotification(
                     new NotificationUser(getAuthenticatedUserId()),
-                    new NotificationUser(post.getUser().getId()),
+                    new NotificationUser(postEntity.getUser().getId()),
                     postId
             );
             notificationService.addLikeNotification(notification);
@@ -75,20 +76,16 @@ public class LikeService extends BaseService {
         }
 
         var like = likeJpaRepository.findByUserIdAndPostId(userId, postId);
-
         var userHasLikedThePost = like.isPresent();
 
         if (userHasLikedThePost) {
             likeJpaRepository.delete(like.get());
-            decrementPostLikeCount(postId);
+
+            var postEntity = getPostEntity(postId);
+            postService.updatePostLikeCount(postId, postEntity.getLikeCount() - 1);
+
             notificationService.deleteLikeNotification(userId, postId);
         }
-    }
-
-    private void decrementPostLikeCount(int postId) {
-        var post = getPostEntity(postId);
-        post.decrementLikeCount();
-        postJpaRepository.save(post);
     }
 
     private PostEntity getPostEntity(int postId) {

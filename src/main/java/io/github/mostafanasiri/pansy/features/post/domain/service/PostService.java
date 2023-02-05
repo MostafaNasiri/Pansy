@@ -145,6 +145,24 @@ public class PostService extends BaseService {
         fileService.checkIfFilesAreAlreadyAttachedToAnEntity(imageFileIds);
     }
 
+    public void updatePostLikeCount(int postId, int likeCount) {
+        var postEntity = getPostEntity(postId);
+        postEntity.setLikeCount(likeCount);
+        postEntity = postJpaRepository.save(postEntity);
+
+        var post = postDomainMapper.postEntityToPost(postEntity.getUser(), postEntity, false);
+        savePostInRedis(post);
+    }
+
+    public void updatePostCommentCount(int postId, int commentCount) {
+        var postEntity = getPostEntity(postId);
+        postEntity.setCommentCount(commentCount);
+        postEntity = postJpaRepository.save(postEntity);
+
+        var post = postDomainMapper.postEntityToPost(postEntity.getUser(), postEntity, false);
+        savePostInRedis(post);
+    }
+
     @Transactional
     public Post updatePost(@NonNull Post input) {
         var postEntity = getPostEntity(input.id());

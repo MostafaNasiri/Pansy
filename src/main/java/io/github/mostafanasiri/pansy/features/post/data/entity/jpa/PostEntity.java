@@ -87,26 +87,6 @@ public class PostEntity extends BaseEntity {
         return commentCount;
     }
 
-    public void incrementLikeCount() {
-        likeCount++;
-    }
-
-    public void decrementLikeCount() {
-        if (likeCount > 0) {
-            likeCount--;
-        }
-    }
-
-    public void incrementCommentCount() {
-        commentCount++;
-    }
-
-    public void decrementCommentCount() {
-        if (commentCount > 0) {
-            commentCount--;
-        }
-    }
-
     public void setCaption(String caption) {
         this.caption = caption;
     }
@@ -117,5 +97,17 @@ public class PostEntity extends BaseEntity {
 
     public boolean hasImage(int imageId) {
         return images.stream().anyMatch(i -> i.getId() == imageId);
+    }
+
+    public void setLikeCount(int likeCount) {
+        if (likeCount > 0) {
+            this.likeCount = likeCount;
+        }
+    }
+
+    public void setCommentCount(int commentCount) {
+        if (commentCount > 0) {
+            this.commentCount = commentCount;
+        }
     }
 }
