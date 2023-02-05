@@ -30,4 +30,18 @@ public interface FollowerJpaRepository extends JpaRepository<FollowerEntity, Int
             WHERE f.sourceUser=?1
             """)
     List<FollowerEntity> getFollowing(UserEntity sourceUser, Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(f.id)
+            FROM FollowerEntity f
+            WHERE f.targetUser=?1
+            """)
+    int getFollowerCount(UserEntity userEntity);
+
+    @Query("""
+            SELECT COUNT(f.id)
+            FROM FollowerEntity f
+            WHERE f.sourceUser=?1
+            """)
+    int getFollowingCount(UserEntity userEntity);
 }

@@ -78,23 +78,15 @@ public class UserEntity extends BaseEntity {
         }
     }
 
-    public void incrementFollowerCount() {
-        followerCount++;
-    }
-
-    public void decrementFollowerCount() {
-        if (followerCount > 0) {
-            followerCount--;
+    public void setFollowerCount(int followerCount) {
+        if (followerCount >= 0) {
+            this.followerCount = followerCount;
         }
     }
 
-    public void incrementFollowingCount() {
-        followingCount++;
-    }
-
-    public void decrementFollowingCount() {
-        if (followingCount > 0) {
-            followingCount--;
+    public void setFollowingCount(int followingCount) {
+        if (followingCount >= 0) {
+            this.followingCount = followingCount;
         }
     }
 }

@@ -28,6 +28,8 @@ public class FollowService extends BaseService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
     @Autowired
+    private UserService userService;
+    @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
     private UserRedisRepository userRedisRepository;
@@ -39,9 +41,10 @@ public class FollowService extends BaseService {
     private UserDomainMapper userDomainMapper;
 
     public List<User> getFollowers(int userId, int page, int size) {
-        var userEntity = getUserEntity(userId);
-        var pageRequest = PageRequest.of(page, size);
+        var user = userService.getUser(userId);
+        var userEntity = userJpaRepository.getReferenceById(user.id());
 
+        var pageRequest = PageRequest.of(page, size);
         return followerJpaRepository.getFollowers(userEntity, pageRequest)
                 .stream()
                 .map((f) -> userDomainMapper.userEntityToUser(f.getSourceUser()))
@@ -49,9 +52,10 @@ public class FollowService extends BaseService {
     }
 
     public List<User> getFollowing(int userId, int page, int size) {
-        var userEntity = getUserEntity(userId);
-        var pageRequest = PageRequest.of(page, size);
+        var user = userService.getUser(userId);
+        var userEntity = userJpaRepository.getReferenceById(user.id());
 
+        var pageRequest = PageRequest.of(page, size);
         return followerJpaRepository.getFollowing(userEntity, pageRequest)
                 .stream()
                 .map((f) -> userDomainMapper.userEntityToUser(f.getTargetUser()))
@@ -78,25 +82,11 @@ public class FollowService extends BaseService {
             var follower = new FollowerEntity(sourceUser, targetUser);
             followerJpaRepository.save(follower);
 
-            incrementFollowingCount(sourceUser);
-            incrementFollowerCount(targetUser);
+            updateFollowingCount(sourceUser);
+            updateFollowerCount(targetUser);
 
             createFollowNotification(sourceUserId, targetUserId);
         }
-    }
-
-    private void incrementFollowingCount(UserEntity userEntity) {
-        userEntity.incrementFollowingCount();
-
-        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
-        saveUserInRedis(user);
-    }
-
-    private void incrementFollowerCount(UserEntity userEntity) {
-        userEntity.incrementFollowerCount();
-
-        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
-        saveUserInRedis(user);
     }
 
     private void createFollowNotification(int sourceUserId, int targetUserId) {
@@ -125,22 +115,24 @@ public class FollowService extends BaseService {
         if (follower != null) {
             followerJpaRepository.delete(follower);
 
-            decrementFollowingCount(sourceUser);
-            decrementFollowerCount(targetUser);
+            updateFollowingCount(sourceUser);
+            updateFollowerCount(targetUser);
 
             notificationService.deleteFollowNotification(sourceUserId, targetUserId);
         }
     }
 
-    private void decrementFollowingCount(UserEntity userEntity) {
-        userEntity.decrementFollowingCount();
+    private void updateFollowingCount(UserEntity userEntity) {
+        var count = followerJpaRepository.getFollowingCount(userEntity);
+        userEntity.setFollowingCount(count);
 
         var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(user);
     }
 
-    private void decrementFollowerCount(UserEntity userEntity) {
-        userEntity.decrementFollowerCount();
+    private void updateFollowerCount(UserEntity userEntity) {
+        var count = followerJpaRepository.getFollowerCount(userEntity);
+        userEntity.setFollowerCount(count);
 
         var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(user);
