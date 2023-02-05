@@ -129,10 +129,7 @@ public class PostService extends BaseService {
         var postEntity = new PostEntity(authenticatedUserEntity, input.caption(), imageFileEntities);
         postEntity = postJpaRepository.save(postEntity);
 
-        userService.updateUserPostCount(
-                authenticatedUserEntity.getId(),
-                authenticatedUserEntity.getPostCount() + 1
-        );
+        updateUserPostCount(authenticatedUserEntity);
 
         var post = postDomainMapper.postEntityToPost(authenticatedUserEntity, postEntity, false);
         savePostInRedis(post);
@@ -234,16 +231,17 @@ public class PostService extends BaseService {
 
         postJpaRepository.delete(post);
 
-        // Update authenticated user's postCount field
         var authenticatedUserEntity = getAuthenticatedUser();
-        userService.updateUserPostCount(
-                authenticatedUserEntity.getId(),
-                authenticatedUserEntity.getPostCount() - 1
-        );
+        updateUserPostCount(authenticatedUserEntity);
 
         // Delete post from redis
         postRedisRepository.findById(postId)
                 .ifPresent(p -> postRedisRepository.delete(p));
+    }
+
+    private void updateUserPostCount(UserEntity authenticatedUserEntity) {
+        var postCount = postJpaRepository.getUserPostCount(authenticatedUserEntity);
+        userService.updateUserPostCount(authenticatedUserEntity.getId(), postCount);
     }
 
     private PostEntity getPostEntity(int postId) {

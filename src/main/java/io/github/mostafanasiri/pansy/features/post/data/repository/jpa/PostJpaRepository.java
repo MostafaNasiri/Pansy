@@ -27,4 +27,11 @@ public interface PostJpaRepository extends JpaRepository<PostEntity, Integer> {
             ORDER BY p.createdAt DESC
             """)
     List<Integer> getUserPostIds(UserEntity user, Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(p.id)
+            FROM PostEntity p
+            WHERE p.user=?1
+            """)
+    int getUserPostCount(UserEntity user);
 }
