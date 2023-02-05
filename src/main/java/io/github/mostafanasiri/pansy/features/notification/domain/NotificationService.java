@@ -17,9 +17,9 @@ import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.CommentJp
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class NotificationService extends BaseService {
     @Autowired
     private PostJpaRepository postJpaRepository;
     @Autowired
-    private ModelMapper modelMapper;
+    private NotificationDomainMapper notificationDomainMapper;
 
     @Transactional
     public List<Notification> getNotifications(int page, int size) {
@@ -50,7 +50,7 @@ public class NotificationService extends BaseService {
                 .toList();
         notificationRepository.markNotificationsAsRead(notificationIds);
 
-        return modelMapper.mapFromNotificationEntities(result);
+        return notificationDomainMapper.mapFromNotificationEntities(result);
     }
 
     public int getUnreadNotificationsCount() {

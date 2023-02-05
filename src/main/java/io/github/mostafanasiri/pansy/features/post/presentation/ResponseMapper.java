@@ -3,10 +3,10 @@ package io.github.mostafanasiri.pansy.features.post.presentation;
 import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.CommentResponse;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.PostResponse;
 import io.github.mostafanasiri.pansy.features.post.presentation.response.UserResponse;
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class ResponseMapper {
     }
 
     public UserResponse mapFromUserModel(@NonNull User user) {
-        var avatarUrl = user.avatar() != null ? fileUtils.createFileUrl(user.avatar()) : null;
+        var avatarUrl = user.avatar() != null ? fileUtils.createFileUrl(user.avatar().name()) : null;
 
         return new UserResponse(
                 user.id(),

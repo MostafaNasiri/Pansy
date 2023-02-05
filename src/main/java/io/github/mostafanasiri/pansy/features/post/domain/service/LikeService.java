@@ -10,9 +10,9 @@ import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.LikeEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.LikeJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
-import io.github.mostafanasiri.pansy.features.post.domain.DomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.post.domain.model.User;
+import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class LikeService extends BaseService {
     @Autowired
     private NotificationService notificationService;
     @Autowired
-    private DomainMapper domainMapper;
+    private UserDomainMapper userDomainMapper;
 
     public List<User> getLikes(int postId, int page, int size) {
         var post = getPostEntity(postId);
@@ -38,7 +38,7 @@ public class LikeService extends BaseService {
         var likes = likeJpaRepository.getLikes(post, pageRequest);
 
         return likes.stream()
-                .map(like -> domainMapper.userEntityToUser(like.getUser()))
+                .map(like -> userDomainMapper.userEntityToUser(like.getUser()))
                 .toList();
     }
 

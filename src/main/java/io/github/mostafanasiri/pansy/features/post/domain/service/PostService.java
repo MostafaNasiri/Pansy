@@ -11,10 +11,9 @@ import io.github.mostafanasiri.pansy.features.post.data.entity.redis.PostRedis;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.LikeJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.redis.PostRedisRepository;
-import io.github.mostafanasiri.pansy.features.post.domain.DomainMapper;
+import io.github.mostafanasiri.pansy.features.post.domain.PostDomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.post.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
@@ -52,7 +51,7 @@ public class PostService extends BaseService {
     @Autowired
     private FileService fileService;
     @Autowired
-    private DomainMapper domainMapper;
+    private PostDomainMapper postDomainMapper;
 
     public List<Post> getUserPosts(int userId, int page, int size) {
         var user = userService.getUser(userId);
@@ -93,13 +92,13 @@ public class PostService extends BaseService {
             var unCachedPostEntities = postJpaRepository.getUserPosts(userEntity, unCachedPostIds);
 
             // Map cached and uncached posts to Post models
-            unCachedPosts = domainMapper.postEntitiesToPosts(userEntity, unCachedPostEntities, likedPostIds);
+            unCachedPosts = postDomainMapper.postEntitiesToPosts(userEntity, unCachedPostEntities, likedPostIds);
 
             // Save uncached posts in Redis
             unCachedPosts.forEach(this::savePostInRedis);
         }
 
-        var cachedPosts = domainMapper.postsRedisToPosts(postsRedis, likedPostIds);
+        var cachedPosts = postDomainMapper.postsRedisToPosts(postsRedis, likedPostIds);
 
         // Combine all posts
         var result = new ArrayList<Post>();
@@ -115,7 +114,7 @@ public class PostService extends BaseService {
 
     @Transactional
     public Post createPost(@NonNull Post input) {
-        var authenticatedUserEntity = getUserEntity(getAuthenticatedUserId());
+        var authenticatedUserEntity = getAuthenticatedUser();
 
         if (input.images().isEmpty()) {
             throw new InvalidInputException("A post must have at least one image");
@@ -135,9 +134,7 @@ public class PostService extends BaseService {
                 authenticatedUserEntity.getPostCount() + 1
         );
 
-        var user = domainMapper.userEntityToUser(authenticatedUserEntity);
-        var post = domainMapper.postEntityToPost(user, postEntity, false);
-
+        var post = postDomainMapper.postEntityToPost(authenticatedUserEntity, postEntity, false);
         savePostInRedis(post);
 
         return post;
@@ -167,8 +164,11 @@ public class PostService extends BaseService {
                 getAuthenticatedUserId(), postEntity.getId()
         ).isPresent();
 
-        var user = domainMapper.userEntityToUser(getAuthenticatedUser());
-        var post = domainMapper.postEntityToPost(user, postJpaRepository.save(postEntity), isLikedByAuthenticatedUser);
+        var post = postDomainMapper.postEntityToPost(
+                getAuthenticatedUser(),
+                postJpaRepository.save(postEntity),
+                isLikedByAuthenticatedUser
+        );
 
         savePostInRedis(post);
 
@@ -201,7 +201,7 @@ public class PostService extends BaseService {
 
         userRedisRepository.findById(post.user().id())
                 .ifPresent(userRedis -> {
-                    var postRedis = domainMapper.postToPostRedis(userRedis, post);
+                    var postRedis = postDomainMapper.postToPostRedis(userRedis, post);
                     postRedisRepository.save(postRedis);
                 });
     }
@@ -231,10 +231,5 @@ public class PostService extends BaseService {
     private PostEntity getPostEntity(int postId) {
         return postJpaRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(Post.class, postId));
-    }
-
-    private UserEntity getUserEntity(int userId) {
-        return userJpaRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
     }
 }

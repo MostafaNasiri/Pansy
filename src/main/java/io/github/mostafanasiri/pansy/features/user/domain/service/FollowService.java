@@ -12,7 +12,7 @@ import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.DomainMapper;
+import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public class FollowService extends BaseService {
     @Autowired
     private NotificationService notificationService;
     @Autowired
-    private DomainMapper domainMapper;
+    private UserDomainMapper userDomainMapper;
 
     public List<User> getFollowers(int userId, int page, int size) {
         var userEntity = getUserEntity(userId);
@@ -44,7 +44,7 @@ public class FollowService extends BaseService {
 
         return followerJpaRepository.getFollowers(userEntity, pageRequest)
                 .stream()
-                .map((f) -> domainMapper.userEntityToUser(f.getSourceUser()))
+                .map((f) -> userDomainMapper.userEntityToUser(f.getSourceUser()))
                 .toList();
     }
 
@@ -54,7 +54,7 @@ public class FollowService extends BaseService {
 
         return followerJpaRepository.getFollowing(userEntity, pageRequest)
                 .stream()
-                .map((f) -> domainMapper.userEntityToUser(f.getTargetUser()))
+                .map((f) -> userDomainMapper.userEntityToUser(f.getTargetUser()))
                 .toList();
     }
 
@@ -88,14 +88,14 @@ public class FollowService extends BaseService {
     private void incrementFollowingCount(UserEntity userEntity) {
         userEntity.incrementFollowingCount();
 
-        var user = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(user);
     }
 
     private void incrementFollowerCount(UserEntity userEntity) {
         userEntity.incrementFollowerCount();
 
-        var user = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(user);
     }
 
@@ -135,21 +135,21 @@ public class FollowService extends BaseService {
     private void decrementFollowingCount(UserEntity userEntity) {
         userEntity.decrementFollowingCount();
 
-        var user = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(user);
     }
 
     private void decrementFollowerCount(UserEntity userEntity) {
         userEntity.decrementFollowerCount();
 
-        var user = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(user);
     }
 
     private void saveUserInRedis(User user) {
         logger.info(String.format("Saving user %s in Redis", user.id()));
 
-        var userRedis = domainMapper.userToUserRedis(user);
+        var userRedis = userDomainMapper.userToUserRedis(user);
         userRedisRepository.save(userRedis);
     }
 

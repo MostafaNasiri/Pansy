@@ -7,8 +7,8 @@ import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-@Component("userFeatureModelMapper")
-public class DomainMapper {
+@Component
+public class UserDomainMapper {
     public User userEntityToUser(@NonNull UserEntity userEntity) {
         Image avatarImage = null;
 

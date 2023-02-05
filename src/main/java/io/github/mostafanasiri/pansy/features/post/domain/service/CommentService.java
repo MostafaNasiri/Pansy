@@ -11,7 +11,7 @@ import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.CommentEntity
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.CommentJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
-import io.github.mostafanasiri.pansy.features.post.domain.DomainMapper;
+import io.github.mostafanasiri.pansy.features.post.domain.PostDomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class CommentService extends BaseService {
     @Autowired
     private NotificationService notificationService;
     @Autowired
-    private DomainMapper domainMapper;
+    private PostDomainMapper postDomainMapper;
 
     public List<Comment> getComments(int postId, int page, int size) {
         var postEntity = getPostEntity(postId);
@@ -40,7 +40,7 @@ public class CommentService extends BaseService {
         var entities = commentJpaRepository.getComments(postEntity, pageRequest);
 
         return entities.stream()
-                .map(domainMapper::commentEntityToComment)
+                .map(postDomainMapper::commentEntityToComment)
                 .toList();
     }
 
@@ -64,7 +64,7 @@ public class CommentService extends BaseService {
         );
         notificationService.addCommentNotification(commentNotification);
 
-        return domainMapper.commentEntityToComment(commentEntity);
+        return postDomainMapper.commentEntityToComment(commentEntity);
     }
 
     @Transactional

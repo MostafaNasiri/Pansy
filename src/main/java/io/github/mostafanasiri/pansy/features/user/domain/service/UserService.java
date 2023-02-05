@@ -11,7 +11,7 @@ import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.DomainMapper;
+import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,18 +37,18 @@ public class UserService extends BaseService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
-    private DomainMapper domainMapper;
+    private UserDomainMapper userDomainMapper;
 
     public User getUser(int userId) {
         var userRedis = userRedisRepository.findById(userId);
         if (userRedis.isPresent()) {
             logger.info(String.format("getUser - Fetching user %s from Redis", userId));
-            return domainMapper.userRedisToUser(userRedis.get());
+            return userDomainMapper.userRedisToUser(userRedis.get());
         }
 
         logger.info(String.format("getUser - Fetching user %s from database", userId));
         var userEntity = getUserEntity(userId);
-        var user = domainMapper.userEntityToUser(userEntity);
+        var user = userDomainMapper.userEntityToUser(userEntity);
         saveUserInRedis(user);
 
         return user;
@@ -62,7 +62,7 @@ public class UserService extends BaseService {
         var hashedPassword = passwordEncoder.encode(user.password());
         var userEntity = new UserEntity(user.fullName(), user.username(), hashedPassword);
 
-        var createdUser = domainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        var createdUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(createdUser);
 
         return createdUser;
@@ -84,7 +84,7 @@ public class UserService extends BaseService {
         authenticatedUserEntity.setFullName(user.fullName());
         authenticatedUserEntity.setBio(user.bio());
 
-        var updatedUser = domainMapper.userEntityToUser(userJpaRepository.save(authenticatedUserEntity));
+        var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(authenticatedUserEntity));
         saveUserInRedis(updatedUser);
 
         return updatedUser;
@@ -94,14 +94,14 @@ public class UserService extends BaseService {
         var user = getUserEntity(userId);
         user.setPostCount(count);
 
-        var updatedUser = domainMapper.userEntityToUser(userJpaRepository.save(user));
+        var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(user));
         saveUserInRedis(updatedUser);
     }
 
     private void saveUserInRedis(User user) {
         logger.info(String.format("Saving user %s in Redis", user.id()));
 
-        var userRedis = domainMapper.userToUserRedis(user);
+        var userRedis = userDomainMapper.userToUserRedis(user);
         userRedisRepository.save(userRedis);
     }
 

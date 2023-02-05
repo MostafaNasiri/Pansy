@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component("notificationsFeatureModelMapper")
-public class ModelMapper {
+@Component
+public class NotificationDomainMapper {
     public List<Notification> mapFromNotificationEntities(List<NotificationEntity> entities) {
         return entities.stream()
                 .map(entity -> {
