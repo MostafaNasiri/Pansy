@@ -8,7 +8,8 @@ public record PostResponse(
         UserResponse author,
         String caption,
         List<String> imageUrls,
-        int likesCount,
+        int likeCount,
+        int commentCount,
         boolean isLikedByCurrentUser,
         Date createdAt
 ) {

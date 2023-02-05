@@ -100,13 +100,13 @@ public class PostEntity extends BaseEntity {
     }
 
     public void setLikeCount(int likeCount) {
-        if (likeCount > 0) {
+        if (likeCount >= 0) {
             this.likeCount = likeCount;
         }
     }
 
     public void setCommentCount(int commentCount) {
-        if (commentCount > 0) {
+        if (commentCount >= 0) {
             this.commentCount = commentCount;
         }
     }

@@ -30,4 +30,11 @@ public interface LikeJpaRepository extends JpaRepository<LikeEntity, Integer> {
             ORDER BY l.createdAt DESC
             """)
     List<LikeEntity> getLikes(PostEntity post, Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(l.id)
+            FROM LikeEntity l
+            WHERE l.post=?1
+            """)
+    int getPostLikeCount(PostEntity post);
 }
