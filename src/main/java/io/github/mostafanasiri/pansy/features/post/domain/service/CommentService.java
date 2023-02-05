@@ -54,7 +54,7 @@ public class CommentService extends BaseService {
         var commentEntity = new CommentEntity(commentator, postEntity, comment.text());
         commentEntity = commentJpaRepository.save(commentEntity);
 
-        postService.updatePostCommentCount(postId, postEntity.getCommentCount() + 1);
+        updatePostCommentCount(postEntity);
 
         // Add new comment notification for the post's author
         var commentNotification = new CommentNotification(
@@ -73,19 +73,24 @@ public class CommentService extends BaseService {
         var commentator = getAuthenticatedUser();
         var commentEntity = getCommentEntity(commentId);
 
-        if (commentEntity.getUser() != commentator) {
+        if (commentEntity.getUser().getId() != commentator.getId()) {
             throw new AuthorizationException("Comment does not belong to the authenticated user");
         }
 
         var postEntity = getPostEntity(postId);
 
-        if (commentEntity.getPost() != postEntity) {
+        if (commentEntity.getPost().getId() != postEntity.getId()) {
             throw new InvalidInputException("Comment does not belong to this post");
         }
 
         commentJpaRepository.delete(commentEntity);
-        postService.updatePostCommentCount(postId, postEntity.getCommentCount() - 1);
+        updatePostCommentCount(postEntity);
         notificationService.deleteCommentNotification(commentEntity.getId());
+    }
+
+    private void updatePostCommentCount(PostEntity postEntity) {
+        int commentCount = commentJpaRepository.getPostCommentCount(postEntity);
+        postService.updatePostCommentCount(postEntity.getId(), commentCount);
     }
 
     private CommentEntity getCommentEntity(int commentId) {

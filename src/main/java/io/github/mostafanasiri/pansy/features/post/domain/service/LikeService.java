@@ -58,7 +58,7 @@ public class LikeService extends BaseService {
             var like = new LikeEntity(userEntity, postEntity);
             likeJpaRepository.save(like);
 
-            updatePostLikeCount(postId, postEntity);
+            updatePostLikeCount(postEntity);
 
             var notification = new LikeNotification(
                     new NotificationUser(getAuthenticatedUserId()),
@@ -82,15 +82,15 @@ public class LikeService extends BaseService {
             likeJpaRepository.delete(like.get());
 
             var postEntity = getPostEntity(postId);
-            updatePostLikeCount(postId, postEntity);
+            updatePostLikeCount(postEntity);
 
             notificationService.deleteLikeNotification(userId, postId);
         }
     }
 
-    private void updatePostLikeCount(int postId, PostEntity postEntity) {
+    private void updatePostLikeCount(PostEntity postEntity) {
         var likeCount = likeJpaRepository.getPostLikeCount(postEntity);
-        postService.updatePostLikeCount(postId, likeCount);
+        postService.updatePostLikeCount(postEntity.getId(), likeCount);
     }
 
     private PostEntity getPostEntity(int postId) {

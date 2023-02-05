@@ -20,4 +20,11 @@ public interface CommentJpaRepository extends JpaRepository<CommentEntity, Integ
             ORDER BY c.createdAt DESC
             """)
     List<CommentEntity> getComments(PostEntity post, Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(c.id)
+            FROM CommentEntity c
+            WHERE c.post=?1
+            """)
+    int getPostCommentCount(PostEntity post);
 }
