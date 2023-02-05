@@ -50,7 +50,7 @@ public class NotificationService extends BaseService {
                 .toList();
         notificationRepository.markNotificationsAsRead(notificationIds);
 
-        return notificationDomainMapper.mapFromNotificationEntities(result);
+        return notificationDomainMapper.notificationEntitiesToNotifications(result);
     }
 
     public int getUnreadNotificationsCount() {

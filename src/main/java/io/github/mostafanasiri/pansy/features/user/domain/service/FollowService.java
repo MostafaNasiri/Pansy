@@ -6,7 +6,6 @@ import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
-import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
@@ -90,10 +89,7 @@ public class FollowService extends BaseService {
     }
 
     private void createFollowNotification(int sourceUserId, int targetUserId) {
-        var notification = new FollowNotification(
-                new NotificationUser(sourceUserId),
-                new NotificationUser(targetUserId)
-        );
+        var notification = new FollowNotification(new User(sourceUserId), new User(targetUserId));
         notificationService.addFollowNotification(notification);
     }
 

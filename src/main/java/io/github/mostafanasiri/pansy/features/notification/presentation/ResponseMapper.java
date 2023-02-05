@@ -24,8 +24,8 @@ public class ResponseMapper {
                     var id = n.getId();
                     var notifierUserId = n.getNotifierUser().id();
                     var notifierUsername = n.getNotifierUser().username();
-                    var notifierUserAvatarUrl = n.getNotifierUser().avatarName() != null ?
-                            fileUtils.createFileUrl(n.getNotifierUser().avatarName()) : null;
+                    var notifierUserAvatarUrl = n.getNotifierUser().avatar().name() != null ?
+                            fileUtils.createFileUrl(n.getNotifierUser().avatar().name()) : null;
 
                     NotificationType type = null;
                     NotificationData data = null;

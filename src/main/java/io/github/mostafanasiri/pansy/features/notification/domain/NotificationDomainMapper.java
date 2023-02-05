@@ -4,18 +4,25 @@ import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNo
 import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.NotificationEntity;
-import io.github.mostafanasiri.pansy.features.notification.domain.model.*;
-import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.Notification;
+import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class NotificationDomainMapper {
-    public List<Notification> mapFromNotificationEntities(List<NotificationEntity> entities) {
+    @Autowired
+    private UserDomainMapper userDomainMapper;
+
+    public List<Notification> notificationEntitiesToNotifications(List<NotificationEntity> entities) {
         return entities.stream()
                 .map(entity -> {
-                    var notifierUser = mapFromUserEntity(entity.getNotifierUser());
+                    var notifierUser = userDomainMapper.userEntityToUser(entity.getNotifierUser());
 
                     Notification notification = null;
 
@@ -50,15 +57,5 @@ public class NotificationDomainMapper {
                     return notification;
                 })
                 .toList();
-    }
-
-    private NotificationUser mapFromUserEntity(UserEntity entity) {
-        var avatarName = entity.getAvatar() != null ? entity.getAvatar().getName() : null;
-
-        return new NotificationUser(
-                entity.getId(),
-                entity.getUsername(),
-                avatarName
-        );
     }
 }

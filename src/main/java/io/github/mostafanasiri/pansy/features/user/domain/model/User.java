@@ -13,6 +13,10 @@ public record User(
         Integer followerCount,
         Integer followingCount
 ) implements Serializable {
+    public User(int id) {
+        this(id, null, null, null, null, null, null, null, null);
+    }
+
     public User(String fullName, String username, String password) {
         this(null, fullName, username, password, null, null, null, null, null);
     }

@@ -6,7 +6,6 @@ import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
-import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.CommentEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.CommentJpaRepository;
@@ -14,6 +13,7 @@ import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRe
 import io.github.mostafanasiri.pansy.features.post.domain.PostDomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
@@ -58,8 +58,8 @@ public class CommentService extends BaseService {
 
         // Add new comment notification for the post's author
         var commentNotification = new CommentNotification(
-                new NotificationUser(commentator.getId()),
-                new NotificationUser(postEntity.getUser().getId()),
+                new User(commentator.getId()),
+                new User(postEntity.getUser().getId()),
                 commentEntity.getId(),
                 postId
         );

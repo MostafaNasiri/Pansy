@@ -1,17 +1,18 @@
 package io.github.mostafanasiri.pansy.features.notification.domain.model;
 
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import lombok.Getter;
 
 @Getter
 public final class CommentNotification extends Notification {
-    private int commentId;
-    private int postId;
+    private final int commentId;
+    private final int postId;
     private String postThumbnailName;
 
     public CommentNotification(
             int id,
-            NotificationUser notifierUser,
-            NotificationUser notifiedUser,
+            User notifierUser,
+            User notifiedUser,
             int commentId,
             int postId,
             String postThumbnailName
@@ -23,8 +24,8 @@ public final class CommentNotification extends Notification {
     }
 
     public CommentNotification(
-            NotificationUser notifierUser,
-            NotificationUser notifiedUser,
+            User notifierUser,
+            User notifiedUser,
             int commentId,
             int postId
     ) {

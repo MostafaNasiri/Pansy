@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features.notification.domain.model;
 
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import lombok.Getter;
 
 @Getter
@@ -9,8 +10,8 @@ public final class LikeNotification extends Notification {
 
     public LikeNotification(
             int id,
-            NotificationUser notifierUser,
-            NotificationUser notifiedUser,
+            User notifierUser,
+            User notifiedUser,
             int postId,
             String postThumbnailName
     ) {
@@ -20,8 +21,8 @@ public final class LikeNotification extends Notification {
     }
 
     public LikeNotification(
-            NotificationUser notifierUser,
-            NotificationUser notifiedUser,
+            User notifierUser,
+            User notifiedUser,
             int postId
     ) {
         super(notifierUser, notifiedUser);

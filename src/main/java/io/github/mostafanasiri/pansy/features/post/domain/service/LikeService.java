@@ -5,7 +5,6 @@ import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
-import io.github.mostafanasiri.pansy.features.notification.domain.model.NotificationUser;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.LikeEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.LikeJpaRepository;
@@ -61,8 +60,8 @@ public class LikeService extends BaseService {
             updatePostLikeCount(postEntity);
 
             var notification = new LikeNotification(
-                    new NotificationUser(getAuthenticatedUserId()),
-                    new NotificationUser(postEntity.getUser().getId()),
+                    new User(getAuthenticatedUserId()),
+                    new User(postEntity.getUser().getId()),
                     postId
             );
             notificationService.addLikeNotification(notification);
