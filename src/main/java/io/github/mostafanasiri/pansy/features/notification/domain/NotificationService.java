@@ -17,9 +17,8 @@ import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.CommentJp
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.model.User;
+import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,8 @@ import java.util.List;
 
 @Service
 public class NotificationService extends BaseService {
+    @Autowired
+    private UserService userService;
     @Autowired
     private NotificationRepository notificationRepository;
     @Autowired
@@ -58,15 +59,15 @@ public class NotificationService extends BaseService {
     }
 
     public void addCommentNotification(CommentNotification notification) {
-        var notifierUser = getUserEntity(notification.getNotifierUser().id());
-        var notifiedUser = getUserEntity(notification.getNotifiedUser().id());
+        var notifierUser = userService.getUser(notification.getNotifierUser().id());
+        var notifiedUser = userService.getUser(notification.getNotifiedUser().id());
 
         var post = getPostEntity(notification.getPostId());
         var comment = getCommentEntity(notification.getCommentId());
 
         var notificationEntity = new CommentNotificationEntity(
-                notifierUser,
-                notifiedUser,
+                userJpaRepository.getReferenceById(notifierUser.id()),
+                userJpaRepository.getReferenceById(notifiedUser.id()),
                 post,
                 comment
         );
@@ -79,14 +80,14 @@ public class NotificationService extends BaseService {
     }
 
     public void addLikeNotification(LikeNotification notification) {
-        var notifierUser = getUserEntity(notification.getNotifierUser().id());
-        var notifiedUser = getUserEntity(notification.getNotifiedUser().id());
+        var notifierUser = userService.getUser(notification.getNotifierUser().id());
+        var notifiedUser = userService.getUser(notification.getNotifiedUser().id());
 
         var post = getPostEntity(notification.getPostId());
 
         var notificationEntity = new LikeNotificationEntity(
-                notifierUser,
-                notifiedUser,
+                userJpaRepository.getReferenceById(notifierUser.id()),
+                userJpaRepository.getReferenceById(notifiedUser.id()),
                 post
         );
         notificationRepository.save(notificationEntity);
@@ -98,10 +99,13 @@ public class NotificationService extends BaseService {
     }
 
     public void addFollowNotification(FollowNotification notification) {
-        var notifierUser = getUserEntity(notification.getNotifierUser().id());
-        var notifiedUser = getUserEntity(notification.getNotifiedUser().id());
+        var notifierUser = userService.getUser(notification.getNotifierUser().id());
+        var notifiedUser = userService.getUser(notification.getNotifiedUser().id());
 
-        var notificationEntity = new FollowNotificationEntity(notifierUser, notifiedUser);
+        var notificationEntity = new FollowNotificationEntity(
+                userJpaRepository.getReferenceById(notifierUser.id()),
+                userJpaRepository.getReferenceById(notifiedUser.id())
+        );
         notificationRepository.save(notificationEntity);
     }
 
@@ -113,11 +117,6 @@ public class NotificationService extends BaseService {
     private PostEntity getPostEntity(int postId) {
         return postJpaRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException(Post.class, postId));
-    }
-
-    private UserEntity getUserEntity(int userId) {
-        return userJpaRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
     }
 
     private CommentEntity getCommentEntity(int commentId) {

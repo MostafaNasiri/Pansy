@@ -121,16 +121,16 @@ public class FollowService extends BaseService {
     private void updateFollowingCount(UserEntity userEntity) {
         var count = followerJpaRepository.getFollowingCount(userEntity);
         userEntity.setFollowingCount(count);
-
         var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+
         saveUserInRedis(user);
     }
 
     private void updateFollowerCount(UserEntity userEntity) {
         var count = followerJpaRepository.getFollowerCount(userEntity);
         userEntity.setFollowerCount(count);
-
         var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+
         saveUserInRedis(user);
     }
 
