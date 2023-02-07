@@ -1,6 +1,7 @@
 package io.github.mostafanasiri.pansy.features.user.data.entity.jpa;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
+import io.github.mostafanasiri.pansy.features.feed.data.entity.FeedEntity;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -40,6 +41,10 @@ public class UserEntity extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "file_id")
     )
     private FileEntity avatar;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "feed_id")
+    private FeedEntity feed;
 
     @Column(name = "post_count", nullable = false)
     private int postCount = 0;
