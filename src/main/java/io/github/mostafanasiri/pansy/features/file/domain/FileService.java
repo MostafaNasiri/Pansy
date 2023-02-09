@@ -4,7 +4,7 @@ import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InternalErrorException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
-import io.github.mostafanasiri.pansy.features.file.data.FileRepository;
+import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -23,7 +23,7 @@ import java.util.Set;
 @Service
 public class FileService {
     @Autowired
-    private FileRepository repository;
+    private FileJpaRepository repository;
 
     private final String[] allowedFileExtensions = new String[]{
             "jpg",

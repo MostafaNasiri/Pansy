@@ -5,7 +5,7 @@ import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
-import io.github.mostafanasiri.pansy.features.file.data.FileRepository;
+import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.File;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
@@ -31,7 +31,7 @@ public class UserService extends BaseService {
     @Autowired
     private UserRedisRepository userRedisRepository;
     @Autowired
-    private FileRepository fileRepository;
+    private FileJpaRepository fileJpaRepository;
     @Autowired
     private FileService fileService;
     @Autowired
@@ -111,7 +111,7 @@ public class UserService extends BaseService {
     }
 
     private FileEntity getFileEntity(int fileId) {
-        return fileRepository.findById(fileId)
+        return fileJpaRepository.findById(fileId)
                 .orElseThrow(() -> new EntityNotFoundException(File.class, fileId));
     }
 }

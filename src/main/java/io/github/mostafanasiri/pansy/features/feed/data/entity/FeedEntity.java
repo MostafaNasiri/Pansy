@@ -1,27 +1,34 @@
 package io.github.mostafanasiri.pansy.features.feed.data.entity;
 
+import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @Entity
 @Table(name = "feeds")
-public class FeedEntity {
-    @Id
-    @Column(name = "id", updatable = false, nullable = false)
-    private int id;
-
+@EntityListeners(AuditingEntityListener.class)
+public class FeedEntity extends BaseEntity {
     @OneToOne(mappedBy = "feed")
     private UserEntity user;
 
     @Type(JsonType.class)
-    @Column(columnDefinition = "jsonb")
-    private List<FeedItem> items;
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private List<FeedItem> items = new ArrayList<>();
+
+    public record FeedItem(
+            int userId,
+            int postId,
+            long createdAt
+    ) {
+    }
 }

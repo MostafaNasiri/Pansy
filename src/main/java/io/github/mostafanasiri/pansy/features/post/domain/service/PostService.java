@@ -4,7 +4,7 @@ import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
-import io.github.mostafanasiri.pansy.features.file.data.FileRepository;
+import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.redis.PostRedis;
@@ -45,7 +45,7 @@ public class PostService extends BaseService {
     @Autowired
     private LikeJpaRepository likeJpaRepository;
     @Autowired
-    private FileRepository fileRepository;
+    private FileJpaRepository fileJpaRepository;
     @Autowired
     private UserService userService;
     @Autowired
@@ -125,7 +125,7 @@ public class PostService extends BaseService {
         checkImagesForCreatePost(imageFileIds);
 
         // Create post
-        var imageFileEntities = imageFileIds.stream().map(id -> fileRepository.getReferenceById(id)).toList();
+        var imageFileEntities = imageFileIds.stream().map(id -> fileJpaRepository.getReferenceById(id)).toList();
         var postEntity = new PostEntity(authenticatedUserEntity, input.caption(), imageFileEntities);
         postEntity = postJpaRepository.save(postEntity);
 
@@ -171,7 +171,7 @@ public class PostService extends BaseService {
         checkImagesForUpdatePost(postEntity, imageFileIds);
 
         // Update post
-        var imageFileEntities = imageFileIds.stream().map(id -> fileRepository.getReferenceById(id)).toList();
+        var imageFileEntities = imageFileIds.stream().map(id -> fileJpaRepository.getReferenceById(id)).toList();
         postEntity.setCaption(input.caption());
         postEntity.setImages(imageFileEntities);
 

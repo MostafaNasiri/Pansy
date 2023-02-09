@@ -3,7 +3,7 @@ package io.github.mostafanasiri.pansy.features.notification.domain;
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
-import io.github.mostafanasiri.pansy.features.notification.data.NotificationRepository;
+import io.github.mostafanasiri.pansy.features.notification.data.NotificationJpaRepository;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
@@ -31,7 +31,7 @@ public class NotificationService extends BaseService {
     @Autowired
     private UserService userService;
     @Autowired
-    private NotificationRepository notificationRepository;
+    private NotificationJpaRepository notificationJpaRepository;
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
@@ -44,18 +44,18 @@ public class NotificationService extends BaseService {
     @Transactional
     public List<Notification> getNotifications(int page, int size) {
         var pageRequest = PageRequest.of(page, size);
-        var result = notificationRepository.getNotifications(getAuthenticatedUserId(), pageRequest);
+        var result = notificationJpaRepository.getNotifications(getAuthenticatedUserId(), pageRequest);
 
         var notificationIds = result.stream()
                 .map(BaseEntity::getId)
                 .toList();
-        notificationRepository.markNotificationsAsRead(notificationIds);
+        notificationJpaRepository.markNotificationsAsRead(notificationIds);
 
         return notificationDomainMapper.notificationEntitiesToNotifications(result);
     }
 
     public int getUnreadNotificationsCount() {
-        return notificationRepository.countByNotifiedUserIdAndIsReadIsFalse(getAuthenticatedUserId());
+        return notificationJpaRepository.countByNotifiedUserIdAndIsReadIsFalse(getAuthenticatedUserId());
     }
 
     public void addCommentNotification(CommentNotification notification) {
@@ -71,12 +71,12 @@ public class NotificationService extends BaseService {
                 post,
                 comment
         );
-        notificationRepository.save(notificationEntity);
+        notificationJpaRepository.save(notificationEntity);
     }
 
     public void deleteCommentNotification(int commentId) {
-        notificationRepository.getCommentNotification(commentId)
-                .ifPresent(entity -> notificationRepository.delete(entity));
+        notificationJpaRepository.getCommentNotification(commentId)
+                .ifPresent(entity -> notificationJpaRepository.delete(entity));
     }
 
     public void addLikeNotification(LikeNotification notification) {
@@ -90,12 +90,12 @@ public class NotificationService extends BaseService {
                 userJpaRepository.getReferenceById(notifiedUser.id()),
                 post
         );
-        notificationRepository.save(notificationEntity);
+        notificationJpaRepository.save(notificationEntity);
     }
 
     public void deleteLikeNotification(int notifierUserId, int postId) {
-        notificationRepository.getLikeNotification(notifierUserId, postId)
-                .ifPresent(entity -> notificationRepository.delete(entity));
+        notificationJpaRepository.getLikeNotification(notifierUserId, postId)
+                .ifPresent(entity -> notificationJpaRepository.delete(entity));
     }
 
     public void addFollowNotification(FollowNotification notification) {
@@ -106,12 +106,12 @@ public class NotificationService extends BaseService {
                 userJpaRepository.getReferenceById(notifierUser.id()),
                 userJpaRepository.getReferenceById(notifiedUser.id())
         );
-        notificationRepository.save(notificationEntity);
+        notificationJpaRepository.save(notificationEntity);
     }
 
     public void deleteFollowNotification(int notifierUserId, int notifiedUserId) {
-        notificationRepository.getFollowNotification(notifierUserId, notifiedUserId)
-                .ifPresent(entity -> notificationRepository.delete(entity));
+        notificationJpaRepository.getFollowNotification(notifierUserId, notifiedUserId)
+                .ifPresent(entity -> notificationJpaRepository.delete(entity));
     }
 
     private PostEntity getPostEntity(int postId) {
