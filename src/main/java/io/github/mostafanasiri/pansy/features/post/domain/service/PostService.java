@@ -228,13 +228,13 @@ public class PostService extends BaseService {
 
     @Transactional
     public void deletePost(int postId) {
-        var post = getPostEntity(postId);
+        var postEntity = getPostEntity(postId);
 
-        if (post.getUser().getId() != getAuthenticatedUserId()) {
+        if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
             throw new AuthorizationException("Post does not belong to the authenticated user");
         }
 
-        postJpaRepository.delete(post);
+        postJpaRepository.delete(postEntity);
 
         var authenticatedUserEntity = getAuthenticatedUser();
         updateUserPostCount(authenticatedUserEntity);
@@ -242,6 +242,10 @@ public class PostService extends BaseService {
         // Delete post from redis
         postRedisRepository.findById(postId)
                 .ifPresent(p -> postRedisRepository.delete(p));
+
+        feedService.removePostFromFollowersFeeds(
+                postDomainMapper.postEntityToPost(postEntity.getUser(), postEntity, false)
+        );
     }
 
     private void updateUserPostCount(UserEntity authenticatedUserEntity) {
