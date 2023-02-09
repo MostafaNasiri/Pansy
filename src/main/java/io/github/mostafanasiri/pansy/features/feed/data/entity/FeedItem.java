@@ -5,8 +5,4 @@ public record FeedItem(
         int postId,
         long createdAt
 ) {
-    @Override
-    public String toString() {
-        return String.format("%s-%s-%s", userId, postId, createdAt);
-    }
 }
