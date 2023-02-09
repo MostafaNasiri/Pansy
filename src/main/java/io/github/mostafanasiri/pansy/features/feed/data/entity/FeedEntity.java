@@ -18,12 +18,18 @@ import java.util.Deque;
 @Table(name = "feeds")
 @EntityListeners(AuditingEntityListener.class)
 public class FeedEntity extends BaseEntity {
-    @OneToOne(mappedBy = "feed")
+    @OneToOne
+    @JoinColumn(name = "id")
+    @MapsId
     private UserEntity user;
 
     @Type(JsonType.class)
     @Column(nullable = false, columnDefinition = "jsonb")
     private Deque<FeedItem> items = new ArrayDeque<>();
+
+    public FeedEntity(UserEntity user) {
+        this.user = user;
+    }
 
     public void setItems(Deque<FeedItem> items) {
         this.items = items;

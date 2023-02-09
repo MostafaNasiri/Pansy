@@ -46,7 +46,7 @@ public interface FollowerJpaRepository extends JpaRepository<FollowerEntity, Int
     int getFollowingCount(UserEntity userEntity);
 
     @Query("""
-            SELECT f.id
+            SELECT f.sourceUser.id
             FROM FollowerEntity f
             WHERE f.targetUser.id=?1
             """)

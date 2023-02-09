@@ -42,8 +42,8 @@ public class UserEntity extends BaseEntity {
     )
     private FileEntity avatar;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    @JoinColumn(name = "feed_id")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @PrimaryKeyJoinColumn
     private FeedEntity feed;
 
     @Column(name = "post_count", nullable = false)
@@ -59,7 +59,7 @@ public class UserEntity extends BaseEntity {
         this.fullName = fullName;
         this.username = username;
         this.password = password;
-        this.feed = new FeedEntity();
+        this.feed = new FeedEntity(this);
     }
 
     public void setFullName(String fullName) {

@@ -29,11 +29,11 @@ public class FeedService {
     public void addPostToFollowersFeeds(Post post) {
         // Get post author's followers
         var author = userService.getUser(post.user().id());
-        var authorFollowersIds = followerJpaRepository.getFollowersIds(author.id());
+        var authorFollowerIds = followerJpaRepository.getFollowersIds(author.id());
 
         // Add post to author's followers' feeds
-        if (!authorFollowersIds.isEmpty()) {
-            var followersFeeds = feedJpaRepository.findAllById(authorFollowersIds);
+        if (!authorFollowerIds.isEmpty()) {
+            var followersFeeds = feedJpaRepository.getUserFeeds(authorFollowerIds);
             followersFeeds.forEach(feed -> addPostToFeed(post, feed));
 
             feedJpaRepository.saveAll(followersFeeds);
@@ -57,11 +57,11 @@ public class FeedService {
     public void removePostFromFollowersFeeds(Post post) {
         // Get post author's followers
         var author = userService.getUser(post.user().id());
-        var authorFollowersIds = followerJpaRepository.getFollowersIds(author.id());
+        var authorFollowerIds = followerJpaRepository.getFollowersIds(author.id());
 
         // Remove post from author's followers' feeds
-        if (!authorFollowersIds.isEmpty()) {
-            var followersFeeds = feedJpaRepository.findAllById(authorFollowersIds);
+        if (!authorFollowerIds.isEmpty()) {
+            var followersFeeds = feedJpaRepository.findAllById(authorFollowerIds);
 
             followersFeeds.forEach(feed ->
                     feed.getItems()
