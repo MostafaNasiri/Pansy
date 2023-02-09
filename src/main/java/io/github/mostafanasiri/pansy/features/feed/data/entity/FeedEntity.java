@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 @Getter
 @NoArgsConstructor
@@ -23,7 +23,11 @@ public class FeedEntity extends BaseEntity {
 
     @Type(JsonType.class)
     @Column(nullable = false, columnDefinition = "jsonb")
-    private List<FeedItem> items = new ArrayList<>();
+    private Deque<FeedItem> items = new ArrayDeque<>();
+
+    public void setItems(Deque<FeedItem> items) {
+        this.items = items;
+    }
 
     public record FeedItem(
             int userId,

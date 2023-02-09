@@ -48,7 +48,7 @@ public interface FollowerJpaRepository extends JpaRepository<FollowerEntity, Int
     @Query("""
             SELECT f.id
             FROM FollowerEntity f
-            WHERE f.targetUser=?1
+            WHERE f.targetUser.id=?1
             """)
-    List<Integer> getFollowersIds(UserEntity user);
+    List<Integer> getFollowersIds(int userId);
 }

@@ -4,6 +4,7 @@ import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
+import io.github.mostafanasiri.pansy.features.feed.domain.FeedService;
 import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
@@ -50,6 +51,8 @@ public class PostService extends BaseService {
     private UserService userService;
     @Autowired
     private FileService fileService;
+    @Autowired
+    private FeedService feedService;
     @Autowired
     private PostDomainMapper postDomainMapper;
 
@@ -133,6 +136,8 @@ public class PostService extends BaseService {
 
         var post = postDomainMapper.postEntityToPost(authenticatedUserEntity, postEntity, false);
         savePostInRedis(post);
+
+        feedService.addPostToFollowersFeeds(post);
 
         return post;
     }
