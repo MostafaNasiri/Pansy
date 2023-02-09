@@ -33,7 +33,7 @@ public class FeedService {
 
         // Add post to author's followers' feeds
         if (!authorFollowerIds.isEmpty()) {
-            var followersFeeds = feedJpaRepository.getUserFeeds(authorFollowerIds);
+            var followersFeeds = feedJpaRepository.findAllById(authorFollowerIds);
             followersFeeds.forEach(feed -> addPostToFeed(post, feed));
 
             feedJpaRepository.saveAll(followersFeeds);
@@ -72,5 +72,16 @@ public class FeedService {
         }
     }
 
-    // TODO: removePostsFromFeed(feedOwner, targetUser)
+    @Async
+    public void removeAllPostsFromFeed(int feedOwnerUserId, int postsAuthorUserId) {
+        var feedOwner = userService.getUser(feedOwnerUserId);
+        var postsAuthor = userService.getUser(postsAuthorUserId);
+
+        var feed = feedJpaRepository.findById(feedOwner.id());
+
+        feed.ifPresent(f -> {
+            f.getItems().removeIf(item -> item.userId() == postsAuthor.id());
+            feedJpaRepository.save(f);
+        });
+    }
 }

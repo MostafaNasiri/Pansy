@@ -4,6 +4,7 @@ import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
+import io.github.mostafanasiri.pansy.features.feed.domain.FeedService;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
@@ -28,6 +29,8 @@ public class FollowService extends BaseService {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private FeedService feedService;
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
@@ -115,22 +118,23 @@ public class FollowService extends BaseService {
             updateFollowerCount(targetUser);
 
             notificationService.deleteFollowNotification(sourceUserId, targetUserId);
+            feedService.removeAllPostsFromFeed(sourceUserId, targetUserId);
         }
     }
 
     private void updateFollowingCount(UserEntity userEntity) {
         var count = followerJpaRepository.getFollowingCount(userEntity);
         userEntity.setFollowingCount(count);
-        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
 
+        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(user);
     }
 
     private void updateFollowerCount(UserEntity userEntity) {
         var count = followerJpaRepository.getFollowerCount(userEntity);
         userEntity.setFollowerCount(count);
-        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
 
+        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(user);
     }
 
