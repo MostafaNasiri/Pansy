@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface FileRepository extends JpaRepository<FileEntity, Integer> {
+public interface FileJpaRepository extends JpaRepository<FileEntity, Integer> {
     /**
      * Returns file ids that are attached to an entity from a given list of file ids. The result of this method must
      * always be checked before attaching a file to an entity.

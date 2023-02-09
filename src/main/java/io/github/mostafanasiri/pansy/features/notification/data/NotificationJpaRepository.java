@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface NotificationRepository extends JpaRepository<NotificationEntity, Integer> {
+public interface NotificationJpaRepository extends JpaRepository<NotificationEntity, Integer> {
     @Query("""
             SELECT n, nu, p, c
             FROM NotificationEntity n
