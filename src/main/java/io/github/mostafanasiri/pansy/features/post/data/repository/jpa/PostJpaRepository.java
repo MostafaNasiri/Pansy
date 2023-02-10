@@ -26,7 +26,7 @@ public interface PostJpaRepository extends JpaRepository<PostEntity, Integer> {
             SELECT p
             FROM PostEntity p
             INNER JOIN FETCH p.images
-            WHERE p.id IN (?2)
+            WHERE p.id IN (?1)
             ORDER BY p.createdAt DESC
             """)
     List<PostEntity> getPostsByIdWithoutUser(List<Integer> postIds);

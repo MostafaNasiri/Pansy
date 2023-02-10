@@ -23,11 +23,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 )
 @EntityListeners(AuditingEntityListener.class)
 public class FollowerEntity extends BaseEntity {
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_user_id", nullable = false)
     private UserEntity sourceUser;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_user_id", nullable = false)
     private UserEntity targetUser;
 }

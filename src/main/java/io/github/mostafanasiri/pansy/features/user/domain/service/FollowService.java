@@ -2,16 +2,13 @@ package io.github.mostafanasiri.pansy.features.user.domain.service;
 
 import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
-import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.post.domain.service.FeedService;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.slf4j.Logger;
@@ -34,8 +31,6 @@ public class FollowService extends BaseService {
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
-    private UserRedisRepository userRedisRepository;
-    @Autowired
     private FollowerJpaRepository followerJpaRepository;
     @Autowired
     private NotificationService notificationService;
@@ -44,10 +39,9 @@ public class FollowService extends BaseService {
 
     public List<User> getFollowers(int userId, int page, int size) {
         var user = userService.getUser(userId);
-        var userEntity = userJpaRepository.getReferenceById(user.id());
 
         var pageRequest = PageRequest.of(page, size);
-        return followerJpaRepository.getFollowers(userEntity, pageRequest)
+        return followerJpaRepository.getFollowers(user.id(), pageRequest)
                 .stream()
                 .map((f) -> userDomainMapper.userEntityToUser(f.getSourceUser()))
                 .toList();
@@ -55,10 +49,9 @@ public class FollowService extends BaseService {
 
     public List<User> getFollowing(int userId, int page, int size) {
         var user = userService.getUser(userId);
-        var userEntity = userJpaRepository.getReferenceById(user.id());
 
         var pageRequest = PageRequest.of(page, size);
-        return followerJpaRepository.getFollowing(userEntity, pageRequest)
+        return followerJpaRepository.getFollowing(user.id(), pageRequest)
                 .stream()
                 .map((f) -> userDomainMapper.userEntityToUser(f.getTargetUser()))
                 .toList();
@@ -74,18 +67,21 @@ public class FollowService extends BaseService {
             throw new InvalidInputException("A user can't follow him/herself!");
         }
 
-        var sourceUser = getUserEntity(getAuthenticatedUserId());
-        var targetUser = getUserEntity(targetUserId);
+        var sourceUser = userService.getUser(getAuthenticatedUserId());
+        var targetUser = userService.getUser(targetUserId);
 
         var sourceUserHasNotFollowedTargetUser =
-                followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser) == null;
+                followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId).isEmpty();
 
         if (sourceUserHasNotFollowedTargetUser) {
-            var follower = new FollowerEntity(sourceUser, targetUser);
+            var follower = new FollowerEntity(
+                    userJpaRepository.getReferenceById(sourceUser.id()),
+                    userJpaRepository.getReferenceById(targetUser.id())
+            );
             followerJpaRepository.save(follower);
 
-            updateFollowingCount(sourceUser);
-            updateFollowerCount(targetUser);
+            updateFollowingCount(sourceUserId);
+            updateFollowerCount(targetUserId);
 
             createFollowNotification(sourceUserId, targetUserId);
         }
@@ -106,47 +102,28 @@ public class FollowService extends BaseService {
             throw new InvalidInputException("A user can't unfollow him/herself!");
         }
 
-        var sourceUser = getUserEntity(getAuthenticatedUserId());
-        var targetUser = getUserEntity(targetUserId);
+        var sourceUser = userService.getUser(getAuthenticatedUserId());
+        var targetUser = userService.getUser(targetUserId);
 
-        var follower = followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser);
+        followerJpaRepository.findBySourceUserAndTargetUser(sourceUser.id(), targetUser.id())
+                .ifPresent(followerEntity -> {
+                    followerJpaRepository.delete(followerEntity);
 
-        if (follower != null) {
-            followerJpaRepository.delete(follower);
+                    updateFollowingCount(sourceUserId);
+                    updateFollowerCount(targetUserId);
 
-            updateFollowingCount(sourceUser);
-            updateFollowerCount(targetUser);
-
-            notificationService.deleteFollowNotification(sourceUserId, targetUserId);
-            feedService.removeAllPostsFromFeed(sourceUserId, targetUserId);
-        }
+                    notificationService.deleteFollowNotification(sourceUserId, targetUserId);
+                    feedService.removeAllPostsFromFeed(sourceUserId, targetUserId);
+                });
     }
 
-    private void updateFollowingCount(UserEntity userEntity) {
-        var count = followerJpaRepository.getFollowingCount(userEntity);
-        userEntity.setFollowingCount(count);
-
-        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
-        saveUserInRedis(user);
+    private void updateFollowingCount(int userId) {
+        var count = followerJpaRepository.getFollowingCount(userId);
+        userService.updateUserFollowingCount(userId, count);
     }
 
-    private void updateFollowerCount(UserEntity userEntity) {
-        var count = followerJpaRepository.getFollowerCount(userEntity);
-        userEntity.setFollowerCount(count);
-
-        var user = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
-        saveUserInRedis(user);
-    }
-
-    private void saveUserInRedis(User user) {
-        logger.info(String.format("Saving user %s in Redis", user.id()));
-
-        var userRedis = userDomainMapper.userToUserRedis(user);
-        userRedisRepository.save(userRedis);
-    }
-
-    private UserEntity getUserEntity(int userId) {
-        return userJpaRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+    private void updateFollowerCount(int userId) {
+        var count = followerJpaRepository.getFollowerCount(userId);
+        userService.updateUserFollowerCount(userId, count);
     }
 }

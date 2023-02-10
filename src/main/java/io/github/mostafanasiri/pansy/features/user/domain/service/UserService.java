@@ -99,6 +99,14 @@ public class UserService extends BaseService {
         saveUserInRedis(updatedUser);
     }
 
+    public void updateUserFollowerCount(int userId, int count) {
+
+    }
+
+    public void updateUserFollowingCount(int userId, int count) {
+
+    }
+
     private void saveUserInRedis(User user) {
         logger.info(String.format("Saving user %s in Redis", user.id()));
 
