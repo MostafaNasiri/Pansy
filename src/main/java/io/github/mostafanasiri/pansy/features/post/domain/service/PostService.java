@@ -16,9 +16,9 @@ import io.github.mostafanasiri.pansy.features.post.data.repository.redis.PostRed
 import io.github.mostafanasiri.pansy.features.post.domain.PostDomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
+import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +58,22 @@ public class PostService extends BaseService {
     private FeedService feedService;
     @Autowired
     private PostDomainMapper postDomainMapper;
+
+    public Post getPost(int postId) {
+        var postRedis = postRedisRepository.findById(postId);
+        if (postRedis.isPresent()) {
+            logger.info(String.format("getPost - Fetching post %s from Redis", postId));
+            return postDomainMapper.postRedisToPost(postRedis.get());
+        }
+
+        logger.info(String.format("getPost - Fetching post %s from database", postId));
+        var postEntity = getPostEntity(postId);
+        var post = postDomainMapper.postEntityToPost(postEntity, false);
+
+        savePostInRedis(post);
+
+        return post;
+    }
 
     public List<Post> getUserFeed(int userId, int page, int size) {
         if (userId != getAuthenticatedUserId()) {
@@ -124,7 +140,7 @@ public class PostService extends BaseService {
         }
 
         // Map cached posts to Post models
-        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts, likedPostIds);
+        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts); // TODO: set isLiked
 
         // Combine all posts
         var result = new ArrayList<Post>();
@@ -136,19 +152,18 @@ public class PostService extends BaseService {
 
     public List<Post> getUserPosts(int userId, int page, int size) {
         var user = userService.getUser(userId);
-        var userEntity = userJpaRepository.getReferenceById(user.id());
 
         var pageRequest = PageRequest.of(page, size);
-        var userPostIds = postJpaRepository.getUserPostIds(userEntity, pageRequest);
+        var userPostIds = postJpaRepository.getUserPostIds(user.id(), pageRequest);
 
         // Get ids of the posts that the authenticated user has liked
         var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), userPostIds);
 
-        return fetchUserPosts(userEntity, userPostIds, likedPostIds);
+        return fetchUserPosts(user, userPostIds, likedPostIds);
     }
 
     private List<Post> fetchUserPosts(
-            UserEntity userEntity,
+            User user,
             List<Integer> userPostIds,
             List<Integer> likedPostIds
     ) {
@@ -174,17 +189,17 @@ public class PostService extends BaseService {
         // Get uncached posts from the database
         List<Post> unCachedPosts = new ArrayList<>();
         if (!unCachedPostIds.isEmpty()) {
-            var unCachedPostEntities = postJpaRepository.getUserPostsById(userEntity, unCachedPostIds);
+            var unCachedPostEntities = postJpaRepository.getPostsByIdWithoutUser(unCachedPostIds);
 
             // Map uncached posts to Post models
-            unCachedPosts = postDomainMapper.postEntitiesToPosts(userEntity, unCachedPostEntities, likedPostIds);
+            unCachedPosts = postDomainMapper.postEntitiesToPosts(user, unCachedPostEntities, likedPostIds);
 
             // Save uncached posts in Redis
             unCachedPosts.forEach(this::savePostInRedis);
         }
 
         // Map cached posts to Post models
-        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts, likedPostIds);
+        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts); // TODO: set isLiked
 
         // Combine all posts
         var result = new ArrayList<Post>();
@@ -199,7 +214,7 @@ public class PostService extends BaseService {
 
     @Transactional
     public Post createPost(@NonNull Post input) {
-        var authenticatedUserEntity = getAuthenticatedUser();
+        var authenticatedUser = userService.getUser(getAuthenticatedUserId());
 
         if (input.images().isEmpty()) {
             throw new InvalidInputException("A post must have at least one image");
@@ -211,12 +226,16 @@ public class PostService extends BaseService {
 
         // Create post
         var imageFileEntities = imageFileIds.stream().map(id -> fileJpaRepository.getReferenceById(id)).toList();
-        var postEntity = new PostEntity(authenticatedUserEntity, input.caption(), imageFileEntities);
+        var postEntity = new PostEntity(
+                userJpaRepository.getReferenceById(getAuthenticatedUserId()),
+                input.caption(),
+                imageFileEntities
+        );
         postEntity = postJpaRepository.save(postEntity);
 
-        updateUserPostCount(authenticatedUserEntity);
+        updateAuthenticatedUserPostCount();
 
-        var post = postDomainMapper.postEntityToPost(authenticatedUserEntity, postEntity, false);
+        var post = postDomainMapper.postEntityToPost(authenticatedUser, postEntity, false);
         savePostInRedis(post);
 
         feedService.addPostToFollowersFeeds(post);
@@ -234,7 +253,7 @@ public class PostService extends BaseService {
         postEntity.setLikeCount(likeCount);
         postEntity = postJpaRepository.save(postEntity);
 
-        var post = postDomainMapper.postEntityToPost(postEntity.getUser(), postEntity, false);
+        var post = postDomainMapper.postEntityToPost(postEntity, false);
         savePostInRedis(post);
     }
 
@@ -243,15 +262,22 @@ public class PostService extends BaseService {
         postEntity.setCommentCount(commentCount);
         postEntity = postJpaRepository.save(postEntity);
 
-        var post = postDomainMapper.postEntityToPost(postEntity.getUser(), postEntity, false);
+        var post = postDomainMapper.postEntityToPost(postEntity, false);
         savePostInRedis(post);
     }
 
     @Transactional
     public Post updatePost(@NonNull Post input) {
+        var authenticatedUser = userService.getUser(getAuthenticatedUserId());
         var postEntity = getPostEntity(input.id());
 
-        validateUpdatePostInput(input, postEntity);
+        if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
+            throw new AuthorizationException("Post does not belong to authenticated user");
+        }
+
+        if (input.images().isEmpty()) {
+            throw new InvalidInputException("A post must have at least one image");
+        }
 
         var imageFileIds = input.images().stream().map(Image::id).toList();
 
@@ -267,7 +293,7 @@ public class PostService extends BaseService {
         ).isPresent();
 
         var post = postDomainMapper.postEntityToPost(
-                getAuthenticatedUser(),
+                authenticatedUser,
                 postJpaRepository.save(postEntity),
                 isLikedByAuthenticatedUser
         );
@@ -275,16 +301,6 @@ public class PostService extends BaseService {
         savePostInRedis(post);
 
         return post;
-    }
-
-    private void validateUpdatePostInput(Post input, PostEntity postEntity) {
-        if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
-            throw new AuthorizationException("Post does not belong to authenticated user");
-        }
-
-        if (input.images().isEmpty()) {
-            throw new InvalidInputException("A post must have at least one image");
-        }
     }
 
     private void checkImagesForUpdatePost(PostEntity postEntity, List<Integer> imageFileIds) {
@@ -312,6 +328,7 @@ public class PostService extends BaseService {
 
     @Transactional
     public void deletePost(int postId) {
+        var authenticatedUser = userService.getUser(getAuthenticatedUserId());
         var postEntity = getPostEntity(postId);
 
         if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
@@ -320,21 +337,21 @@ public class PostService extends BaseService {
 
         postJpaRepository.delete(postEntity);
 
-        var authenticatedUserEntity = getAuthenticatedUser();
-        updateUserPostCount(authenticatedUserEntity);
+        updateAuthenticatedUserPostCount();
 
         // Delete post from redis
         postRedisRepository.findById(postId)
                 .ifPresent(p -> postRedisRepository.delete(p));
 
         feedService.removePostFromFollowersFeeds(
-                postDomainMapper.postEntityToPost(postEntity.getUser(), postEntity, false)
+                postDomainMapper.postEntityToPost(authenticatedUser, postEntity, false)
         );
     }
 
-    private void updateUserPostCount(UserEntity authenticatedUserEntity) {
-        var postCount = postJpaRepository.getUserPostCount(authenticatedUserEntity);
-        userService.updateUserPostCount(authenticatedUserEntity.getId(), postCount);
+    private void updateAuthenticatedUserPostCount() {
+        var userEntity = userJpaRepository.getReferenceById(getAuthenticatedUserId());
+        var postCount = postJpaRepository.getUserPostCount(userEntity);
+        userService.updateUserPostCount(userEntity.getId(), postCount);
     }
 
     private PostEntity getPostEntity(int postId) {

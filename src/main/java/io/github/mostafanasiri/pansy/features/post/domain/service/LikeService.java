@@ -10,6 +10,7 @@ import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.LikeJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ public class LikeService extends BaseService {
     private PostService postService;
     @Autowired
     private LikeJpaRepository likeJpaRepository;
+    @Autowired
+    private UserJpaRepository userJpaRepository;
     @Autowired
     private PostJpaRepository postJpaRepository;
     @Autowired
@@ -51,7 +54,7 @@ public class LikeService extends BaseService {
         ).isPresent();
 
         if (!authenticatedUserHasAlreadyLikedThePost) {
-            var userEntity = getAuthenticatedUser();
+            var userEntity = userJpaRepository.getReferenceById(getAuthenticatedUserId());
             var postEntity = getPostEntity(postId);
 
             var like = new LikeEntity(userEntity, postEntity);

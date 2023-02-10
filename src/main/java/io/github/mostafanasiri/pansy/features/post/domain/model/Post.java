@@ -22,4 +22,16 @@ public record Post(
     public Post(Integer id, String caption, List<Image> images) {
         this(id, null, caption, images, null, null, null, null);
     }
+
+    public Post(
+            Integer id,
+            User user,
+            String caption,
+            List<Image> images,
+            Integer likeCount,
+            Integer commentCount,
+            Date createdAt
+    ) {
+        this(id, user, caption, images, likeCount, commentCount, null, createdAt);
+    }
 }

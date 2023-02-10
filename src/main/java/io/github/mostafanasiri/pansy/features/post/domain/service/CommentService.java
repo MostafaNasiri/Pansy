@@ -13,6 +13,7 @@ import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRe
 import io.github.mostafanasiri.pansy.features.post.domain.PostDomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,8 @@ public class CommentService extends BaseService {
     private PostService postService;
     @Autowired
     private CommentJpaRepository commentJpaRepository;
+    @Autowired
+    private UserJpaRepository userJpaRepository;
     @Autowired
     private PostJpaRepository postJpaRepository;
     @Autowired
@@ -48,7 +51,7 @@ public class CommentService extends BaseService {
 
     @Transactional
     public Comment addComment(int postId, @NonNull Comment comment) {
-        var commentator = getAuthenticatedUser();
+        var commentator = userJpaRepository.getReferenceById(getAuthenticatedUserId());
         var postEntity = getPostEntity(postId);
 
         var commentEntity = new CommentEntity(commentator, postEntity, comment.text());
@@ -70,7 +73,7 @@ public class CommentService extends BaseService {
 
     @Transactional
     public void deleteComment(int postId, int commentId) {
-        var commentator = getAuthenticatedUser();
+        var commentator = userJpaRepository.getReferenceById(getAuthenticatedUserId());
         var commentEntity = getCommentEntity(commentId);
 
         if (commentEntity.getUser().getId() != commentator.getId()) {
