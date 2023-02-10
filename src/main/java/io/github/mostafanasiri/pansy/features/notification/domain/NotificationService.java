@@ -12,11 +12,10 @@ import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNo
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.Notification;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.CommentEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.CommentJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
-import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
+import io.github.mostafanasiri.pansy.features.post.domain.service.PostService;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +29,8 @@ import java.util.List;
 public class NotificationService extends BaseService {
     @Autowired
     private UserService userService;
+    @Autowired
+    private PostService postService;
     @Autowired
     private NotificationJpaRepository notificationJpaRepository;
     @Autowired
@@ -62,14 +63,14 @@ public class NotificationService extends BaseService {
         var notifierUser = userService.getUser(notification.getNotifierUser().id());
         var notifiedUser = userService.getUser(notification.getNotifiedUser().id());
 
-        var post = getPostEntity(notification.getPostId());
-        var comment = getCommentEntity(notification.getCommentId());
+        var post = postService.getPost(notification.getPostId());
+        var commentEntity = getCommentEntity(notification.getCommentId());
 
         var notificationEntity = new CommentNotificationEntity(
                 userJpaRepository.getReferenceById(notifierUser.id()),
                 userJpaRepository.getReferenceById(notifiedUser.id()),
-                post,
-                comment
+                postJpaRepository.getReferenceById(post.id()),
+                commentEntity
         );
         notificationJpaRepository.save(notificationEntity);
     }
@@ -83,12 +84,12 @@ public class NotificationService extends BaseService {
         var notifierUser = userService.getUser(notification.getNotifierUser().id());
         var notifiedUser = userService.getUser(notification.getNotifiedUser().id());
 
-        var post = getPostEntity(notification.getPostId());
+        var post = postService.getPost(notification.getPostId());
 
         var notificationEntity = new LikeNotificationEntity(
                 userJpaRepository.getReferenceById(notifierUser.id()),
                 userJpaRepository.getReferenceById(notifiedUser.id()),
-                post
+                postJpaRepository.getReferenceById(post.id())
         );
         notificationJpaRepository.save(notificationEntity);
     }
@@ -112,11 +113,6 @@ public class NotificationService extends BaseService {
     public void deleteFollowNotification(int notifierUserId, int notifiedUserId) {
         notificationJpaRepository.getFollowNotification(notifierUserId, notifiedUserId)
                 .ifPresent(entity -> notificationJpaRepository.delete(entity));
-    }
-
-    private PostEntity getPostEntity(int postId) {
-        return postJpaRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException(Post.class, postId));
     }
 
     private CommentEntity getCommentEntity(int commentId) {

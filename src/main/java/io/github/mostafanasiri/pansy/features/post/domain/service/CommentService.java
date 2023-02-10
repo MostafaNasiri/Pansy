@@ -36,6 +36,8 @@ public class CommentService extends BaseService {
     @Autowired
     private PostDomainMapper postDomainMapper;
 
+    // TODO: add getComment(id)
+
     public List<Comment> getComments(int postId, int page, int size) {
         var post = postService.getPost(postId);
 
