@@ -1,7 +1,6 @@
 package io.github.mostafanasiri.pansy.features.post.data.repository.jpa;
 
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.LikeEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,15 +25,15 @@ public interface LikeJpaRepository extends JpaRepository<LikeEntity, Integer> {
             FROM LikeEntity l
             INNER JOIN FETCH l.user lu
             LEFT JOIN FETCH lu.avatar
-            WHERE l.post=?1
+            WHERE l.post.id=?1
             ORDER BY l.createdAt DESC
             """)
-    List<LikeEntity> getLikes(PostEntity post, Pageable pageable);
+    List<LikeEntity> getLikes(int postId, Pageable pageable);
 
     @Query("""
             SELECT COUNT(l.id)
             FROM LikeEntity l
-            WHERE l.post=?1
+            WHERE l.post.id=?1
             """)
-    int getPostLikeCount(PostEntity post);
+    int getPostLikeCount(int postId);
 }

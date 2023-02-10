@@ -2,14 +2,11 @@ package io.github.mostafanasiri.pansy.features.post.domain.service;
 
 import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
-import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.LikeEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.LikeJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
-import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
@@ -36,10 +33,10 @@ public class LikeService extends BaseService {
     private UserDomainMapper userDomainMapper;
 
     public List<User> getLikes(int postId, int page, int size) {
-        var post = getPostEntity(postId);
+        var post = postService.getPost(postId);
 
         var pageRequest = PageRequest.of(page, size);
-        var likes = likeJpaRepository.getLikes(post, pageRequest);
+        var likes = likeJpaRepository.getLikes(post.id(), pageRequest);
 
         return likes.stream()
                 .map(like -> userDomainMapper.userEntityToUser(like.getUser()))
@@ -55,16 +52,16 @@ public class LikeService extends BaseService {
 
         if (!authenticatedUserHasAlreadyLikedThePost) {
             var userEntity = userJpaRepository.getReferenceById(getAuthenticatedUserId());
-            var postEntity = getPostEntity(postId);
+            var post = postService.getPost(postId);
 
-            var like = new LikeEntity(userEntity, postEntity);
+            var like = new LikeEntity(userEntity, postJpaRepository.getReferenceById(post.id()));
             likeJpaRepository.save(like);
 
-            updatePostLikeCount(postEntity);
+            updatePostLikeCount(post.id());
 
             var notification = new LikeNotification(
                     new User(getAuthenticatedUserId()),
-                    new User(postEntity.getUser().getId()),
+                    new User(post.user().id()),
                     postId
             );
             notificationService.addLikeNotification(notification);
@@ -77,26 +74,20 @@ public class LikeService extends BaseService {
             throw new AuthorizationException("Forbidden action");
         }
 
-        var like = likeJpaRepository.findByUserIdAndPostId(userId, postId);
+        var post = postService.getPost(postId);
+
+        var like = likeJpaRepository.findByUserIdAndPostId(userId, post.id());
         var userHasLikedThePost = like.isPresent();
 
         if (userHasLikedThePost) {
             likeJpaRepository.delete(like.get());
-
-            var postEntity = getPostEntity(postId);
-            updatePostLikeCount(postEntity);
-
+            updatePostLikeCount(post.id());
             notificationService.deleteLikeNotification(userId, postId);
         }
     }
 
-    private void updatePostLikeCount(PostEntity postEntity) {
-        var likeCount = likeJpaRepository.getPostLikeCount(postEntity);
-        postService.updatePostLikeCount(postEntity.getId(), likeCount);
-    }
-
-    private PostEntity getPostEntity(int postId) {
-        return postJpaRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException(Post.class, postId));
+    private void updatePostLikeCount(int postId) {
+        var likeCount = likeJpaRepository.getPostLikeCount(postId);
+        postService.updatePostLikeCount(postId, likeCount);
     }
 }
