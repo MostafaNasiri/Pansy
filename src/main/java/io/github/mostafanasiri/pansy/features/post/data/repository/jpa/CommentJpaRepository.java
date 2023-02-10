@@ -1,7 +1,6 @@
 package io.github.mostafanasiri.pansy.features.post.data.repository.jpa;
 
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.CommentEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,15 +15,15 @@ public interface CommentJpaRepository extends JpaRepository<CommentEntity, Integ
             FROM CommentEntity c
             INNER JOIN FETCH c.user cu
             LEFT JOIN FETCH cu.avatar
-            WHERE c.post=?1
+            WHERE c.post.id=?1
             ORDER BY c.createdAt DESC
             """)
-    List<CommentEntity> getComments(PostEntity post, Pageable pageable);
+    List<CommentEntity> getComments(int postId, Pageable pageable);
 
     @Query("""
             SELECT COUNT(c.id)
             FROM CommentEntity c
-            WHERE c.post=?1
+            WHERE c.post.id=?1
             """)
-    int getPostCommentCount(PostEntity post);
+    int getPostCommentCount(int postId);
 }

@@ -7,12 +7,10 @@ import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.CommentEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.CommentJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.domain.PostDomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
-import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +37,10 @@ public class CommentService extends BaseService {
     private PostDomainMapper postDomainMapper;
 
     public List<Comment> getComments(int postId, int page, int size) {
-        var postEntity = getPostEntity(postId);
+        var post = postService.getPost(postId);
 
         var pageRequest = PageRequest.of(page, size);
-        var entities = commentJpaRepository.getComments(postEntity, pageRequest);
+        var entities = commentJpaRepository.getComments(post.id(), pageRequest);
 
         return entities.stream()
                 .map(postDomainMapper::commentEntityToComment)
@@ -52,17 +50,21 @@ public class CommentService extends BaseService {
     @Transactional
     public Comment addComment(int postId, @NonNull Comment comment) {
         var commentator = userJpaRepository.getReferenceById(getAuthenticatedUserId());
-        var postEntity = getPostEntity(postId);
+        var post = postService.getPost(postId);
 
-        var commentEntity = new CommentEntity(commentator, postEntity, comment.text());
+        var commentEntity = new CommentEntity(
+                commentator,
+                postJpaRepository.getReferenceById(post.id()),
+                comment.text()
+        );
         commentEntity = commentJpaRepository.save(commentEntity);
 
-        updatePostCommentCount(postEntity);
+        updatePostCommentCount(post.id());
 
         // Add new comment notification for the post's author
         var commentNotification = new CommentNotification(
                 new User(commentator.getId()),
-                new User(postEntity.getUser().getId()),
+                new User(post.user().id()),
                 commentEntity.getId(),
                 postId
         );
@@ -80,29 +82,24 @@ public class CommentService extends BaseService {
             throw new AuthorizationException("Comment does not belong to the authenticated user");
         }
 
-        var postEntity = getPostEntity(postId);
+        var post = postService.getPost(postId);
 
-        if (commentEntity.getPost().getId() != postEntity.getId()) {
+        if (commentEntity.getPost().getId() != post.id()) {
             throw new InvalidInputException("Comment does not belong to this post");
         }
 
         commentJpaRepository.delete(commentEntity);
-        updatePostCommentCount(postEntity);
+        updatePostCommentCount(post.id());
         notificationService.deleteCommentNotification(commentEntity.getId());
     }
 
-    private void updatePostCommentCount(PostEntity postEntity) {
-        int commentCount = commentJpaRepository.getPostCommentCount(postEntity);
-        postService.updatePostCommentCount(postEntity.getId(), commentCount);
+    private void updatePostCommentCount(int postId) {
+        int commentCount = commentJpaRepository.getPostCommentCount(postId);
+        postService.updatePostCommentCount(postId, commentCount);
     }
 
     private CommentEntity getCommentEntity(int commentId) {
         return commentJpaRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException(Comment.class, commentId));
-    }
-
-    private PostEntity getPostEntity(int postId) {
-        return postJpaRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException(Post.class, postId));
     }
 }
