@@ -14,11 +14,22 @@ public interface PostJpaRepository extends JpaRepository<PostEntity, Integer> {
     @Query("""
             SELECT p
             FROM PostEntity p
+            INNER JOIN FETCH p.user
+            INNER JOIN FETCH p.images
+            WHERE p.id IN (?1)
+            ORDER BY p.createdAt DESC
+            """)
+    List<PostEntity> getPostsById(List<Integer> postIds);
+
+
+    @Query("""
+            SELECT p
+            FROM PostEntity p
             INNER JOIN FETCH p.images
             WHERE p.user=?1 AND p.id IN (?2)
             ORDER BY p.createdAt DESC
             """)
-    List<PostEntity> getUserPosts(UserEntity user, List<Integer> postIds);
+    List<PostEntity> getUserPostsById(UserEntity user, List<Integer> postIds);
 
     @Query("""
             SELECT p.id

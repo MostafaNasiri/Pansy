@@ -44,7 +44,24 @@ public class PostController {
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
         var posts = postService.getUserPosts(userId, page, size);
-        var result = posts.stream().map(mapper::mapFromPostModel).toList();
+        var result = posts.stream()
+                .map(mapper::mapFromPostModel)
+                .toList();
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{user_id}/feed")
+    @Operation(summary = "Returns a list of recent posts that are posted by the specified user's followers")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getFeed(
+            @PathVariable(name = "user_id") int userId,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+            @RequestParam(defaultValue = "30") @Max(50) int size
+    ) {
+        var posts = postService.getUserFeed(userId, page, size);
+        var result = posts.stream()
+                .map(mapper::mapFromPostModel)
+                .toList();
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }

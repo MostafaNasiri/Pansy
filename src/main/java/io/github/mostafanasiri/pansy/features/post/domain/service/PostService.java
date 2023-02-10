@@ -4,11 +4,12 @@ import io.github.mostafanasiri.pansy.common.BaseService;
 import io.github.mostafanasiri.pansy.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
-import io.github.mostafanasiri.pansy.features.feed.domain.FeedService;
 import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.redis.PostRedis;
+import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.FeedJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.LikeJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.features.post.data.repository.redis.PostRedisRepository;
@@ -48,6 +49,8 @@ public class PostService extends BaseService {
     @Autowired
     private FileJpaRepository fileJpaRepository;
     @Autowired
+    private FeedJpaRepository feedJpaRepository;
+    @Autowired
     private UserService userService;
     @Autowired
     private FileService fileService;
@@ -55,6 +58,81 @@ public class PostService extends BaseService {
     private FeedService feedService;
     @Autowired
     private PostDomainMapper postDomainMapper;
+
+    public List<Post> getUserFeed(int userId, int page, int size) {
+        if (userId != getAuthenticatedUserId()) {
+            throw new AuthorizationException("Forbidden action");
+        }
+
+        var feed = feedJpaRepository.findById(userId);
+
+        List<Post> result = new ArrayList<>();
+
+        if (feed.isPresent()) {
+            var pageRequest = PageRequest.of(page, size);
+
+            var postIds = feed.get()
+                    .getItems()
+                    .stream()
+                    .map(FeedEntity.FeedItem::postId)
+                    .skip(pageRequest.getOffset())
+                    .limit(size)
+                    .toList();
+
+            result = fetchPostsById(postIds);
+
+            // Order posts by creation date (descending)
+            result.sort((p1, p2) -> ((-1) * p1.createdAt().compareTo(p2.createdAt())));
+        }
+
+        return result;
+    }
+
+    private List<Post> fetchPostsById(List<Integer> postIds) {
+        var redisPosts = new ArrayList<PostRedis>();
+        var unCachedPostIds = new ArrayList<Integer>();
+
+        // Find cached and uncached posts
+        postIds.forEach(id -> {
+            var postRedis = postRedisRepository.findById(id);
+
+            if (postRedis.isPresent()) {
+                logger.info(String.format("fetchPostsById - Fetched post %s from Redis", id));
+                redisPosts.add(postRedis.get());
+            } else {
+                logger.info(String.format(
+                        "fetchPostsById - Post %s doesn't exist in Redis. Must fetch it from the database",
+                        id
+                ));
+                unCachedPostIds.add(id);
+            }
+        });
+
+        // Get ids of the posts that the authenticated user has liked
+        var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), postIds);
+
+        // Get uncached posts from the database
+        List<Post> unCachedPosts = new ArrayList<>();
+        if (!unCachedPostIds.isEmpty()) {
+            var unCachedPostEntities = postJpaRepository.getPostsById(unCachedPostIds);
+
+            // Map uncached posts to Post models
+            unCachedPosts = postDomainMapper.postEntitiesToPosts(unCachedPostEntities, likedPostIds);
+
+            // Save uncached posts in Redis
+            unCachedPosts.forEach(this::savePostInRedis);
+        }
+
+        // Map cached posts to Post models
+        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts, likedPostIds);
+
+        // Combine all posts
+        var result = new ArrayList<Post>();
+        result.addAll(unCachedPosts);
+        result.addAll(cachedPosts);
+
+        return result;
+    }
 
     public List<Post> getUserPosts(int userId, int page, int size) {
         var user = userService.getUser(userId);
@@ -66,11 +144,15 @@ public class PostService extends BaseService {
         // Get ids of the posts that the authenticated user has liked
         var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), userPostIds);
 
-        return fetchPosts(userEntity, userPostIds, likedPostIds);
+        return fetchUserPosts(userEntity, userPostIds, likedPostIds);
     }
 
-    private List<Post> fetchPosts(UserEntity userEntity, List<Integer> userPostIds, List<Integer> likedPostIds) {
-        var postsRedis = new ArrayList<PostRedis>();
+    private List<Post> fetchUserPosts(
+            UserEntity userEntity,
+            List<Integer> userPostIds,
+            List<Integer> likedPostIds
+    ) {
+        var redisPosts = new ArrayList<PostRedis>();
         var unCachedPostIds = new ArrayList<Integer>();
 
         // Find cached and uncached posts
@@ -78,11 +160,11 @@ public class PostService extends BaseService {
             var postRedis = postRedisRepository.findById(id);
 
             if (postRedis.isPresent()) {
-                logger.info(String.format("getUserPosts - Fetched post %s from Redis", id));
-                postsRedis.add(postRedis.get());
+                logger.info(String.format("fetchUserPosts - Fetched post %s from Redis", id));
+                redisPosts.add(postRedis.get());
             } else {
                 logger.info(String.format(
-                        "getUserPosts - User %s doesn't exist in Redis. Must fetch it from the database",
+                        "fetchUserPosts - Post %s doesn't exist in Redis. Must fetch it from the database",
                         id
                 ));
                 unCachedPostIds.add(id);
@@ -92,16 +174,17 @@ public class PostService extends BaseService {
         // Get uncached posts from the database
         List<Post> unCachedPosts = new ArrayList<>();
         if (!unCachedPostIds.isEmpty()) {
-            var unCachedPostEntities = postJpaRepository.getUserPosts(userEntity, unCachedPostIds);
+            var unCachedPostEntities = postJpaRepository.getUserPostsById(userEntity, unCachedPostIds);
 
-            // Map cached and uncached posts to Post models
+            // Map uncached posts to Post models
             unCachedPosts = postDomainMapper.postEntitiesToPosts(userEntity, unCachedPostEntities, likedPostIds);
 
             // Save uncached posts in Redis
             unCachedPosts.forEach(this::savePostInRedis);
         }
 
-        var cachedPosts = postDomainMapper.postsRedisToPosts(postsRedis, likedPostIds);
+        // Map cached posts to Post models
+        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts, likedPostIds);
 
         // Combine all posts
         var result = new ArrayList<Post>();
@@ -113,7 +196,6 @@ public class PostService extends BaseService {
 
         return result;
     }
-
 
     @Transactional
     public Post createPost(@NonNull Post input) {
@@ -219,6 +301,8 @@ public class PostService extends BaseService {
     private void savePostInRedis(Post post) {
         logger.info(String.format("Saving post %s in Redis", post.id()));
 
+        // We can't save a post in Redis if the post's author does not exist in Redis.
+        // TODO: So one way might be to first get the author from UserService to make sure that it will be saved in Redis if it isn't saved yet
         userRedisRepository.findById(post.user().id())
                 .ifPresent(userRedis -> {
                     var postRedis = postDomainMapper.postToPostRedis(userRedis, post);

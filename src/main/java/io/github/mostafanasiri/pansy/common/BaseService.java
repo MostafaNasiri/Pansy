@@ -5,7 +5,7 @@ import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class BaseService {
-    protected UserEntity getAuthenticatedUser() {
+    protected UserEntity getAuthenticatedUser() { // TODO: Remove this method
         return ((AppUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                 .getUser();
     }

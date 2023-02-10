@@ -1,7 +1,9 @@
-package io.github.mostafanasiri.pansy.features.feed.domain;
+package io.github.mostafanasiri.pansy.features.post.domain.service;
 
-import io.github.mostafanasiri.pansy.features.feed.data.FeedJpaRepository;
-import io.github.mostafanasiri.pansy.features.feed.data.entity.FeedEntity;
+import io.github.mostafanasiri.pansy.common.BaseService;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
+import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.FeedJpaRepository;
+import io.github.mostafanasiri.pansy.features.post.domain.PostDomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
@@ -13,7 +15,7 @@ import java.util.ArrayDeque;
 import java.util.stream.Collectors;
 
 @Service
-public class FeedService {
+public class FeedService extends BaseService {
     private final static int MAX_FEED_SIZE = 10_000;
 
     @Autowired
@@ -23,7 +25,7 @@ public class FeedService {
     @Autowired
     private FollowerJpaRepository followerJpaRepository;
     @Autowired
-    private FeedDomainMapper feedDomainMapper;
+    private PostDomainMapper postDomainMapper;
 
     @Async
     public void addPostToFollowersFeeds(Post post) {
@@ -43,7 +45,7 @@ public class FeedService {
     private void addPostToFeed(Post post, FeedEntity feed) {
         var feedItems = feed.getItems();
 
-        feedItems.addFirst(feedDomainMapper.postToFeedItem(post));
+        feedItems.addFirst(postDomainMapper.postToFeedItem(post));
 
         // Make sure that the feed doesn't grow larger than MAX_FEED_SIZE
         feedItems = feedItems.stream()

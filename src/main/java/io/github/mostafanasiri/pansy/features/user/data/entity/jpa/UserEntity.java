@@ -1,8 +1,8 @@
 package io.github.mostafanasiri.pansy.features.user.data.entity.jpa;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
-import io.github.mostafanasiri.pansy.features.feed.data.entity.FeedEntity;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

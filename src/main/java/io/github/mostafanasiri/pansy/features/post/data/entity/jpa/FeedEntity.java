@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.feed.data.entity;
+package io.github.mostafanasiri.pansy.features.post.data.entity.jpa;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
@@ -35,10 +35,6 @@ public class FeedEntity extends BaseEntity {
         this.items = items;
     }
 
-    public record FeedItem(
-            int userId,
-            int postId,
-            long createdAt
-    ) {
+    public record FeedItem(int userId, int postId) {
     }
 }

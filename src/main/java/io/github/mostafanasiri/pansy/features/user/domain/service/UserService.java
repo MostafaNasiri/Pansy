@@ -49,6 +49,7 @@ public class UserService extends BaseService {
         logger.info(String.format("getUser - Fetching user %s from database", userId));
         var userEntity = getUserEntity(userId);
         var user = userDomainMapper.userEntityToUser(userEntity);
+
         saveUserInRedis(user);
 
         return user;
@@ -61,8 +62,8 @@ public class UserService extends BaseService {
 
         var hashedPassword = passwordEncoder.encode(user.password());
         var userEntity = new UserEntity(user.fullName(), user.username(), hashedPassword);
-
         var createdUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+
         saveUserInRedis(createdUser);
 
         return createdUser;
