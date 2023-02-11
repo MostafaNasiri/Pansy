@@ -9,6 +9,7 @@ import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.File;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.features.user.data.entity.redis.UserRedis;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
@@ -20,6 +21,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,6 +40,97 @@ public class UserService extends BaseService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserDomainMapper userDomainMapper;
+
+    public List<User> getUsers(List<Integer> userIds) {
+        var cachedUsers = getCachedUsers(userIds);
+        var cachedUserIds = cachedUsers.stream()
+                .map(User::id)
+                .toList();
+
+        var unCachedUsers = getUnCachedUsers(userIds, cachedUserIds);
+        if (!unCachedUsers.isEmpty()) {
+            saveUsersInRedis(unCachedUsers);
+        }
+
+        var result = new ArrayList<User>();
+        result.addAll(unCachedUsers);
+        result.addAll(cachedUsers);
+
+        return result;
+    }
+
+    private List<User> getCachedUsers(List<Integer> userIds) {
+        var cachedUsers = new ArrayList<UserRedis>();
+
+        userRedisRepository.findAllById(userIds)
+                .forEach(userRedis -> {
+                    logger.info(String.format("getCachedUsers - Fetched user %s from Redis", userRedis.getId()));
+                    cachedUsers.add(userRedis);
+                });
+
+        return userDomainMapper.usersRedisToUsers(cachedUsers);
+    }
+
+    private List<User> getUnCachedUsers(List<Integer> userIds, List<Integer> cachedUserIds) {
+        var unCachedUserIds = new ArrayList<>(userIds);
+        unCachedUserIds.removeAll(cachedUserIds);
+
+        List<User> unCachedUsers = new ArrayList<>();
+
+        if (!unCachedUserIds.isEmpty()) {
+            logger.info(String.format("getUnCachedUsers - Fetching users %s from database", unCachedUserIds));
+
+            var unCachedUserEntities = userJpaRepository.findAllById(unCachedUserIds);
+
+            // Map uncached users to User models
+            unCachedUsers = userDomainMapper.userEntitiesToUsers(unCachedUserEntities);
+        }
+
+        return unCachedUsers;
+    }
+
+//    public List<User> getUsers(List<Integer> userIds) {
+//        var redisUsers = new ArrayList<UserRedis>();
+//        var unCachedUserIds = new ArrayList<Integer>();
+//
+//        // Find cached and uncached users
+//        userIds.forEach(id -> {
+//            var userRedis = userRedisRepository.findById(id);
+//
+//            if (userRedis.isPresent()) {
+//                logger.info(String.format("getUsers - Fetched user %s from Redis", id));
+//                redisUsers.add(userRedis.get());
+//            } else {
+//                logger.info(String.format(
+//                        "getUsers - User %s doesn't exist in Redis. Must fetch it from the database",
+//                        id
+//                ));
+//                unCachedUserIds.add(id);
+//            }
+//        });
+//
+//        // Get uncached users from the database
+//        List<User> unCachedUsers = new ArrayList<>();
+//        if (!unCachedUserIds.isEmpty()) {
+//            var unCachedUserEntities = userJpaRepository.findAllById(unCachedUserIds);
+//
+//            // Map uncached users to User models
+//            unCachedUsers = userDomainMapper.userEntitiesToUsers(unCachedUserEntities);
+//
+//            // Save uncached users in Redis
+//            unCachedUsers.forEach(this::saveUserInRedis);
+//        }
+//
+//        // Map cached users to User models
+//        var cachedUsers = userDomainMapper.usersRedisToUsers(redisUsers);
+//
+//        // Combine all users
+//        var result = new ArrayList<User>();
+//        result.addAll(unCachedUsers);
+//        result.addAll(cachedUsers);
+//
+//        return result;
+//    }
 
     public User getUser(int userId) {
         var userRedis = userRedisRepository.findById(userId);
@@ -100,11 +193,18 @@ public class UserService extends BaseService {
     }
 
     public void updateUserFollowerCount(int userId, int count) {
-
+        // TODO: implement
     }
 
     public void updateUserFollowingCount(int userId, int count) {
+        // TODO: implement
+    }
 
+    private void saveUsersInRedis(List<User> users) {
+        logger.info(String.format("Saving users %s in Redis", users.stream().map(User::id).toList()));
+
+        var usersRedis = userDomainMapper.usersToUsersRedis(users);
+        userRedisRepository.saveAll(usersRedis);
     }
 
     private void saveUserInRedis(User user) {
