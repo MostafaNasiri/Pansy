@@ -121,7 +121,7 @@ public class PostController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var users = likeService.getLikes(postId, page, size);
+        var users = likeService.getPostLikers(postId, page, size);
 
         var result = users.stream()
                 .map(mapper::mapFromUserModel)

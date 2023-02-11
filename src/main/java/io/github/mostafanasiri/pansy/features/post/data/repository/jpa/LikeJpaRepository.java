@@ -21,14 +21,11 @@ public interface LikeJpaRepository extends JpaRepository<LikeEntity, Integer> {
     List<Integer> getLikedPostIds(int user, List<Integer> postIds);
 
     @Query("""
-            SELECT l
+            SELECT l.user.id
             FROM LikeEntity l
-            INNER JOIN FETCH l.user lu
-            LEFT JOIN FETCH lu.avatar
             WHERE l.post.id=?1
-            ORDER BY l.createdAt DESC
             """)
-    List<LikeEntity> getLikes(int postId, Pageable pageable);
+    List<Integer> getLikerUserIds(int postId, Pageable pageable);
 
     @Query("""
             SELECT COUNT(l.id)
