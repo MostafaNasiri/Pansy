@@ -98,7 +98,7 @@ public class PostService extends BaseService {
             result = fetchPosts(postIds);
 
             // Order posts by creation date (descending)
-            result.sort((p1, p2) -> ((-1) * p1.createdAt().compareTo(p2.createdAt())));
+            result.sort((p1, p2) -> ((-1) * p1.getCreatedAt().compareTo(p2.getCreatedAt())));
         }
 
         return result;
@@ -207,7 +207,7 @@ public class PostService extends BaseService {
         result.addAll(cachedPosts);
 
         // Order posts by creation date (descending)
-        result.sort((p1, p2) -> ((-1) * p1.createdAt().compareTo(p2.createdAt())));
+        result.sort((p1, p2) -> ((-1) * p1.getCreatedAt().compareTo(p2.getCreatedAt())));
 
         return result;
     }
@@ -216,11 +216,11 @@ public class PostService extends BaseService {
     public @NonNull Post createPost(@NonNull Post input) {
         var authenticatedUser = userService.getUser(getAuthenticatedUserId());
 
-        if (input.images().isEmpty()) {
+        if (input.getImages().isEmpty()) {
             throw new InvalidInputException("A post must have at least one image");
         }
 
-        var imageFileIds = input.images().stream().map(Image::id).toList();
+        var imageFileIds = input.getImages().stream().map(Image::id).toList();
 
         checkImagesForCreatePost(imageFileIds);
 
@@ -228,7 +228,7 @@ public class PostService extends BaseService {
         var imageFileEntities = imageFileIds.stream().map(id -> fileJpaRepository.getReferenceById(id)).toList();
         var postEntity = new PostEntity(
                 userJpaRepository.getReferenceById(getAuthenticatedUserId()),
-                input.caption(),
+                input.getCaption(),
                 imageFileEntities
         );
         postEntity = postJpaRepository.save(postEntity);
@@ -269,23 +269,23 @@ public class PostService extends BaseService {
     @Transactional
     public @NonNull Post updatePost(@NonNull Post input) {
         var authenticatedUser = userService.getUser(getAuthenticatedUserId());
-        var postEntity = getPostEntity(input.id());
+        var postEntity = getPostEntity(input.getId());
 
         if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
             throw new AuthorizationException("Post does not belong to authenticated user");
         }
 
-        if (input.images().isEmpty()) {
+        if (input.getImages().isEmpty()) {
             throw new InvalidInputException("A post must have at least one image");
         }
 
-        var imageFileIds = input.images().stream().map(Image::id).toList();
+        var imageFileIds = input.getImages().stream().map(Image::id).toList();
 
         checkImagesForUpdatePost(postEntity, imageFileIds);
 
         // Update post
         var imageFileEntities = imageFileIds.stream().map(id -> fileJpaRepository.getReferenceById(id)).toList();
-        postEntity.setCaption(input.caption());
+        postEntity.setCaption(input.getCaption());
         postEntity.setImages(imageFileEntities);
 
         var isLikedByAuthenticatedUser = likeJpaRepository.findByUserIdAndPostId(
@@ -315,11 +315,11 @@ public class PostService extends BaseService {
     }
 
     private void savePostInRedis(Post post) {
-        logger.info(String.format("Saving post %s in Redis", post.id()));
+        logger.info(String.format("Saving post %s in Redis", post.getId()));
 
         // We can't save a post in Redis if the post's author does not exist in Redis.
         // TODO: So one way might be to first get the author from UserService to make sure that it will be saved in Redis if it isn't saved yet
-        userRedisRepository.findById(post.user().id())
+        userRedisRepository.findById(post.getUser().id())
                 .ifPresent(userRedis -> {
                     var postRedis = postDomainMapper.postToPostRedis(userRedis, post);
                     postRedisRepository.save(postRedis);
@@ -330,11 +330,11 @@ public class PostService extends BaseService {
     public void deletePost(int postId) {
         var post = getPost(postId);
 
-        if (post.user().id() != getAuthenticatedUserId()) {
+        if (post.getUser().id() != getAuthenticatedUserId()) {
             throw new AuthorizationException("Post does not belong to the authenticated user");
         }
 
-        postJpaRepository.delete(postJpaRepository.getReferenceById(post.id()));
+        postJpaRepository.delete(postJpaRepository.getReferenceById(post.getId()));
 
         updateAuthenticatedUserPostCount();
 

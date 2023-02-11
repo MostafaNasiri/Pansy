@@ -37,7 +37,7 @@ public class LikeService extends BaseService {
         var post = postService.getPost(postId);
 
         var pageRequest = PageRequest.of(page, size);
-        var likerUserIds = likeJpaRepository.getLikerUserIds(post.id(), pageRequest);
+        var likerUserIds = likeJpaRepository.getLikerUserIds(post.getId(), pageRequest);
 
         return userService.getUsers(likerUserIds);
     }
@@ -53,14 +53,14 @@ public class LikeService extends BaseService {
             var userEntity = userJpaRepository.getReferenceById(getAuthenticatedUserId());
             var post = postService.getPost(postId);
 
-            var like = new LikeEntity(userEntity, postJpaRepository.getReferenceById(post.id()));
+            var like = new LikeEntity(userEntity, postJpaRepository.getReferenceById(post.getId()));
             likeJpaRepository.save(like);
 
-            updatePostLikeCount(post.id());
+            updatePostLikeCount(post.getId());
 
             var notification = new LikeNotification(
                     new User(getAuthenticatedUserId()),
-                    new User(post.user().id()),
+                    new User(post.getUser().id()),
                     postId
             );
             notificationService.addLikeNotification(notification);
@@ -75,12 +75,12 @@ public class LikeService extends BaseService {
 
         var post = postService.getPost(postId);
 
-        var like = likeJpaRepository.findByUserIdAndPostId(userId, post.id());
+        var like = likeJpaRepository.findByUserIdAndPostId(userId, post.getId());
         var userHasLikedThePost = like.isPresent();
 
         if (userHasLikedThePost) {
             likeJpaRepository.delete(like.get());
-            updatePostLikeCount(post.id());
+            updatePostLikeCount(post.getId());
             notificationService.deleteLikeNotification(userId, postId);
         }
     }

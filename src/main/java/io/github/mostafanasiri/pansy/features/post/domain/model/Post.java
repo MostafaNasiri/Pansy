@@ -1,26 +1,31 @@
 package io.github.mostafanasiri.pansy.features.post.domain.model;
 
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
+import lombok.Getter;
 
 import java.util.Date;
 import java.util.List;
 
-public record Post(
-        Integer id,
-        User user,
-        String caption,
-        List<Image> images,
-        Integer likeCount,
-        Integer commentCount,
-        Boolean isLikedByAuthenticatedUser,
-        Date createdAt
-) {
+@Getter
+public class Post {
+    private Integer id;
+    private User user;
+    private String caption;
+    private List<Image> images;
+    private Integer likeCount;
+    private Integer commentCount;
+    private Date createdAt;
+    private Boolean isLikedByAuthenticatedUser;
+
     public Post(String caption, List<Image> images) {
-        this(null, null, caption, images, null, null, null, null);
+        this.caption = caption;
+        this.images = images;
     }
 
     public Post(Integer id, String caption, List<Image> images) {
-        this(id, null, caption, images, null, null, null, null);
+        this.id = id;
+        this.caption = caption;
+        this.images = images;
     }
 
     public Post(
@@ -32,6 +37,16 @@ public record Post(
             Integer commentCount,
             Date createdAt
     ) {
-        this(id, user, caption, images, likeCount, commentCount, null, createdAt);
+        this.id = id;
+        this.user = user;
+        this.caption = caption;
+        this.images = images;
+        this.likeCount = likeCount;
+        this.commentCount = commentCount;
+        this.createdAt = createdAt;
+    }
+
+    public void setLikedByAuthenticatedUser(boolean likedByAuthenticatedUser) {
+        isLikedByAuthenticatedUser = likedByAuthenticatedUser;
     }
 }

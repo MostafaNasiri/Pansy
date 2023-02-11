@@ -42,7 +42,7 @@ public class CommentService extends BaseService {
         var post = postService.getPost(postId);
 
         var pageRequest = PageRequest.of(page, size);
-        var entities = commentJpaRepository.getComments(post.id(), pageRequest);
+        var entities = commentJpaRepository.getComments(post.getId(), pageRequest);
 
         return entities.stream()
                 .map(postDomainMapper::commentEntityToComment)
@@ -56,17 +56,17 @@ public class CommentService extends BaseService {
 
         var commentEntity = new CommentEntity(
                 commentator,
-                postJpaRepository.getReferenceById(post.id()),
+                postJpaRepository.getReferenceById(post.getId()),
                 comment.text()
         );
         commentEntity = commentJpaRepository.save(commentEntity);
 
-        updatePostCommentCount(post.id());
+        updatePostCommentCount(post.getId());
 
         // Add new comment notification for the post's author
         var commentNotification = new CommentNotification(
                 new User(commentator.getId()),
-                new User(post.user().id()),
+                new User(post.getUser().id()),
                 commentEntity.getId(),
                 postId
         );
@@ -86,12 +86,12 @@ public class CommentService extends BaseService {
 
         var post = postService.getPost(postId);
 
-        if (commentEntity.getPost().getId() != post.id()) {
+        if (commentEntity.getPost().getId() != post.getId()) {
             throw new InvalidInputException("Comment does not belong to this post");
         }
 
         commentJpaRepository.delete(commentEntity);
-        updatePostCommentCount(post.id());
+        updatePostCommentCount(post.getId());
         notificationService.deleteCommentNotification(commentEntity.getId());
     }
 

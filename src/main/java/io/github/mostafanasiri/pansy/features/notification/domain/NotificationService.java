@@ -70,7 +70,7 @@ public class NotificationService extends BaseService {
         var notificationEntity = new CommentNotificationEntity(
                 userJpaRepository.getReferenceById(notifierUser.id()),
                 userJpaRepository.getReferenceById(notifiedUser.id()),
-                postJpaRepository.getReferenceById(post.id()),
+                postJpaRepository.getReferenceById(post.getId()),
                 commentEntity
         );
         notificationJpaRepository.save(notificationEntity);
@@ -90,7 +90,7 @@ public class NotificationService extends BaseService {
         var notificationEntity = new LikeNotificationEntity(
                 userJpaRepository.getReferenceById(notifierUser.id()),
                 userJpaRepository.getReferenceById(notifiedUser.id()),
-                postJpaRepository.getReferenceById(post.id())
+                postJpaRepository.getReferenceById(post.getId())
         );
         notificationJpaRepository.save(notificationEntity);
     }

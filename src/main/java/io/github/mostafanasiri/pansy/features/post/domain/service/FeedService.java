@@ -31,7 +31,7 @@ public class FeedService extends BaseService {
     @Async
     public void addPostToFollowersFeeds(@NonNull Post post) {
         // Get post author's followers
-        var author = userService.getUser(post.user().id());
+        var author = userService.getUser(post.getUser().id());
         var authorFollowerIds = followerJpaRepository.getFollowersIds(author.id());
 
         // Add post to author's followers' feeds
@@ -59,7 +59,7 @@ public class FeedService extends BaseService {
     @Async
     public void removePostFromFollowersFeeds(@NonNull Post post) {
         // Get post author's followers
-        var author = userService.getUser(post.user().id());
+        var author = userService.getUser(post.getUser().id());
         var authorFollowerIds = followerJpaRepository.getFollowersIds(author.id());
 
         // Remove post from author's followers' feeds
@@ -68,7 +68,7 @@ public class FeedService extends BaseService {
 
             followersFeeds.forEach(feed ->
                     feed.getItems()
-                            .removeIf(item -> item.postId() == post.id())
+                            .removeIf(item -> item.postId() == post.getId())
             );
 
             feedJpaRepository.saveAll(followersFeeds);

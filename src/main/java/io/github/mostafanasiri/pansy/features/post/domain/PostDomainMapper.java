@@ -47,7 +47,6 @@ public class PostDomainMapper {
                 images,
                 entity.getLikeCount(),
                 entity.getCommentCount(),
-                isLiked,
                 entity.getCreatedAt()
         );
     }
@@ -77,7 +76,6 @@ public class PostDomainMapper {
                 images,
                 entity.getLikeCount(),
                 entity.getCommentCount(),
-                isLiked,
                 entity.getCreatedAt()
         );
     }
@@ -107,21 +105,21 @@ public class PostDomainMapper {
     }
 
     public PostRedis postToPostRedis(UserRedis userRedis, Post post) {
-        var imageUrls = post.images().stream().map(Image::name).toList();
+        var imageUrls = post.getImages().stream().map(Image::name).toList();
 
         return new PostRedis(
-                post.id(),
+                post.getId(),
                 userRedis,
-                post.caption(),
+                post.getCaption(),
                 imageUrls,
-                post.likeCount(),
-                post.commentCount(),
-                post.createdAt()
+                post.getLikeCount(),
+                post.getCommentCount(),
+                post.getCreatedAt()
         );
     }
 
     public FeedEntity.FeedItem postToFeedItem(Post post) {
-        return new FeedEntity.FeedItem(post.user().id(), post.id());
+        return new FeedEntity.FeedItem(post.getUser().id(), post.getId());
     }
 
     public Comment commentEntityToComment(CommentEntity entity) {

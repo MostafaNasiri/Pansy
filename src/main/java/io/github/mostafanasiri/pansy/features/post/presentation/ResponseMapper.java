@@ -17,22 +17,22 @@ public class ResponseMapper {
     private FileUtils fileUtils;
 
     public PostResponse mapFromPostModel(@NonNull Post post) {
-        var userResponse = mapFromUserModel(post.user());
+        var userResponse = mapFromUserModel(post.getUser());
 
-        var imageUrls = post.images()
+        var imageUrls = post.getImages()
                 .stream()
                 .map((i) -> fileUtils.createFileUrl(i.name()))
                 .toList();
 
         return new PostResponse(
-                post.id(),
+                post.getId(),
                 userResponse,
-                post.caption(),
+                post.getCaption(),
                 imageUrls,
-                post.likeCount() != null ? post.likeCount() : 0,
-                post.commentCount() != null ? post.commentCount() : 0,
-                post.isLikedByAuthenticatedUser() != null ? post.isLikedByAuthenticatedUser() : false,
-                post.createdAt()
+                post.getLikeCount() != null ? post.getLikeCount() : 0,
+                post.getCommentCount() != null ? post.getCommentCount() : 0,
+                post.getIsLikedByAuthenticatedUser() != null ? post.getIsLikedByAuthenticatedUser() : false,
+                post.getCreatedAt()
         );
     }
 
