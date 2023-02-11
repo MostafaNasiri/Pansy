@@ -95,7 +95,7 @@ public class PostService extends BaseService {
                     .limit(size)
                     .toList();
 
-            result = fetchPostsById(postIds);
+            result = fetchPosts(postIds);
 
             // Order posts by creation date (descending)
             result.sort((p1, p2) -> ((-1) * p1.createdAt().compareTo(p2.createdAt())));
@@ -104,7 +104,7 @@ public class PostService extends BaseService {
         return result;
     }
 
-    private List<Post> fetchPostsById(List<Integer> postIds) {
+    private List<Post> fetchPosts(List<Integer> postIds) {
         var redisPosts = new ArrayList<PostRedis>();
         var unCachedPostIds = new ArrayList<Integer>();
 
@@ -328,14 +328,13 @@ public class PostService extends BaseService {
 
     @Transactional
     public void deletePost(int postId) {
-        var authenticatedUser = userService.getUser(getAuthenticatedUserId());
-        var postEntity = getPostEntity(postId);
+        var post = getPost(postId);
 
-        if (postEntity.getUser().getId() != getAuthenticatedUserId()) {
+        if (post.user().id() != getAuthenticatedUserId()) {
             throw new AuthorizationException("Post does not belong to the authenticated user");
         }
 
-        postJpaRepository.delete(postEntity);
+        postJpaRepository.delete(postJpaRepository.getReferenceById(post.id()));
 
         updateAuthenticatedUserPostCount();
 
@@ -343,9 +342,7 @@ public class PostService extends BaseService {
         postRedisRepository.findById(postId)
                 .ifPresent(p -> postRedisRepository.delete(p));
 
-        feedService.removePostFromFollowersFeeds(
-                postDomainMapper.postEntityToPost(authenticatedUser, postEntity, false)
-        );
+        feedService.removePostFromFollowersFeeds(post);
     }
 
     private void updateAuthenticatedUserPostCount() {

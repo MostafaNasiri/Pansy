@@ -7,8 +7,16 @@ import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class UserDomainMapper {
+    public List<User> userEntitiesToUsers(List<UserEntity> userEntities) {
+        return userEntities.stream()
+                .map(this::userEntityToUser)
+                .toList();
+    }
+
     public User userEntityToUser(@NonNull UserEntity userEntity) {
         Image avatarImage = null;
 
@@ -30,6 +38,12 @@ public class UserDomainMapper {
         );
     }
 
+    public List<User> usersRedisToUsers(List<UserRedis> usersRedis) {
+        return usersRedis.stream()
+                .map(this::userRedisToUser)
+                .toList();
+    }
+
     public User userRedisToUser(@NonNull UserRedis userRedis) {
         return new User(
                 userRedis.getId(),
@@ -42,6 +56,12 @@ public class UserDomainMapper {
                 userRedis.getFollowerCount(),
                 userRedis.getFollowingCount()
         );
+    }
+
+    public List<UserRedis> usersToUsersRedis(List<User> users) {
+        return users.stream()
+                .map(this::userToUserRedis)
+                .toList();
     }
 
     public UserRedis userToUserRedis(@NonNull User user) {

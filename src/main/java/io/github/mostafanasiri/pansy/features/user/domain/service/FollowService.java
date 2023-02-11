@@ -9,7 +9,6 @@ import io.github.mostafanasiri.pansy.features.post.domain.service.FeedService;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,27 +33,23 @@ public class FollowService extends BaseService {
     private FollowerJpaRepository followerJpaRepository;
     @Autowired
     private NotificationService notificationService;
-    @Autowired
-    private UserDomainMapper userDomainMapper;
 
     public List<User> getFollowers(int userId, int page, int size) {
         var user = userService.getUser(userId);
 
         var pageRequest = PageRequest.of(page, size);
-        return followerJpaRepository.getFollowers(user.id(), pageRequest)
-                .stream()
-                .map((f) -> userDomainMapper.userEntityToUser(f.getSourceUser()))
-                .toList();
+        var followerIds = followerJpaRepository.getFollowerIds(user.id(), pageRequest);
+
+        return userService.getUsers(followerIds);
     }
 
     public List<User> getFollowing(int userId, int page, int size) {
         var user = userService.getUser(userId);
 
         var pageRequest = PageRequest.of(page, size);
-        return followerJpaRepository.getFollowing(user.id(), pageRequest)
-                .stream()
-                .map((f) -> userDomainMapper.userEntityToUser(f.getTargetUser()))
-                .toList();
+        var followingIds = followerJpaRepository.getFollowingIds(user.id(), pageRequest);
+
+        return userService.getUsers(followingIds);
     }
 
     @Transactional
