@@ -8,6 +8,7 @@ import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class FeedService extends BaseService {
     private PostDomainMapper postDomainMapper;
 
     @Async
-    public void addPostToFollowersFeeds(Post post) {
+    public void addPostToFollowersFeeds(@NonNull Post post) {
         // Get post author's followers
         var author = userService.getUser(post.user().id());
         var authorFollowerIds = followerJpaRepository.getFollowersIds(author.id());
@@ -56,7 +57,7 @@ public class FeedService extends BaseService {
     }
 
     @Async
-    public void removePostFromFollowersFeeds(Post post) {
+    public void removePostFromFollowersFeeds(@NonNull Post post) {
         // Get post author's followers
         var author = userService.getUser(post.user().id());
         var authorFollowerIds = followerJpaRepository.getFollowersIds(author.id());

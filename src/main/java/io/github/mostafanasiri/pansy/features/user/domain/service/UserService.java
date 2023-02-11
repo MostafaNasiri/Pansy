@@ -45,7 +45,7 @@ public class UserService extends BaseService {
     @Autowired
     private UserDomainMapper userDomainMapper;
 
-    public @NonNull List<User> getUsers(List<Integer> userIds) {
+    public @NonNull List<User> getUsers(@NonNull List<Integer> userIds) {
         var cachedUsers = getCachedUsers(userIds);
         var cachedUserIds = cachedUsers.stream()
                 .map(User::id)

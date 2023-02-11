@@ -60,7 +60,7 @@ public class NotificationService extends BaseService {
         return notificationJpaRepository.countByNotifiedUserIdAndIsReadIsFalse(getAuthenticatedUserId());
     }
 
-    public void addCommentNotification(CommentNotification notification) {
+    public void addCommentNotification(@NonNull CommentNotification notification) {
         var notifierUser = userService.getUser(notification.getNotifierUser().id());
         var notifiedUser = userService.getUser(notification.getNotifiedUser().id());
 
@@ -81,7 +81,7 @@ public class NotificationService extends BaseService {
                 .ifPresent(entity -> notificationJpaRepository.delete(entity));
     }
 
-    public void addLikeNotification(LikeNotification notification) {
+    public void addLikeNotification(@NonNull LikeNotification notification) {
         var notifierUser = userService.getUser(notification.getNotifierUser().id());
         var notifiedUser = userService.getUser(notification.getNotifiedUser().id());
 
@@ -100,7 +100,7 @@ public class NotificationService extends BaseService {
                 .ifPresent(entity -> notificationJpaRepository.delete(entity));
     }
 
-    public void addFollowNotification(FollowNotification notification) {
+    public void addFollowNotification(@NonNull FollowNotification notification) {
         var notifierUser = userService.getUser(notification.getNotifierUser().id());
         var notifiedUser = userService.getUser(notification.getNotifiedUser().id());
 

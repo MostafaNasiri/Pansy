@@ -121,7 +121,7 @@ public class FileService {
     /**
      * @throws InvalidInputException if at least one of the given file ids is already attached to an entity.
      */
-    public void checkIfFilesAreAlreadyAttachedToAnEntity(List<Integer> fileIds) {
+    public void checkIfFilesAreAlreadyAttachedToAnEntity(@NonNull List<Integer> fileIds) {
         var result = repository.getFileIdsThatAreAttachedToAnEntity(fileIds);
 
         if (!result.isEmpty()) {
