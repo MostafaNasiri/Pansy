@@ -2,7 +2,6 @@ package io.github.mostafanasiri.pansy.features.user.data.entity.jpa;
 
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -42,10 +41,6 @@ public class UserEntity extends BaseEntity {
     )
     private FileEntity avatar;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    @PrimaryKeyJoinColumn
-    private FeedEntity feed;
-
     @Column(name = "post_count", nullable = false)
     private int postCount = 0;
 
@@ -59,7 +54,6 @@ public class UserEntity extends BaseEntity {
         this.fullName = fullName;
         this.username = username;
         this.password = password;
-        this.feed = new FeedEntity(this);
     }
 
     public void setFullName(String fullName) {

@@ -8,6 +8,8 @@ import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.File;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
+import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.FeedJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.redis.UserRedis;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
@@ -32,6 +34,8 @@ public class UserService extends BaseService {
     private UserJpaRepository userJpaRepository;
     @Autowired
     private UserRedisRepository userRedisRepository;
+    @Autowired
+    private FeedJpaRepository feedJpaRepository;
     @Autowired
     private FileJpaRepository fileJpaRepository;
     @Autowired
@@ -155,8 +159,11 @@ public class UserService extends BaseService {
 
         var hashedPassword = passwordEncoder.encode(user.password());
         var userEntity = new UserEntity(user.fullName(), user.username(), hashedPassword);
-        var createdUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
 
+        var feedEntity = new FeedEntity(userEntity);
+        feedJpaRepository.save(feedEntity);
+
+        var createdUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(createdUser);
 
         return createdUser;

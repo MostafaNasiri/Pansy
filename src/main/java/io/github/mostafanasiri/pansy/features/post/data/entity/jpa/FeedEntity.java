@@ -18,7 +18,7 @@ import java.util.Deque;
 @Table(name = "feeds")
 @EntityListeners(AuditingEntityListener.class)
 public class FeedEntity extends BaseEntity {
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     @MapsId
     private UserEntity user;
