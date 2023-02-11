@@ -38,7 +38,7 @@ public class CommentService extends BaseService {
 
     // TODO: add getComment(id)
 
-    public List<Comment> getComments(int postId, int page, int size) {
+    public @NonNull List<Comment> getComments(int postId, int page, int size) {
         var post = postService.getPost(postId);
 
         var pageRequest = PageRequest.of(page, size);
@@ -50,7 +50,7 @@ public class CommentService extends BaseService {
     }
 
     @Transactional
-    public Comment addComment(int postId, @NonNull Comment comment) {
+    public @NonNull Comment addComment(int postId, @NonNull Comment comment) {
         var commentator = userJpaRepository.getReferenceById(getAuthenticatedUserId());
         var post = postService.getPost(postId);
 

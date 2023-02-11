@@ -52,7 +52,7 @@ public class FileService {
         );
     }
 
-    public List<File> save(@NonNull MultipartFile[] files) {
+    public @NonNull List<File> save(@NonNull MultipartFile[] files) {
         var fileEntities = Arrays.stream(files)
                 .map(f -> {
                     String fileExtension = StringUtils.getFilenameExtension(f.getOriginalFilename());

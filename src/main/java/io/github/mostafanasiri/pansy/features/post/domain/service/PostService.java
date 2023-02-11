@@ -59,7 +59,7 @@ public class PostService extends BaseService {
     @Autowired
     private PostDomainMapper postDomainMapper;
 
-    public Post getPost(int postId) {
+    public @NonNull Post getPost(int postId) {
         var postRedis = postRedisRepository.findById(postId);
         if (postRedis.isPresent()) {
             logger.info(String.format("getPost - Fetching post %s from Redis", postId));
@@ -75,7 +75,7 @@ public class PostService extends BaseService {
         return post;
     }
 
-    public List<Post> getUserFeed(int userId, int page, int size) {
+    public @NonNull List<Post> getUserFeed(int userId, int page, int size) {
         if (userId != getAuthenticatedUserId()) {
             throw new AuthorizationException("Forbidden action");
         }
@@ -150,7 +150,7 @@ public class PostService extends BaseService {
         return result;
     }
 
-    public List<Post> getUserPosts(int userId, int page, int size) {
+    public @NonNull List<Post> getUserPosts(int userId, int page, int size) {
         var user = userService.getUser(userId);
 
         var pageRequest = PageRequest.of(page, size);
@@ -213,7 +213,7 @@ public class PostService extends BaseService {
     }
 
     @Transactional
-    public Post createPost(@NonNull Post input) {
+    public @NonNull Post createPost(@NonNull Post input) {
         var authenticatedUser = userService.getUser(getAuthenticatedUserId());
 
         if (input.images().isEmpty()) {
@@ -267,7 +267,7 @@ public class PostService extends BaseService {
     }
 
     @Transactional
-    public Post updatePost(@NonNull Post input) {
+    public @NonNull Post updatePost(@NonNull Post input) {
         var authenticatedUser = userService.getUser(getAuthenticatedUserId());
         var postEntity = getPostEntity(input.id());
 

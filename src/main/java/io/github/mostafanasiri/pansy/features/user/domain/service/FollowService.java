@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,7 @@ public class FollowService extends BaseService {
     @Autowired
     private NotificationService notificationService;
 
-    public List<User> getFollowers(int userId, int page, int size) {
+    public @NonNull List<User> getFollowers(int userId, int page, int size) {
         var user = userService.getUser(userId);
 
         var pageRequest = PageRequest.of(page, size);
@@ -43,7 +44,7 @@ public class FollowService extends BaseService {
         return userService.getUsers(followerIds);
     }
 
-    public List<User> getFollowing(int userId, int page, int size) {
+    public @NonNull List<User> getFollowing(int userId, int page, int size) {
         var user = userService.getUser(userId);
 
         var pageRequest = PageRequest.of(page, size);

@@ -20,6 +20,7 @@ import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaReposito
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class NotificationService extends BaseService {
     private NotificationDomainMapper notificationDomainMapper;
 
     @Transactional
-    public List<Notification> getNotifications(int page, int size) {
+    public @NonNull List<Notification> getNotifications(int page, int size) {
         var pageRequest = PageRequest.of(page, size);
         var result = notificationJpaRepository.getNotifications(getAuthenticatedUserId(), pageRequest);
 

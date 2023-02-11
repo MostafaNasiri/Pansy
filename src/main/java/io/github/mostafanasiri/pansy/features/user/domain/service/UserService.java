@@ -45,7 +45,7 @@ public class UserService extends BaseService {
     @Autowired
     private UserDomainMapper userDomainMapper;
 
-    public List<User> getUsers(List<Integer> userIds) {
+    public @NonNull List<User> getUsers(List<Integer> userIds) {
         var cachedUsers = getCachedUsers(userIds);
         var cachedUserIds = cachedUsers.stream()
                 .map(User::id)
@@ -93,50 +93,7 @@ public class UserService extends BaseService {
         return unCachedUsers;
     }
 
-//    public List<User> getUsers(List<Integer> userIds) {
-//        var redisUsers = new ArrayList<UserRedis>();
-//        var unCachedUserIds = new ArrayList<Integer>();
-//
-//        // Find cached and uncached users
-//        userIds.forEach(id -> {
-//            var userRedis = userRedisRepository.findById(id);
-//
-//            if (userRedis.isPresent()) {
-//                logger.info(String.format("getUsers - Fetched user %s from Redis", id));
-//                redisUsers.add(userRedis.get());
-//            } else {
-//                logger.info(String.format(
-//                        "getUsers - User %s doesn't exist in Redis. Must fetch it from the database",
-//                        id
-//                ));
-//                unCachedUserIds.add(id);
-//            }
-//        });
-//
-//        // Get uncached users from the database
-//        List<User> unCachedUsers = new ArrayList<>();
-//        if (!unCachedUserIds.isEmpty()) {
-//            var unCachedUserEntities = userJpaRepository.findAllById(unCachedUserIds);
-//
-//            // Map uncached users to User models
-//            unCachedUsers = userDomainMapper.userEntitiesToUsers(unCachedUserEntities);
-//
-//            // Save uncached users in Redis
-//            unCachedUsers.forEach(this::saveUserInRedis);
-//        }
-//
-//        // Map cached users to User models
-//        var cachedUsers = userDomainMapper.usersRedisToUsers(redisUsers);
-//
-//        // Combine all users
-//        var result = new ArrayList<User>();
-//        result.addAll(unCachedUsers);
-//        result.addAll(cachedUsers);
-//
-//        return result;
-//    }
-
-    public User getUser(int userId) {
+    public @NonNull User getUser(int userId) {
         var userRedis = userRedisRepository.findById(userId);
         if (userRedis.isPresent()) {
             logger.info(String.format("getUser - Fetching user %s from Redis", userId));
@@ -152,7 +109,7 @@ public class UserService extends BaseService {
         return user;
     }
 
-    public User createUser(@NonNull User user) {
+    public @NonNull User createUser(@NonNull User user) {
         if (userJpaRepository.findByUsername(user.username()).isPresent()) {
             throw new InvalidInputException("Username already exists");
         }
@@ -169,7 +126,7 @@ public class UserService extends BaseService {
         return createdUser;
     }
 
-    public User updateUser(@NonNull User user) {
+    public @NonNull User updateUser(@NonNull User user) {
         if (getAuthenticatedUserId() != user.id()) {
             throw new AuthorizationException("Forbidden action");
         }
@@ -200,11 +157,19 @@ public class UserService extends BaseService {
     }
 
     public void updateUserFollowerCount(int userId, int count) {
-        // TODO: implement
+        var userEntity = getUserEntity(userId);
+        userEntity.setFollowerCount(count);
+
+        var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        saveUserInRedis(updatedUser);
     }
 
     public void updateUserFollowingCount(int userId, int count) {
-        // TODO: implement
+        var userEntity = getUserEntity(userId);
+        userEntity.setFollowingCount(count);
+
+        var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        saveUserInRedis(updatedUser);
     }
 
     private void saveUsersInRedis(List<User> users) {

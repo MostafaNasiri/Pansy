@@ -12,6 +12,7 @@ import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,7 @@ public class LikeService extends BaseService {
     @Autowired
     private NotificationService notificationService;
 
-    public List<User> getPostLikers(int postId, int page, int size) {
+    public @NonNull List<User> getPostLikers(int postId, int page, int size) {
         var post = postService.getPost(postId);
 
         var pageRequest = PageRequest.of(page, size);
