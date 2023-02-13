@@ -115,7 +115,7 @@ public class PostService extends BaseService {
         return result;
     }
 
-    private List<Post> fetchPosts(List<Integer> postIds) {
+    private List<Post> fetchPosts(List<Integer> postIds) { // TODO: Refactor
         var redisPosts = new ArrayList<PostRedis>();
         var unCachedPostIds = new ArrayList<Integer>();
 
@@ -173,7 +173,7 @@ public class PostService extends BaseService {
         return userPosts;
     }
 
-    private List<Post> fetchUserPosts(User user, List<Integer> userPostIds) {
+    private List<Post> fetchUserPosts(User user, List<Integer> userPostIds) { // TODO: Refactor
         var redisPosts = new ArrayList<PostRedis>();
         var unCachedPostIds = new ArrayList<Integer>();
 

@@ -3,7 +3,6 @@ package io.github.mostafanasiri.pansy.features.user.presentation;
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.features.user.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.domain.service.FollowService;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
 import io.github.mostafanasiri.pansy.features.user.presentation.request.UpdateUserRequest;
@@ -27,8 +26,6 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private FollowService followService;
     @Autowired
     private ResponseMapper responseMapper;
 
@@ -66,7 +63,7 @@ public class UserController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var followers = followService.getFollowers(userId, page, size);
+        var followers = userService.getFollowers(userId, page, size);
         var response = responseMapper.fromUserModels(followers);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -79,7 +76,7 @@ public class UserController {
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var following = followService.getFollowing(userId, page, size);
+        var following = userService.getFollowing(userId, page, size);
         var response = responseMapper.fromUserModels(following);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
@@ -91,7 +88,7 @@ public class UserController {
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
-        followService.followUser(userId, request.targetUserId());
+        userService.followUser(userId, request.targetUserId());
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
@@ -102,7 +99,7 @@ public class UserController {
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody FollowUnfollowUserRequest request
     ) {
-        followService.unfollowUser(userId, request.targetUserId());
+        userService.unfollowUser(userId, request.targetUserId());
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }

@@ -8,10 +8,15 @@ import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.File;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
+import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.FeedJpaRepository;
+import io.github.mostafanasiri.pansy.features.post.domain.service.FeedService;
+import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.features.user.data.entity.redis.UserRedis;
+import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
@@ -19,9 +24,11 @@ import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +42,16 @@ public class UserService extends BaseService {
     @Autowired
     private UserRedisRepository userRedisRepository;
     @Autowired
+    private FollowerJpaRepository followerJpaRepository;
+    @Autowired
     private FeedJpaRepository feedJpaRepository;
     @Autowired
     private FileJpaRepository fileJpaRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private FeedService feedService;
     @Autowired
     private FileService fileService;
 
@@ -158,22 +171,6 @@ public class UserService extends BaseService {
         saveUserInRedis(updatedUser);
     }
 
-    public void updateUserFollowerCount(int userId, int count) {
-        var userEntity = getUserEntity(userId);
-        userEntity.setFollowerCount(count);
-
-        var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
-        saveUserInRedis(updatedUser);
-    }
-
-    public void updateUserFollowingCount(int userId, int count) {
-        var userEntity = getUserEntity(userId);
-        userEntity.setFollowingCount(count);
-
-        var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
-        saveUserInRedis(updatedUser);
-    }
-
     private void saveUsersInRedis(List<User> users) {
         logger.info(String.format("Saving users %s in Redis", users.stream().map(User::id).toList()));
 
@@ -186,6 +183,104 @@ public class UserService extends BaseService {
 
         var userRedis = userDomainMapper.userToUserRedis(user);
         userRedisRepository.save(userRedis);
+    }
+
+    public @NonNull List<User> getFollowers(int userId, int page, int size) {
+        var user = getUser(userId);
+
+        var pageRequest = PageRequest.of(page, size);
+        var followerIds = followerJpaRepository.getFollowerIds(user.id(), pageRequest);
+
+        return getUsers(followerIds);
+    }
+
+    public @NonNull List<User> getFollowing(int userId, int page, int size) {
+        var user = getUser(userId);
+
+        var pageRequest = PageRequest.of(page, size);
+        var followingIds = followerJpaRepository.getFollowingIds(user.id(), pageRequest);
+
+        return getUsers(followingIds);
+    }
+
+    @Transactional
+    public void followUser(int sourceUserId, int targetUserId) {
+        if (getAuthenticatedUserId() != sourceUserId) {
+            throw new AuthorizationException("Forbidden action");
+        }
+
+        if (sourceUserId == targetUserId) {
+            throw new InvalidInputException("A user can't follow him/herself!");
+        }
+
+        var sourceUser = getUser(getAuthenticatedUserId());
+        var targetUser = getUser(targetUserId);
+
+        var sourceUserHasNotFollowedTargetUser =
+                followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId).isEmpty();
+
+        if (sourceUserHasNotFollowedTargetUser) {
+            var follower = new FollowerEntity(
+                    userJpaRepository.getReferenceById(sourceUser.id()),
+                    userJpaRepository.getReferenceById(targetUser.id())
+            );
+            followerJpaRepository.save(follower);
+
+            updateFollowingCount(sourceUserId);
+            updateFollowerCount(targetUserId);
+
+            createFollowNotification(sourceUserId, targetUserId);
+        }
+    }
+
+    private void createFollowNotification(int sourceUserId, int targetUserId) {
+        var notification = new FollowNotification(new User(sourceUserId), new User(targetUserId));
+        notificationService.addFollowNotification(notification);
+    }
+
+    @Transactional
+    public void unfollowUser(int sourceUserId, int targetUserId) {
+        if (getAuthenticatedUserId() != sourceUserId) {
+            throw new AuthorizationException("Forbidden action");
+        }
+
+        if (sourceUserId == targetUserId) {
+            throw new InvalidInputException("A user can't unfollow him/herself!");
+        }
+
+        var sourceUser = getUser(getAuthenticatedUserId());
+        var targetUser = getUser(targetUserId);
+
+        followerJpaRepository.findBySourceUserAndTargetUser(sourceUser.id(), targetUser.id())
+                .ifPresent(followerEntity -> {
+                    followerJpaRepository.delete(followerEntity);
+
+                    updateFollowingCount(sourceUserId);
+                    updateFollowerCount(targetUserId);
+
+                    notificationService.deleteFollowNotification(sourceUserId, targetUserId);
+                    feedService.removeAllPostsFromFeed(sourceUserId, targetUserId);
+                });
+    }
+
+    private void updateFollowingCount(int userId) {
+        var count = followerJpaRepository.getFollowingCount(userId);
+
+        var userEntity = getUserEntity(userId);
+        userEntity.setFollowingCount(count);
+
+        var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        saveUserInRedis(updatedUser);
+    }
+
+    private void updateFollowerCount(int userId) {
+        var count = followerJpaRepository.getFollowerCount(userId);
+
+        var userEntity = getUserEntity(userId);
+        userEntity.setFollowerCount(count);
+
+        var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+        saveUserInRedis(updatedUser);
     }
 
     private UserEntity getUserEntity(int userId) {
