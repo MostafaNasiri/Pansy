@@ -50,12 +50,16 @@ public class PostService extends BaseService {
     private FileJpaRepository fileJpaRepository;
     @Autowired
     private FeedJpaRepository feedJpaRepository;
+
     @Autowired
     private UserService userService;
     @Autowired
     private FileService fileService;
     @Autowired
     private FeedService feedService;
+    @Autowired
+    private LikeService likeService;
+
     @Autowired
     private PostDomainMapper postDomainMapper;
 
@@ -68,7 +72,7 @@ public class PostService extends BaseService {
 
         logger.info(String.format("getPost - Fetching post %s from database", postId));
         var postEntity = getPostEntity(postId);
-        var post = postDomainMapper.postEntityToPost(postEntity, false);
+        var post = postDomainMapper.postEntityToPost(postEntity);
 
         savePostInRedis(post);
 
@@ -96,6 +100,10 @@ public class PostService extends BaseService {
                     .toList();
 
             result = fetchPosts(postIds);
+
+            // Specify the posts that are liked by the authenticated user
+            var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), postIds);
+            result.forEach(post -> post.setLikedByAuthenticatedUser(likedPostIds.contains(post.getId())));
 
             // Order posts by creation date (descending)
             result.sort((p1, p2) -> ((-1) * p1.getCreatedAt().compareTo(p2.getCreatedAt())));
@@ -133,7 +141,7 @@ public class PostService extends BaseService {
             var unCachedPostEntities = postJpaRepository.getPostsById(unCachedPostIds);
 
             // Map uncached posts to Post models
-            unCachedPosts = postDomainMapper.postEntitiesToPosts(unCachedPostEntities, likedPostIds);
+            unCachedPosts = postDomainMapper.postEntitiesToPosts(unCachedPostEntities);
 
             // Save uncached posts in Redis
             unCachedPosts.forEach(this::savePostInRedis);
@@ -156,17 +164,16 @@ public class PostService extends BaseService {
         var pageRequest = PageRequest.of(page, size);
         var userPostIds = postJpaRepository.getUserPostIds(user.id(), pageRequest);
 
-        // Get ids of the posts that the authenticated user has liked
-        var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), userPostIds);
+        var userPosts = fetchUserPosts(user, userPostIds);
 
-        return fetchUserPosts(user, userPostIds, likedPostIds);
+        // Specify the posts that are liked by the authenticated user
+        var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), userPostIds);
+        userPosts.forEach(post -> post.setLikedByAuthenticatedUser(likedPostIds.contains(post.getId())));
+
+        return userPosts;
     }
 
-    private List<Post> fetchUserPosts(
-            User user,
-            List<Integer> userPostIds,
-            List<Integer> likedPostIds
-    ) {
+    private List<Post> fetchUserPosts(User user, List<Integer> userPostIds) {
         var redisPosts = new ArrayList<PostRedis>();
         var unCachedPostIds = new ArrayList<Integer>();
 
@@ -192,14 +199,14 @@ public class PostService extends BaseService {
             var unCachedPostEntities = postJpaRepository.getPostsByIdWithoutUser(unCachedPostIds);
 
             // Map uncached posts to Post models
-            unCachedPosts = postDomainMapper.postEntitiesToPosts(user, unCachedPostEntities, likedPostIds);
+            unCachedPosts = postDomainMapper.postEntitiesToPosts(user, unCachedPostEntities);
 
             // Save uncached posts in Redis
             unCachedPosts.forEach(this::savePostInRedis);
         }
 
         // Map cached posts to Post models
-        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts); // TODO: set isLiked
+        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts);
 
         // Combine all posts
         var result = new ArrayList<Post>();
@@ -235,7 +242,7 @@ public class PostService extends BaseService {
 
         updateAuthenticatedUserPostCount();
 
-        var post = postDomainMapper.postEntityToPost(authenticatedUser, postEntity, false);
+        var post = postDomainMapper.postEntityToPost(authenticatedUser, postEntity);
         savePostInRedis(post);
 
         feedService.addPostToFollowersFeeds(post);
@@ -253,7 +260,7 @@ public class PostService extends BaseService {
         postEntity.setLikeCount(likeCount);
         postEntity = postJpaRepository.save(postEntity);
 
-        var post = postDomainMapper.postEntityToPost(postEntity, false);
+        var post = postDomainMapper.postEntityToPost(postEntity);
         savePostInRedis(post);
     }
 
@@ -262,7 +269,7 @@ public class PostService extends BaseService {
         postEntity.setCommentCount(commentCount);
         postEntity = postJpaRepository.save(postEntity);
 
-        var post = postDomainMapper.postEntityToPost(postEntity, false);
+        var post = postDomainMapper.postEntityToPost(postEntity);
         savePostInRedis(post);
     }
 
@@ -288,15 +295,14 @@ public class PostService extends BaseService {
         postEntity.setCaption(input.getCaption());
         postEntity.setImages(imageFileEntities);
 
-        var isLikedByAuthenticatedUser = likeJpaRepository.findByUserIdAndPostId(
-                getAuthenticatedUserId(), postEntity.getId()
-        ).isPresent();
 
         var post = postDomainMapper.postEntityToPost(
                 authenticatedUser,
-                postJpaRepository.save(postEntity),
-                isLikedByAuthenticatedUser
+                postJpaRepository.save(postEntity)
         );
+
+        var likedByAuthenticatedUser = likeService.isPostLikedByUser(postEntity.getId(), getAuthenticatedUserId());
+        post.setLikedByAuthenticatedUser(likedByAuthenticatedUser);
 
         savePostInRedis(post);
 

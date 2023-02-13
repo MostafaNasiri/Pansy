@@ -44,10 +44,7 @@ public class LikeService extends BaseService {
 
     @Transactional
     public void likePost(int postId) {
-        var authenticatedUserHasAlreadyLikedThePost = likeJpaRepository.findByUserIdAndPostId(
-                getAuthenticatedUserId(),
-                postId
-        ).isPresent();
+        var authenticatedUserHasAlreadyLikedThePost = isPostLikedByUser(postId, getAuthenticatedUserId());
 
         if (!authenticatedUserHasAlreadyLikedThePost) {
             var userEntity = userJpaRepository.getReferenceById(getAuthenticatedUserId());
@@ -83,6 +80,11 @@ public class LikeService extends BaseService {
             updatePostLikeCount(post.getId());
             notificationService.deleteLikeNotification(userId, postId);
         }
+    }
+
+    public boolean isPostLikedByUser(int postId, int userId) {
+        return likeJpaRepository.findByUserIdAndPostId(userId, postId)
+                .isPresent();
     }
 
     private void updatePostLikeCount(int postId) {

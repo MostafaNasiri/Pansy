@@ -15,7 +15,7 @@ public class Post {
     private Integer likeCount;
     private Integer commentCount;
     private Date createdAt;
-    private Boolean isLikedByAuthenticatedUser;
+    private boolean isLikedByAuthenticatedUser;
 
     public Post(String caption, List<Image> images) {
         this.caption = caption;

@@ -23,18 +23,14 @@ public class PostDomainMapper {
     // This method is used when we want to map posts of a single user
     public List<Post> postEntitiesToPosts(
             User postAuthor,
-            List<PostEntity> postEntities,
-            List<Integer> likedPostIds
+            List<PostEntity> postEntities
     ) {
         return postEntities.stream()
-                .map(pe -> {
-                    var isLiked = likedPostIds.contains(pe.getId());
-                    return postEntityToPost(postAuthor, pe, isLiked);
-                })
+                .map(pe -> postEntityToPost(postAuthor, pe))
                 .toList();
     }
 
-    public Post postEntityToPost(User postAuthor, PostEntity entity, boolean isLiked) { // TODO: remove isLiked
+    public Post postEntityToPost(User postAuthor, PostEntity entity) {
         var images = entity.getImages()
                 .stream()
                 .map((i) -> new Image(i.getId(), i.getName()))
@@ -52,16 +48,13 @@ public class PostDomainMapper {
     }
 
     // This method is used when we want to map posts of different users
-    public List<Post> postEntitiesToPosts(List<PostEntity> postEntities, List<Integer> likedPostIds) {
+    public List<Post> postEntitiesToPosts(List<PostEntity> postEntities) {
         return postEntities.stream()
-                .map(pe -> {
-                    var isLiked = likedPostIds.contains(pe.getId());
-                    return postEntityToPost(pe, isLiked);
-                })
+                .map(this::postEntityToPost)
                 .toList();
     }
 
-    public Post postEntityToPost(PostEntity entity, boolean isLiked) { // TODO: remove isLiked
+    public Post postEntityToPost(PostEntity entity) {
         var user = userDomainMapper.userEntityToUser(entity.getUser());
 
         var images = entity.getImages()
