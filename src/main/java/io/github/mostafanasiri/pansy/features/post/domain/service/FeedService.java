@@ -6,7 +6,6 @@ import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.FeedJpaRe
 import io.github.mostafanasiri.pansy.features.post.domain.PostDomainMapper;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
 import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
@@ -20,8 +19,6 @@ public class FeedService extends BaseService {
     private final static int MAX_FEED_SIZE = 10_000;
 
     @Autowired
-    private UserService userService;
-    @Autowired
     private FeedJpaRepository feedJpaRepository;
     @Autowired
     private FollowerJpaRepository followerJpaRepository;
@@ -31,8 +28,7 @@ public class FeedService extends BaseService {
     @Async
     public void addPostToFollowersFeeds(@NonNull Post post) {
         // Get post author's followers
-        var author = userService.getUser(post.getUser().id());
-        var authorFollowerIds = followerJpaRepository.getFollowersIds(author.id());
+        var authorFollowerIds = followerJpaRepository.getFollowersIds(post.getUser().id());
 
         // Add post to author's followers' feeds
         if (!authorFollowerIds.isEmpty()) {
@@ -59,8 +55,7 @@ public class FeedService extends BaseService {
     @Async
     public void removePostFromFollowersFeeds(@NonNull Post post) {
         // Get post author's followers
-        var author = userService.getUser(post.getUser().id());
-        var authorFollowerIds = followerJpaRepository.getFollowersIds(author.id());
+        var authorFollowerIds = followerJpaRepository.getFollowersIds(post.getUser().id());
 
         // Remove post from author's followers' feeds
         if (!authorFollowerIds.isEmpty()) {
@@ -77,13 +72,10 @@ public class FeedService extends BaseService {
 
     @Async
     public void removeAllPostsFromFeed(int feedOwnerUserId, int postsAuthorUserId) {
-        var feedOwner = userService.getUser(feedOwnerUserId);
-        var postsAuthor = userService.getUser(postsAuthorUserId);
-
-        var feed = feedJpaRepository.findById(feedOwner.id());
+        var feed = feedJpaRepository.findById(feedOwnerUserId);
 
         feed.ifPresent(f -> {
-            f.getItems().removeIf(item -> item.userId() == postsAuthor.id());
+            f.getItems().removeIf(item -> item.userId() == postsAuthorUserId);
             feedJpaRepository.save(f);
         });
     }

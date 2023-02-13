@@ -148,7 +148,7 @@ public class PostService extends BaseService {
         }
 
         // Map cached posts to Post models
-        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts); // TODO: set isLiked
+        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts);
 
         // Combine all posts
         var result = new ArrayList<Post>();
@@ -323,13 +323,10 @@ public class PostService extends BaseService {
     private void savePostInRedis(Post post) {
         logger.info(String.format("Saving post %s in Redis", post.getId()));
 
-        // We can't save a post in Redis if the post's author does not exist in Redis.
-        // TODO: So one way might be to first get the author from UserService to make sure that it will be saved in Redis if it isn't saved yet
-        userRedisRepository.findById(post.getUser().id())
-                .ifPresent(userRedis -> {
-                    var postRedis = postDomainMapper.postToPostRedis(userRedis, post);
-                    postRedisRepository.save(postRedis);
-                });
+        var user = userService.getUser(post.getUser().id());
+
+        var postRedis = postDomainMapper.postToPostRedis(user, post);
+        postRedisRepository.save(postRedis);
     }
 
     @Transactional

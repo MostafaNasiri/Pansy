@@ -25,13 +25,14 @@ public class LikeService extends BaseService {
     @Autowired
     private PostService postService;
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private LikeJpaRepository likeJpaRepository;
     @Autowired
     private UserJpaRepository userJpaRepository;
     @Autowired
     private PostJpaRepository postJpaRepository;
-    @Autowired
-    private NotificationService notificationService;
 
     public @NonNull List<User> getPostLikers(int postId, int page, int size) {
         var post = postService.getPost(postId);

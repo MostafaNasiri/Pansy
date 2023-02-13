@@ -7,7 +7,6 @@ import io.github.mostafanasiri.pansy.features.post.data.entity.redis.PostRedis;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.user.data.entity.redis.UserRedis;
 import io.github.mostafanasiri.pansy.features.user.domain.UserDomainMapper;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,12 +96,13 @@ public class PostDomainMapper {
         );
     }
 
-    public PostRedis postToPostRedis(UserRedis userRedis, Post post) {
+    public PostRedis postToPostRedis(User postAuthor, Post post) {
+        var user = userDomainMapper.userToUserRedis(postAuthor);
         var imageUrls = post.getImages().stream().map(Image::name).toList();
 
         return new PostRedis(
                 post.getId(),
-                userRedis,
+                user,
                 post.getCaption(),
                 imageUrls,
                 post.getLikeCount(),

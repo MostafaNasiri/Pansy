@@ -38,8 +38,10 @@ public class UserService extends BaseService {
     private FeedJpaRepository feedJpaRepository;
     @Autowired
     private FileJpaRepository fileJpaRepository;
+
     @Autowired
     private FileService fileService;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
