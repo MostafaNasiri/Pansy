@@ -6,7 +6,10 @@ import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
+import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
+import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
+import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.LikeEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.features.post.data.entity.redis.PostRedis;
 import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.FeedJpaRepository;
@@ -58,7 +61,7 @@ public class PostService extends BaseService {
     @Autowired
     private FeedService feedService;
     @Autowired
-    private LikeService likeService;
+    private NotificationService notificationService;
 
     @Autowired
     private PostDomainMapper postDomainMapper;
@@ -131,9 +134,6 @@ public class PostService extends BaseService {
                 unCachedPostIds.add(id);
             }
         });
-
-        // Get ids of the posts that the authenticated user has liked
-        var likedPostIds = likeJpaRepository.getLikedPostIds(getAuthenticatedUserId(), postIds);
 
         // Get uncached posts from the database
         List<Post> unCachedPosts = new ArrayList<>();
@@ -255,15 +255,6 @@ public class PostService extends BaseService {
         fileService.checkIfFilesAreAlreadyAttachedToAnEntity(imageFileIds);
     }
 
-    public void updatePostLikeCount(int postId, int likeCount) {
-        var postEntity = getPostEntity(postId);
-        postEntity.setLikeCount(likeCount);
-        postEntity = postJpaRepository.save(postEntity);
-
-        var post = postDomainMapper.postEntityToPost(postEntity);
-        savePostInRedis(post);
-    }
-
     public void updatePostCommentCount(int postId, int commentCount) {
         var postEntity = getPostEntity(postId);
         postEntity.setCommentCount(commentCount);
@@ -301,7 +292,7 @@ public class PostService extends BaseService {
                 postJpaRepository.save(postEntity)
         );
 
-        var likedByAuthenticatedUser = likeService.isPostLikedByUser(postEntity.getId(), getAuthenticatedUserId());
+        var likedByAuthenticatedUser = isPostLikedByUser(postEntity.getId(), getAuthenticatedUserId());
         post.setLikedByAuthenticatedUser(likedByAuthenticatedUser);
 
         savePostInRedis(post);
@@ -352,6 +343,71 @@ public class PostService extends BaseService {
         var userEntity = userJpaRepository.getReferenceById(getAuthenticatedUserId());
         var postCount = postJpaRepository.getUserPostCount(userEntity);
         userService.updateUserPostCount(userEntity.getId(), postCount);
+    }
+
+    public @NonNull List<User> getPostLikers(int postId, int page, int size) {
+        var post = getPost(postId);
+
+        var pageRequest = PageRequest.of(page, size);
+        var likerUserIds = likeJpaRepository.getLikerUserIds(post.getId(), pageRequest);
+
+        return userService.getUsers(likerUserIds);
+    }
+
+    @Transactional
+    public void likePost(int postId) {
+        var authenticatedUserHasAlreadyLikedThePost = isPostLikedByUser(postId, getAuthenticatedUserId());
+
+        if (!authenticatedUserHasAlreadyLikedThePost) {
+            var userEntity = userJpaRepository.getReferenceById(getAuthenticatedUserId());
+            var post = getPost(postId);
+
+            var like = new LikeEntity(userEntity, postJpaRepository.getReferenceById(post.getId()));
+            likeJpaRepository.save(like);
+
+            updatePostLikeCount(post.getId());
+
+            var notification = new LikeNotification(
+                    new User(getAuthenticatedUserId()),
+                    new User(post.getUser().id()),
+                    postId
+            );
+            notificationService.addLikeNotification(notification);
+        }
+    }
+
+    @Transactional
+    public void unlikePost(int userId, int postId) {
+        if (getAuthenticatedUserId() != userId) {
+            throw new AuthorizationException("Forbidden action");
+        }
+
+        var post = getPost(postId);
+
+        var like = likeJpaRepository.findByUserIdAndPostId(userId, post.getId());
+        var userHasLikedThePost = like.isPresent();
+
+        if (userHasLikedThePost) {
+            likeJpaRepository.delete(like.get());
+            updatePostLikeCount(post.getId());
+            notificationService.deleteLikeNotification(userId, postId);
+        }
+    }
+
+    public boolean isPostLikedByUser(int postId, int userId) {
+        return likeJpaRepository.findByUserIdAndPostId(userId, postId)
+                .isPresent();
+    }
+
+    private void updatePostLikeCount(int postId) {
+        var likeCount = likeJpaRepository.getPostLikeCount(postId);
+
+        var postEntity = getPostEntity(postId);
+        postEntity.setLikeCount(likeCount);
+        postEntity = postJpaRepository.save(postEntity);
+
+        var post = postDomainMapper.postEntityToPost(postEntity);
+        savePostInRedis(post);
     }
 
     private PostEntity getPostEntity(int postId) {
