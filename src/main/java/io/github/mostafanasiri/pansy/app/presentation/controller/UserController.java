@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.app.presentation.controller;
 
+import io.github.mostafanasiri.pansy.app.common.ApiResponse;
 import io.github.mostafanasiri.pansy.app.domain.model.Image;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.service.UserService;
@@ -8,7 +9,6 @@ import io.github.mostafanasiri.pansy.app.presentation.request.FollowUnfollowUser
 import io.github.mostafanasiri.pansy.app.presentation.request.UpdateUserRequest;
 import io.github.mostafanasiri.pansy.app.presentation.response.FullUserResponse;
 import io.github.mostafanasiri.pansy.app.presentation.response.MinimalUserResponse;
-import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

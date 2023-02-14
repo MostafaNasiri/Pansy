@@ -1,9 +1,8 @@
 package io.github.mostafanasiri.pansy.app.data.entity.jpa;
 
+import io.github.mostafanasiri.pansy.app.common.BaseEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.LikeNotificationEntity;
-import io.github.mostafanasiri.pansy.common.BaseEntity;
-import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

@@ -1,9 +1,9 @@
 package io.github.mostafanasiri.pansy.app.presentation.mapper;
 
 import io.github.mostafanasiri.pansy.app.domain.model.User;
+import io.github.mostafanasiri.pansy.app.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.app.presentation.response.FullUserResponse;
 import io.github.mostafanasiri.pansy.app.presentation.response.MinimalUserResponse;
-import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

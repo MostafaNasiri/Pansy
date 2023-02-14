@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.common;
+package io.github.mostafanasiri.pansy.app.common;
 
 import io.github.mostafanasiri.pansy.auth.AppUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;

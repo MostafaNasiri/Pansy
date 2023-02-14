@@ -2,7 +2,7 @@ package io.github.mostafanasiri.pansy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.mostafanasiri.pansy.common.ApiResponse;
+import io.github.mostafanasiri.pansy.app.common.ApiResponse;
 
 import java.io.IOException;
 

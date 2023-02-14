@@ -1,6 +1,6 @@
-package io.github.mostafanasiri.pansy.features.file.data;
+package io.github.mostafanasiri.pansy.app.data.entity.jpa;
 
-import io.github.mostafanasiri.pansy.common.BaseEntity;
+import io.github.mostafanasiri.pansy.app.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;

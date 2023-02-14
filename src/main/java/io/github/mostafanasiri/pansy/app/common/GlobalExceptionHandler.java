@@ -1,6 +1,6 @@
-package io.github.mostafanasiri.pansy.common;
+package io.github.mostafanasiri.pansy.app.common;
 
-import io.github.mostafanasiri.pansy.common.exception.*;
+import io.github.mostafanasiri.pansy.app.common.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;

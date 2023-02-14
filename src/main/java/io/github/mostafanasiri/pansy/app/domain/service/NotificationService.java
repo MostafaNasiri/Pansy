@@ -1,5 +1,7 @@
 package io.github.mostafanasiri.pansy.app.domain.service;
 
+import io.github.mostafanasiri.pansy.app.common.BaseEntity;
+import io.github.mostafanasiri.pansy.app.common.BaseService;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.LikeNotificationEntity;
@@ -12,8 +14,6 @@ import io.github.mostafanasiri.pansy.app.domain.model.notification.CommentNotifi
 import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.LikeNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.Notification;
-import io.github.mostafanasiri.pansy.common.BaseEntity;
-import io.github.mostafanasiri.pansy.common.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;

@@ -2,9 +2,9 @@ package io.github.mostafanasiri.pansy.app.presentation.mapper;
 
 import io.github.mostafanasiri.pansy.app.domain.model.Comment;
 import io.github.mostafanasiri.pansy.app.domain.model.Post;
+import io.github.mostafanasiri.pansy.app.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.app.presentation.response.CommentResponse;
 import io.github.mostafanasiri.pansy.app.presentation.response.PostResponse;
-import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;

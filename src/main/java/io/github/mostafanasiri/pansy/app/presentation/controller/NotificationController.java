@@ -1,8 +1,8 @@
 package io.github.mostafanasiri.pansy.app.presentation.controller;
 
+import io.github.mostafanasiri.pansy.app.common.ApiResponse;
 import io.github.mostafanasiri.pansy.app.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.app.presentation.mapper.NotificationResponseMapper;
-import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;

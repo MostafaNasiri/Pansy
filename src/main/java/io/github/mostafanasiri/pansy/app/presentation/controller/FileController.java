@@ -1,8 +1,9 @@
-package io.github.mostafanasiri.pansy.features.file.presentation;
+package io.github.mostafanasiri.pansy.app.presentation.controller;
 
-import io.github.mostafanasiri.pansy.common.ApiResponse;
-import io.github.mostafanasiri.pansy.features.file.domain.FileService;
-import io.github.mostafanasiri.pansy.features.file.presentation.response.FileUploadResponse;
+import io.github.mostafanasiri.pansy.app.common.ApiResponse;
+import io.github.mostafanasiri.pansy.app.domain.service.FileService;
+import io.github.mostafanasiri.pansy.app.presentation.FileUtils;
+import io.github.mostafanasiri.pansy.app.presentation.response.FileUploadResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

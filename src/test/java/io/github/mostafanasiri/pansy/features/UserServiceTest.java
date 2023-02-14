@@ -1,12 +1,12 @@
 package io.github.mostafanasiri.pansy.features;
 
+import io.github.mostafanasiri.pansy.app.common.exception.EntityNotFoundException;
+import io.github.mostafanasiri.pansy.app.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FollowerEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.app.domain.service.UserService;
-import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
-import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,6 +1,6 @@
-package io.github.mostafanasiri.pansy.features.file.presentation;
+package io.github.mostafanasiri.pansy.app.presentation;
 
-import io.github.mostafanasiri.pansy.common.exception.InternalErrorException;
+import io.github.mostafanasiri.pansy.app.common.exception.InternalErrorException;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;

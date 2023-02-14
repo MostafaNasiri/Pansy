@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.app.data.entity.jpa;
 
+import io.github.mostafanasiri.pansy.app.common.BaseEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.CommentNotificationEntity;
-import io.github.mostafanasiri.pansy.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

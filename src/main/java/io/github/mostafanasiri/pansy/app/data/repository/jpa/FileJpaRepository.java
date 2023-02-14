@@ -1,5 +1,6 @@
-package io.github.mostafanasiri.pansy.features.file.data;
+package io.github.mostafanasiri.pansy.app.data.repository.jpa;
 
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.FileEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

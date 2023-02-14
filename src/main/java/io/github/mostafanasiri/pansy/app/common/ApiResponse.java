@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.common;
+package io.github.mostafanasiri.pansy.app.common;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

@@ -1,6 +1,6 @@
 package io.github.mostafanasiri.pansy.app.data.entity.jpa;
 
-import io.github.mostafanasiri.pansy.common.BaseEntity;
+import io.github.mostafanasiri.pansy.app.common.BaseEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Getter;

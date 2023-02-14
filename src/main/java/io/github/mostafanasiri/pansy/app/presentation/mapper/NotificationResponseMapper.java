@@ -4,10 +4,10 @@ import io.github.mostafanasiri.pansy.app.domain.model.notification.CommentNotifi
 import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.LikeNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.Notification;
+import io.github.mostafanasiri.pansy.app.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.app.presentation.response.notification.NotificationData;
 import io.github.mostafanasiri.pansy.app.presentation.response.notification.NotificationResponse;
 import io.github.mostafanasiri.pansy.app.presentation.response.notification.NotificationType;
-import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
