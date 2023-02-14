@@ -1,5 +1,12 @@
 package io.github.mostafanasiri.pansy.app.domain.service;
 
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.CommentNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.FollowNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.LikeNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.CommentJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.NotificationJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.PostJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.app.domain.mapper.NotificationDomainMapper;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.CommentNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
@@ -7,13 +14,6 @@ import io.github.mostafanasiri.pansy.app.domain.model.notification.LikeNotificat
 import io.github.mostafanasiri.pansy.app.domain.model.notification.Notification;
 import io.github.mostafanasiri.pansy.common.BaseEntity;
 import io.github.mostafanasiri.pansy.common.BaseService;
-import io.github.mostafanasiri.pansy.features.notification.data.NotificationJpaRepository;
-import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
-import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
-import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
-import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.CommentJpaRepository;
-import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.PostJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;

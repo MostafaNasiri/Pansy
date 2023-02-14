@@ -1,13 +1,13 @@
 package io.github.mostafanasiri.pansy.app.domain.mapper;
 
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.CommentEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.FeedEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.PostEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.redis.PostRedis;
 import io.github.mostafanasiri.pansy.app.domain.model.Comment;
 import io.github.mostafanasiri.pansy.app.domain.model.Image;
 import io.github.mostafanasiri.pansy.app.domain.model.Post;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.CommentEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.PostEntity;
-import io.github.mostafanasiri.pansy.features.post.data.entity.redis.PostRedis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

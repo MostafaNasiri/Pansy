@@ -1,9 +1,9 @@
 package io.github.mostafanasiri.pansy.app.domain.mapper;
 
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.redis.UserRedis;
 import io.github.mostafanasiri.pansy.app.domain.model.Image;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.redis.UserRedis;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 

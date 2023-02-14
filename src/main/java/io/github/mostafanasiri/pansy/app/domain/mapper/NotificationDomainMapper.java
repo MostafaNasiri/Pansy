@@ -1,13 +1,13 @@
 package io.github.mostafanasiri.pansy.app.domain.mapper;
 
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.CommentNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.FollowNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.LikeNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.NotificationEntity;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.CommentNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.LikeNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.Notification;
-import io.github.mostafanasiri.pansy.features.notification.data.entity.CommentNotificationEntity;
-import io.github.mostafanasiri.pansy.features.notification.data.entity.FollowNotificationEntity;
-import io.github.mostafanasiri.pansy.features.notification.data.entity.LikeNotificationEntity;
-import io.github.mostafanasiri.pansy.features.notification.data.entity.NotificationEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

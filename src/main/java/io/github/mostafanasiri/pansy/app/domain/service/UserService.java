@@ -1,5 +1,13 @@
 package io.github.mostafanasiri.pansy.app.domain.service;
 
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.FeedEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.FollowerEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.redis.UserRedis;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.FeedJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.FollowerJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.app.domain.mapper.UserDomainMapper;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
@@ -11,14 +19,6 @@ import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import io.github.mostafanasiri.pansy.features.file.data.FileJpaRepository;
 import io.github.mostafanasiri.pansy.features.file.domain.File;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
-import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.FeedJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.FollowerEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.data.entity.redis.UserRedis;
-import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.UserJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.redis.UserRedisRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

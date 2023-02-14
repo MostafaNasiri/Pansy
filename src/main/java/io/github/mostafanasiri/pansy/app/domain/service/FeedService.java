@@ -1,11 +1,11 @@
 package io.github.mostafanasiri.pansy.app.domain.service;
 
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.FeedEntity;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.FeedJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.app.domain.mapper.PostDomainMapper;
 import io.github.mostafanasiri.pansy.app.domain.model.Post;
 import io.github.mostafanasiri.pansy.common.BaseService;
-import io.github.mostafanasiri.pansy.features.post.data.entity.jpa.FeedEntity;
-import io.github.mostafanasiri.pansy.features.post.data.repository.jpa.FeedJpaRepository;
-import io.github.mostafanasiri.pansy.features.user.data.repo.jpa.FollowerJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
