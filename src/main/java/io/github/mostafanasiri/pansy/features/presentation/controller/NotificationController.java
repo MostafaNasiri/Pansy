@@ -1,7 +1,8 @@
-package io.github.mostafanasiri.pansy.features.notification.presentation;
+package io.github.mostafanasiri.pansy.features.presentation.controller;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.features.notification.domain.NotificationService;
+import io.github.mostafanasiri.pansy.features.presentation.mapper.NotificationResponseMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
@@ -22,7 +23,7 @@ public class NotificationController {
     private NotificationService service;
 
     @Autowired
-    private ResponseMapper responseMapper;
+    private NotificationResponseMapper notificationResponseMapper;
 
     @GetMapping("/users/me/notifications")
     @Operation(summary = "Returns a list of the authenticated user's notifications")
@@ -31,7 +32,7 @@ public class NotificationController {
             @RequestParam(defaultValue = "30") @Max(30) int size
     ) {
         var notifications = service.getNotifications(page, size);
-        var result = responseMapper.mapFromNotificationModels(notifications);
+        var result = notificationResponseMapper.mapFromNotificationModels(notifications);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }

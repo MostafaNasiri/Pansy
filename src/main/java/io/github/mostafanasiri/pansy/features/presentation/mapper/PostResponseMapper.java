@@ -1,23 +1,23 @@
-package io.github.mostafanasiri.pansy.features.post.presentation;
+package io.github.mostafanasiri.pansy.features.presentation.mapper;
 
 import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Comment;
 import io.github.mostafanasiri.pansy.features.post.domain.model.Post;
-import io.github.mostafanasiri.pansy.features.post.presentation.response.CommentResponse;
-import io.github.mostafanasiri.pansy.features.post.presentation.response.PostResponse;
-import io.github.mostafanasiri.pansy.features.post.presentation.response.UserResponse;
-import io.github.mostafanasiri.pansy.features.user.domain.model.User;
+import io.github.mostafanasiri.pansy.features.presentation.response.post.CommentResponse;
+import io.github.mostafanasiri.pansy.features.presentation.response.post.PostResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ResponseMapper {
+public class PostResponseMapper {
+    @Autowired
+    private UserResponseMapper userResponseMapper;
     @Autowired
     private FileUtils fileUtils;
 
     public PostResponse mapFromPostModel(@NonNull Post post) {
-        var userResponse = mapFromUserModel(post.getUser());
+        var user = userResponseMapper.userToMinimalUserResponse(post.getUser());
 
         var imageUrls = post.getImages()
                 .stream()
@@ -26,7 +26,7 @@ public class ResponseMapper {
 
         return new PostResponse(
                 post.getId(),
-                userResponse,
+                user,
                 post.getCaption(),
                 imageUrls,
                 post.getLikeCount() != null ? post.getLikeCount() : 0,
@@ -36,20 +36,12 @@ public class ResponseMapper {
         );
     }
 
-    public UserResponse mapFromUserModel(@NonNull User user) {
-        var avatarUrl = user.avatar() != null ? fileUtils.createFileUrl(user.avatar().name()) : null;
-
-        return new UserResponse(
-                user.id(),
-                user.username(),
-                avatarUrl
-        );
-    }
-
     public CommentResponse mapFromCommentModel(@NonNull Comment comment) {
+        var user = userResponseMapper.userToMinimalUserResponse(comment.user());
+
         return new CommentResponse(
                 comment.id(),
-                mapFromUserModel(comment.user()),
+                user,
                 comment.text(),
                 comment.createdAt()
         );

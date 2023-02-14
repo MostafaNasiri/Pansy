@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.user.presentation.request;
+package io.github.mostafanasiri.pansy.features.presentation.request;
 
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

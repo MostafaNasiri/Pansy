@@ -1,13 +1,14 @@
-package io.github.mostafanasiri.pansy.features.user.presentation;
+package io.github.mostafanasiri.pansy.features.presentation.controller;
 
 import io.github.mostafanasiri.pansy.common.ApiResponse;
+import io.github.mostafanasiri.pansy.features.presentation.mapper.UserResponseMapper;
+import io.github.mostafanasiri.pansy.features.presentation.request.FollowUnfollowUserRequest;
+import io.github.mostafanasiri.pansy.features.presentation.request.UpdateUserRequest;
+import io.github.mostafanasiri.pansy.features.presentation.response.user.FullUserResponse;
+import io.github.mostafanasiri.pansy.features.presentation.response.user.MinimalUserResponse;
 import io.github.mostafanasiri.pansy.features.user.domain.model.Image;
 import io.github.mostafanasiri.pansy.features.user.domain.model.User;
 import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
-import io.github.mostafanasiri.pansy.features.user.presentation.request.FollowUnfollowUserRequest;
-import io.github.mostafanasiri.pansy.features.user.presentation.request.UpdateUserRequest;
-import io.github.mostafanasiri.pansy.features.user.presentation.response.FollowersFollowingResponse;
-import io.github.mostafanasiri.pansy.features.user.presentation.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,20 +28,20 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
-    private ResponseMapper responseMapper;
+    private UserResponseMapper userResponseMapper;
 
     @GetMapping("/{user_id}")
     @Operation(summary = "Returns a user's public data")
-    public ResponseEntity<ApiResponse<UserResponse>> getPublicUserData(@PathVariable(name = "user_id") int userId) {
+    public ResponseEntity<ApiResponse<FullUserResponse>> getPublicUserData(@PathVariable(name = "user_id") int userId) {
         var user = userService.getUser(userId);
-        var response = responseMapper.fromUserModel(user);
+        var response = userResponseMapper.userToFullUserResponse(user);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }
 
     @PutMapping("/{user_id}")
     @Operation(summary = "Updates a user's data")
-    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
+    public ResponseEntity<ApiResponse<FullUserResponse>> updateUser(
             @PathVariable(name = "user_id") int userId,
             @Valid @RequestBody UpdateUserRequest request
     ) {
@@ -51,33 +52,33 @@ public class UserController {
         var user = new User(userId, request.getFullName(), avatarImage, request.getBio());
 
         var updatedUser = userService.updateUser(user);
-        var response = responseMapper.fromUserModel(updatedUser);
+        var response = userResponseMapper.userToFullUserResponse(updatedUser);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }
 
     @GetMapping("/{user_id}/followers")
     @Operation(summary = "Returns a list of users who are followers of the specified user id")
-    public ResponseEntity<ApiResponse<List<FollowersFollowingResponse>>> getFollowers(
+    public ResponseEntity<ApiResponse<List<MinimalUserResponse>>> getFollowers(
             @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
         var followers = userService.getFollowers(userId, page, size);
-        var response = responseMapper.fromUserModels(followers);
+        var response = userResponseMapper.usersToMinimalUserResponses(followers);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }
 
     @GetMapping("/{user_id}/following")
     @Operation(summary = "Returns a list of users the specified user id is following")
-    public ResponseEntity<ApiResponse<List<FollowersFollowingResponse>>> getFollowing(
+    public ResponseEntity<ApiResponse<List<MinimalUserResponse>>> getFollowing(
             @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
         var following = userService.getFollowing(userId, page, size);
-        var response = responseMapper.fromUserModels(following);
+        var response = userResponseMapper.usersToMinimalUserResponses(following);
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
     }

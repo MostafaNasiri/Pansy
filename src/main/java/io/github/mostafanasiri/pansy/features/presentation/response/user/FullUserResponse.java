@@ -1,6 +1,6 @@
-package io.github.mostafanasiri.pansy.features.user.presentation.response;
+package io.github.mostafanasiri.pansy.features.presentation.response.user;
 
-public record UserResponse(
+public record FullUserResponse(
         int id,
         String fullName,
         String username,

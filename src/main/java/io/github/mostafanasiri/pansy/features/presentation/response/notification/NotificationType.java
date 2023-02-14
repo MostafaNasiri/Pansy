@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features.notification.presentation.response;
+package io.github.mostafanasiri.pansy.features.presentation.response.notification;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

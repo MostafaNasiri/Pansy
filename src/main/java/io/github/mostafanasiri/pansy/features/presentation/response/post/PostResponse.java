@@ -1,11 +1,13 @@
-package io.github.mostafanasiri.pansy.features.post.presentation.response;
+package io.github.mostafanasiri.pansy.features.presentation.response.post;
+
+import io.github.mostafanasiri.pansy.features.presentation.response.user.MinimalUserResponse;
 
 import java.util.Date;
 import java.util.List;
 
 public record PostResponse(
         int id,
-        UserResponse author,
+        MinimalUserResponse user,
         String caption,
         List<String> imageUrls,
         int likeCount,

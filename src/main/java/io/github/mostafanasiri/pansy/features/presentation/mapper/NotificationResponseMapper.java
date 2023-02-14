@@ -1,20 +1,20 @@
-package io.github.mostafanasiri.pansy.features.notification.presentation;
+package io.github.mostafanasiri.pansy.features.presentation.mapper;
 
 import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.CommentNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.FollowNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.LikeNotification;
 import io.github.mostafanasiri.pansy.features.notification.domain.model.Notification;
-import io.github.mostafanasiri.pansy.features.notification.presentation.response.NotificationData;
-import io.github.mostafanasiri.pansy.features.notification.presentation.response.NotificationResponse;
-import io.github.mostafanasiri.pansy.features.notification.presentation.response.NotificationType;
+import io.github.mostafanasiri.pansy.features.presentation.response.notification.NotificationData;
+import io.github.mostafanasiri.pansy.features.presentation.response.notification.NotificationResponse;
+import io.github.mostafanasiri.pansy.features.presentation.response.notification.NotificationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component("notificationsFeatureResponseMapper")
-public class ResponseMapper {
+public class NotificationResponseMapper {
     @Autowired
     private FileUtils fileUtils;
 
