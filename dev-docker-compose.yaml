@@ -1,0 +1,45 @@
+name: pansy-dev
+
+services:
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=1
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 5555:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=a@a.com
+      - PGADMIN_DEFAULT_PASSWORD=0
+    depends_on:
+      - db
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+
+  redisinsight:
+    image: redislabs/redisinsight
+    ports:
+      - '8001:8001'
+    depends_on:
+      - redis
+    volumes:
+      - redisinsight-data:/db
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+  redis-data:
+  redisinsight-data:
