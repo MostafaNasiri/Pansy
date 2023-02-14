@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy;
 
+import io.github.mostafanasiri.pansy.app.domain.service.UserService;
 import io.github.mostafanasiri.pansy.auth.AuthController;
 import io.github.mostafanasiri.pansy.auth.JwtTokenUtil;
 import io.github.mostafanasiri.pansy.auth.dto.LoginRequest;
@@ -7,7 +8,6 @@ import io.github.mostafanasiri.pansy.auth.dto.RegisterRequest;
 import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
 import io.github.mostafanasiri.pansy.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

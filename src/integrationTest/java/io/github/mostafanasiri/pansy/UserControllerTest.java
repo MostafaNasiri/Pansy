@@ -1,14 +1,14 @@
 package io.github.mostafanasiri.pansy;
 
+import io.github.mostafanasiri.pansy.app.domain.service.UserService;
+import io.github.mostafanasiri.pansy.app.presentation.controller.UserController;
+import io.github.mostafanasiri.pansy.app.presentation.request.FollowUnfollowUserRequest;
+import io.github.mostafanasiri.pansy.app.presentation.request.UpdateUserRequest;
 import io.github.mostafanasiri.pansy.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.features.file.data.FileEntity;
 import io.github.mostafanasiri.pansy.features.file.domain.FileService;
 import io.github.mostafanasiri.pansy.features.file.presentation.FileUtils;
-import io.github.mostafanasiri.pansy.features.presentation.controller.UserController;
-import io.github.mostafanasiri.pansy.features.presentation.request.FollowUnfollowUserRequest;
-import io.github.mostafanasiri.pansy.features.presentation.request.UpdateUserRequest;
 import io.github.mostafanasiri.pansy.features.user.data.entity.jpa.UserEntity;
-import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

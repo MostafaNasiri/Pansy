@@ -1,13 +1,13 @@
 package io.github.mostafanasiri.pansy.auth;
 
+import io.github.mostafanasiri.pansy.app.domain.model.User;
+import io.github.mostafanasiri.pansy.app.domain.service.UserService;
 import io.github.mostafanasiri.pansy.auth.dto.LoginRequest;
 import io.github.mostafanasiri.pansy.auth.dto.LoginResponse;
 import io.github.mostafanasiri.pansy.auth.dto.RegisterRequest;
 import io.github.mostafanasiri.pansy.auth.dto.RegisterResponse;
 import io.github.mostafanasiri.pansy.common.ApiResponse;
 import io.github.mostafanasiri.pansy.common.exception.AuthenticationException;
-import io.github.mostafanasiri.pansy.features.user.domain.model.User;
-import io.github.mostafanasiri.pansy.features.user.domain.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
