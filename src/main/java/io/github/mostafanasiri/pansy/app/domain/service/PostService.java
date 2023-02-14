@@ -12,6 +12,7 @@ import io.github.mostafanasiri.pansy.app.data.repository.jpa.*;
 import io.github.mostafanasiri.pansy.app.data.repository.redis.PostRedisRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.app.domain.mapper.PostDomainMapper;
+import io.github.mostafanasiri.pansy.app.domain.model.Image;
 import io.github.mostafanasiri.pansy.app.domain.model.Post;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.LikeNotification;
@@ -74,12 +75,8 @@ public class PostService extends BaseService {
         return post;
     }
 
-    public @NonNull List<Post> getUserFeed(int userId, int page, int size) {
-        if (userId != getAuthenticatedUserId()) {
-            throw new AuthorizationException("Forbidden action");
-        }
-
-        var feed = feedJpaRepository.findById(userId);
+    public @NonNull List<Post> getAuthenticatedUserFeed(int page, int size) {
+        var feed = feedJpaRepository.findById(getAuthenticatedUserId());
 
         List<Post> result = new ArrayList<>();
 

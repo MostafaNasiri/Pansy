@@ -2,6 +2,7 @@ package io.github.mostafanasiri.pansy.app.presentation.controller;
 
 import io.github.mostafanasiri.pansy.app.common.ApiResponse;
 import io.github.mostafanasiri.pansy.app.domain.model.Comment;
+import io.github.mostafanasiri.pansy.app.domain.model.Image;
 import io.github.mostafanasiri.pansy.app.domain.model.Post;
 import io.github.mostafanasiri.pansy.app.domain.service.CommentService;
 import io.github.mostafanasiri.pansy.app.domain.service.PostService;
@@ -51,14 +52,13 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
 
-    @GetMapping("/users/{user_id}/feed")
-    @Operation(summary = "Returns a list of recent posts that are posted by the specified user's followers")
+    @GetMapping("/users/me/feed")
+    @Operation(summary = "Returns a list of recent posts that are posted by the authenticated user's followers")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getFeed(
-            @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "30") @Max(50) int size
     ) {
-        var posts = postService.getUserFeed(userId, page, size);
+        var posts = postService.getAuthenticatedUserFeed(page, size);
         var result = posts.stream()
                 .map(postResponseMapper::mapFromPostModel)
                 .toList();
