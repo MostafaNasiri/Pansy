@@ -17,8 +17,6 @@ services:
     environment:
       - PGADMIN_DEFAULT_EMAIL=a@a.com
       - PGADMIN_DEFAULT_PASSWORD=0
-    depends_on:
-      - db
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 
@@ -33,13 +31,31 @@ services:
     image: redislabs/redisinsight
     ports:
       - '8001:8001'
-    depends_on:
-      - redis
     volumes:
       - redisinsight-data:/db
+
+  elasticsearch:
+    image: elasticsearch:7.17.9
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: kibana:7.17.9
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
 
 volumes:
   postgres-data:
   pgadmin-data:
   redis-data:
   redisinsight-data:
+  elasticsearch-data:
