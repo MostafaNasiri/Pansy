@@ -5,12 +5,15 @@ import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.lang.NonNull;
 
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@Indexed(index = "UserIndex")
 @Entity
 @Table(
         name = "users",
@@ -20,9 +23,11 @@ import org.springframework.lang.NonNull;
 )
 @EntityListeners(AuditingEntityListener.class)
 public class UserEntity extends BaseEntity {
+    @FullTextField
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @FullTextField
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
