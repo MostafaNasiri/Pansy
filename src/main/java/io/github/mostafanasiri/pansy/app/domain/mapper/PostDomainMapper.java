@@ -1,10 +1,8 @@
 package io.github.mostafanasiri.pansy.app.domain.mapper;
 
-import io.github.mostafanasiri.pansy.app.data.entity.jpa.CommentEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FeedEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.redis.PostRedis;
-import io.github.mostafanasiri.pansy.app.domain.model.Comment;
 import io.github.mostafanasiri.pansy.app.domain.model.Image;
 import io.github.mostafanasiri.pansy.app.domain.model.Post;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
@@ -112,10 +110,5 @@ public class PostDomainMapper {
 
     public FeedEntity.FeedItem postToFeedItem(Post post) {
         return new FeedEntity.FeedItem(post.getUser().id(), post.getId());
-    }
-
-    public Comment commentEntityToComment(CommentEntity entity) {
-        var user = userDomainMapper.userEntityToUser(entity.getUser());
-        return new Comment(entity.getId(), user, entity.getText(), entity.getCreatedAt());
     }
 }

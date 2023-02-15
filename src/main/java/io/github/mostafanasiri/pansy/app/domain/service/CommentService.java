@@ -8,7 +8,7 @@ import io.github.mostafanasiri.pansy.app.data.entity.jpa.CommentEntity;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.CommentJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
-import io.github.mostafanasiri.pansy.app.domain.mapper.PostDomainMapper;
+import io.github.mostafanasiri.pansy.app.domain.mapper.CommentDomainMapper;
 import io.github.mostafanasiri.pansy.app.domain.model.Comment;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.CommentNotification;
@@ -35,7 +35,7 @@ public class CommentService extends BaseService {
     private PostJpaRepository postJpaRepository;
 
     @Autowired
-    private PostDomainMapper postDomainMapper;
+    private CommentDomainMapper commentDomainMapper;
 
     public @NonNull List<Comment> getComments(int postId, int page, int size) {
         var post = postService.getPost(postId);
@@ -44,7 +44,7 @@ public class CommentService extends BaseService {
         var entities = commentJpaRepository.getComments(post.getId(), pageRequest);
 
         return entities.stream()
-                .map(postDomainMapper::commentEntityToComment)
+                .map(commentDomainMapper::commentEntityToComment)
                 .toList();
     }
 
@@ -71,7 +71,7 @@ public class CommentService extends BaseService {
         );
         notificationService.addCommentNotification(commentNotification);
 
-        return postDomainMapper.commentEntityToComment(commentEntity);
+        return commentDomainMapper.commentEntityToComment(commentEntity);
     }
 
     @Transactional
