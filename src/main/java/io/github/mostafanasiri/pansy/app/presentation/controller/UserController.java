@@ -15,8 +15,8 @@ import io.github.mostafanasiri.pansy.app.presentation.response.PostResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +42,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<MinimalUserResponse>>> searchInUsers(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
+            @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {
         var result = userService.searchInUsers(name, page, size);
         var response = userResponseMapper.usersToMinimalUserResponses(result);
@@ -82,7 +82,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<MinimalUserResponse>>> getFollowers(
             @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
+            @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {
         var followers = userService.getFollowers(userId, page, size);
         var response = userResponseMapper.usersToMinimalUserResponses(followers);
@@ -95,7 +95,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<MinimalUserResponse>>> getFollowing(
             @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
+            @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {
         var following = userService.getFollowing(userId, page, size);
         var response = userResponseMapper.usersToMinimalUserResponses(following);
@@ -130,7 +130,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<PostResponse>>> getPosts(
             @PathVariable(name = "user_id") int userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
+            @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {
         var posts = postService.getUserPosts(userId, page, size);
         var result = posts.stream()
@@ -144,7 +144,7 @@ public class UserController {
     @Operation(summary = "Returns a list of recent posts that are posted by the authenticated user's followers")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getFeed(
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
+            @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {
         var posts = postService.getAuthenticatedUserFeed(page, size);
         var result = posts.stream()

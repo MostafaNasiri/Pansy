@@ -16,8 +16,8 @@ import io.github.mostafanasiri.pansy.app.presentation.response.PostResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,7 +93,7 @@ public class PostController {
     public ResponseEntity<ApiResponse<List<MinimalUserResponse>>> getPostLikes(
             @PathVariable(name = "post_id") int postId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
+            @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {
         var users = postService.getPostLikers(postId, page, size);
         var result = userResponseMapper.usersToMinimalUserResponses(users);
@@ -117,7 +117,7 @@ public class PostController {
     public ResponseEntity<ApiResponse<List<CommentResponse>>> getComments(
             @PathVariable(name = "post_id") int postId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
+            @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {
         var comments = commentService.getComments(postId, page, size);
         var result = comments.stream()

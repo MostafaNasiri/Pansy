@@ -5,8 +5,8 @@ import io.github.mostafanasiri.pansy.app.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.app.presentation.mapper.NotificationResponseMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ public class NotificationController {
     @Operation(summary = "Returns a list of the authenticated user's notifications")
     public ResponseEntity<ApiResponse<List>> getNotifications(
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(30) int size
+            @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {
         var notifications = service.getNotifications(page, size);
         var result = notificationResponseMapper.mapFromNotificationModels(notifications);
