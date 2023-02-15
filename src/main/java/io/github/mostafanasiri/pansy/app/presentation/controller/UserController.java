@@ -37,6 +37,19 @@ public class UserController {
     @Autowired
     private PostResponseMapper postResponseMapper;
 
+    @GetMapping("/")
+    @Operation(summary = "Searches in users by their usernames and full names")
+    public ResponseEntity<ApiResponse<List<MinimalUserResponse>>> searchInUsers(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+            @RequestParam(defaultValue = "30") @Max(50) int size
+    ) {
+        var result = userService.searchInUsers(name, page, size);
+        var response = userResponseMapper.usersToMinimalUserResponses(result);
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, response), HttpStatus.OK);
+    }
+
     @GetMapping("/{user_id}")
     @Operation(summary = "Returns a user's public data")
     public ResponseEntity<ApiResponse<FullUserResponse>> getPublicUserData(@PathVariable(name = "user_id") int userId) {

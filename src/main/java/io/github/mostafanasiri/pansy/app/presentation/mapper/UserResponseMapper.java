@@ -40,8 +40,8 @@ public class UserResponseMapper {
 
         return new MinimalUserResponse(
                 user.id(),
-                user.fullName(),
                 user.username(),
+                user.fullName(),
                 avatarUrl
         );
     }

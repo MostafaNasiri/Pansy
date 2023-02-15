@@ -18,6 +18,10 @@ import io.github.mostafanasiri.pansy.app.domain.mapper.UserDomainMapper;
 import io.github.mostafanasiri.pansy.app.domain.model.File;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,10 +56,37 @@ public class UserService extends BaseService {
     @Autowired
     private FileService fileService;
 
+    @PersistenceContext
+    private EntityManager entityManager;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserDomainMapper userDomainMapper;
+
+    public @NonNull List<User> searchInUsers(@NonNull String name, int page, int size) {
+        SearchSession searchSession = Search.session(entityManager);
+
+        var pageRequest = PageRequest.of(page, size);
+        var searchResult = searchSession.search(UserEntity.class)
+                .where(
+                        f -> f.bool()
+                                .should(
+                                        f.match()
+                                                .field("username")
+                                                .matching(name)
+                                                .fuzzy()
+                                )
+                                .should(
+                                        f.match()
+                                                .field("fullName")
+                                                .matching(name)
+                                                .fuzzy()
+                                )
+                )
+                .fetchHits((int) pageRequest.getOffset(), pageRequest.getPageSize());
+
+        return userDomainMapper.userEntitiesToUsers(searchResult);
+    }
 
     public @NonNull List<User> getUsers(@NonNull List<Integer> userIds) {
         var cachedUsers = getCachedUsers(userIds);
