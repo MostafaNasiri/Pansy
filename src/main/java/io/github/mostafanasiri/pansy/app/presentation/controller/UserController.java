@@ -3,12 +3,15 @@ package io.github.mostafanasiri.pansy.app.presentation.controller;
 import io.github.mostafanasiri.pansy.app.common.ApiResponse;
 import io.github.mostafanasiri.pansy.app.domain.model.Image;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
+import io.github.mostafanasiri.pansy.app.domain.service.PostService;
 import io.github.mostafanasiri.pansy.app.domain.service.UserService;
+import io.github.mostafanasiri.pansy.app.presentation.mapper.PostResponseMapper;
 import io.github.mostafanasiri.pansy.app.presentation.mapper.UserResponseMapper;
 import io.github.mostafanasiri.pansy.app.presentation.request.FollowUnfollowUserRequest;
 import io.github.mostafanasiri.pansy.app.presentation.request.UpdateUserRequest;
 import io.github.mostafanasiri.pansy.app.presentation.response.FullUserResponse;
 import io.github.mostafanasiri.pansy.app.presentation.response.MinimalUserResponse;
+import io.github.mostafanasiri.pansy.app.presentation.response.PostResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,7 +31,11 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
+    private PostService postService;
+    @Autowired
     private UserResponseMapper userResponseMapper;
+    @Autowired
+    private PostResponseMapper postResponseMapper;
 
     @GetMapping("/{user_id}")
     @Operation(summary = "Returns a user's public data")
@@ -103,5 +110,34 @@ public class UserController {
         userService.unfollowUser(userId, request.targetUserId());
 
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
+    }
+
+    @GetMapping("/{user_id}/posts")
+    @Operation(summary = "Returns a user's posts")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getPosts(
+            @PathVariable(name = "user_id") int userId,
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+            @RequestParam(defaultValue = "30") @Max(50) int size
+    ) {
+        var posts = postService.getUserPosts(userId, page, size);
+        var result = posts.stream()
+                .map(postResponseMapper::mapFromPostModel)
+                .toList();
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
+    }
+
+    @GetMapping("/me/feed")
+    @Operation(summary = "Returns a list of recent posts that are posted by the authenticated user's followers")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getFeed(
+            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+            @RequestParam(defaultValue = "30") @Max(50) int size
+    ) {
+        var posts = postService.getAuthenticatedUserFeed(page, size);
+        var result = posts.stream()
+                .map(postResponseMapper::mapFromPostModel)
+                .toList();
+
+        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
 }

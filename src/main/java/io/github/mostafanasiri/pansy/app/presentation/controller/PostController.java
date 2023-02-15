@@ -27,6 +27,7 @@ import java.util.List;
 
 @Tag(name = "Post")
 @RestController
+@RequestMapping("/posts")
 public class PostController {
     @Autowired
     private PostService postService;
@@ -37,36 +38,7 @@ public class PostController {
     @Autowired
     private PostResponseMapper postResponseMapper;
 
-    @GetMapping("/users/{user_id}/posts")
-    @Operation(summary = "Returns a user's posts")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getPosts(
-            @PathVariable(name = "user_id") int userId,
-            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
-    ) {
-        var posts = postService.getUserPosts(userId, page, size);
-        var result = posts.stream()
-                .map(postResponseMapper::mapFromPostModel)
-                .toList();
-
-        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
-    }
-
-    @GetMapping("/users/me/feed")
-    @Operation(summary = "Returns a list of recent posts that are posted by the authenticated user's followers")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getFeed(
-            @RequestParam(defaultValue = "0") @PositiveOrZero int page,
-            @RequestParam(defaultValue = "30") @Max(50) int size
-    ) {
-        var posts = postService.getAuthenticatedUserFeed(page, size);
-        var result = posts.stream()
-                .map(postResponseMapper::mapFromPostModel)
-                .toList();
-
-        return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
-    }
-
-    @PostMapping("/posts")
+    @PostMapping("/")
     @Operation(summary = "Creates a new post for the authenticated user")
     public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody CreateEditPostRequest request) {
         var post = new Post(
@@ -81,7 +53,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
     }
 
-    @PutMapping("/posts/{post_id}")
+    @PutMapping("/{post_id}")
     @Operation(summary = "Edits a post")
     public ResponseEntity<ApiResponse<PostResponse>> editPost(
             @PathVariable(name = "post_id") int postId,
@@ -100,7 +72,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
 
-    @DeleteMapping("/posts/{post_id}")
+    @DeleteMapping("/{post_id}")
     @Operation(summary = "Deletes a post")
     public ResponseEntity<ApiResponse<Boolean>> deletePost(@PathVariable(name = "post_id") int postId) {
         postService.deletePost(postId);
@@ -108,7 +80,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.OK);
     }
 
-    @PostMapping("/posts/{post_id}/likes")
+    @PostMapping("/{post_id}/likes")
     @Operation(summary = "Likes the specified post by the authenticated user")
     public ResponseEntity<ApiResponse<Boolean>> likePost(@PathVariable(name = "post_id") int postId) {
         postService.likePost(postId);
@@ -116,7 +88,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
-    @GetMapping("/posts/{post_id}/likes")
+    @GetMapping("/{post_id}/likes")
     @Operation(summary = "Returns a list of users who liked the specified post id")
     public ResponseEntity<ApiResponse<List<MinimalUserResponse>>> getPostLikes(
             @PathVariable(name = "post_id") int postId,
@@ -129,7 +101,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
 
-    @DeleteMapping("/posts/{post_id}/likes/{user_id}")
+    @DeleteMapping("/{post_id}/likes/{user_id}")
     @Operation(summary = "Unlikes a post that has already been liked by the authenticated user")
     public ResponseEntity<ApiResponse<Boolean>> unlikePost(
             @PathVariable(name = "post_id") int postId,
@@ -140,7 +112,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, true), HttpStatus.CREATED);
     }
 
-    @GetMapping("/posts/{post_id}/comments")
+    @GetMapping("/{post_id}/comments")
     @Operation(summary = "Returns comments of the specified post id")
     public ResponseEntity<ApiResponse<List<CommentResponse>>> getComments(
             @PathVariable(name = "post_id") int postId,
@@ -155,7 +127,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.OK);
     }
 
-    @PostMapping("/posts/{post_id}/comments")
+    @PostMapping("/{post_id}/comments")
     @Operation(summary = "Adds a comment for the specified post id")
     public ResponseEntity<ApiResponse<CommentResponse>> addComment(
             @PathVariable(name = "post_id") int postId,
@@ -167,7 +139,7 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(ApiResponse.Status.SUCCESS, result), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/posts/{post_id}/comments/{comment_id}")
+    @DeleteMapping("/{post_id}/comments/{comment_id}")
     @Operation(summary = "Removes a comment from the specified post id")
     public ResponseEntity<ApiResponse<Boolean>> deleteComment(
             @PathVariable(name = "post_id") int postId,
