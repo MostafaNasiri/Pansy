@@ -4,6 +4,7 @@ import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.CommentNot
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.NotificationEntity;
+import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.CommentNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.LikeNotification;
@@ -18,6 +19,34 @@ public class NotificationDomainMapper {
     @Autowired
     private UserDomainMapper userDomainMapper;
 
+    private static CommentNotification getCommentNotification(CommentNotificationEntity cne, User notifierUser) {
+        var postId = cne.getPost().getId();
+        var commentId = cne.getComment().getId();
+        var postThumbnailName = cne.getPost().getImages().get(0).getName();
+
+        return new CommentNotification(
+                cne.getId(),
+                notifierUser,
+                null,
+                commentId,
+                postId,
+                postThumbnailName
+        );
+    }
+
+    private static LikeNotification getLikeNotification(LikeNotificationEntity lne, User notifierUser) {
+        var postId = lne.getPost().getId();
+        var postThumbnailName = lne.getPost().getImages().get(0).getName();
+
+        return new LikeNotification(
+                lne.getId(),
+                notifierUser,
+                null,
+                postId,
+                postThumbnailName
+        );
+    }
+
     public List<Notification> notificationEntitiesToNotifications(List<NotificationEntity> entities) {
         return entities.stream()
                 .map(entity -> {
@@ -26,29 +55,9 @@ public class NotificationDomainMapper {
                     Notification notification = null;
 
                     if (entity instanceof LikeNotificationEntity lne) {
-                        var postId = lne.getPost().getId();
-                        var postThumbnailName = lne.getPost().getImages().get(0).getName();
-
-                        notification = new LikeNotification(
-                                entity.getId(),
-                                notifierUser,
-                                null,
-                                postId,
-                                postThumbnailName
-                        );
+                        notification = getLikeNotification(lne, notifierUser);
                     } else if (entity instanceof CommentNotificationEntity cne) {
-                        var postId = cne.getPost().getId();
-                        var commentId = cne.getComment().getId();
-                        var postThumbnailName = cne.getPost().getImages().get(0).getName();
-
-                        notification = new CommentNotification(
-                                entity.getId(),
-                                notifierUser,
-                                null,
-                                commentId,
-                                postId,
-                                postThumbnailName
-                        );
+                        notification = getCommentNotification(cne, notifierUser);
                     } else if (entity instanceof FollowNotificationEntity) {
                         notification = new FollowNotification(entity.getId(), notifierUser, null);
                     }
