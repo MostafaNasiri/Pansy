@@ -3,6 +3,7 @@ package io.github.mostafanasiri.pansy.app.presentation.controller;
 import io.github.mostafanasiri.pansy.app.common.ApiResponse;
 import io.github.mostafanasiri.pansy.app.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.app.presentation.mapper.NotificationResponseMapper;
+import io.github.mostafanasiri.pansy.app.presentation.response.notification.NotificationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -27,7 +28,7 @@ public class NotificationController {
 
     @GetMapping("/users/me/notifications")
     @Operation(summary = "Returns a list of the authenticated user's notifications")
-    public ResponseEntity<ApiResponse<List>> getNotifications(
+    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getNotifications(
             @RequestParam(defaultValue = "0") @PositiveOrZero int page,
             @RequestParam(defaultValue = "50") @Size(min = 1, max = 50) int size
     ) {

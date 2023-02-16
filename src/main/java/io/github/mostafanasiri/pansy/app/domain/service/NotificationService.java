@@ -5,6 +5,7 @@ import io.github.mostafanasiri.pansy.app.common.BaseService;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.CommentNotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.FollowNotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.LikeNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.NotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.CommentJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.NotificationJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.PostJpaRepository;
@@ -41,12 +42,17 @@ public class NotificationService extends BaseService {
         var pageRequest = PageRequest.of(page, size);
         var result = notificationJpaRepository.getNotifications(getAuthenticatedUserId(), pageRequest);
 
+        markUnreadNotificationsAsRead(result);
+
+        return notificationDomainMapper.notificationEntitiesToNotifications(result);
+    }
+
+    private void markUnreadNotificationsAsRead(List<NotificationEntity> result) {
         var notificationIds = result.stream()
+                .filter(notificationEntity -> !notificationEntity.isRead())
                 .map(BaseEntity::getId)
                 .toList();
         notificationJpaRepository.markNotificationsAsRead(notificationIds);
-
-        return notificationDomainMapper.notificationEntitiesToNotifications(result);
     }
 
     public int getUnreadNotificationsCount() {
