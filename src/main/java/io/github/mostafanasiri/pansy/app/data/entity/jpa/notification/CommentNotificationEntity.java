@@ -4,12 +4,14 @@ import io.github.mostafanasiri.pansy.app.data.entity.jpa.CommentEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @DiscriminatorValue("comment")
 public class CommentNotificationEntity extends NotificationEntity {

@@ -94,7 +94,7 @@ public class CommentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void addComment_successful_savesCommentInDatabase() {
+    public void addComment_successful_storesCommentInDatabase() {
         // Arrange
         var postId = 1;
         var comment = new Comment("x");

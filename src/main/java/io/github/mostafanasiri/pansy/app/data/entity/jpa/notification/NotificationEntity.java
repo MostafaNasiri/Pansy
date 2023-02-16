@@ -3,12 +3,14 @@ package io.github.mostafanasiri.pansy.app.data.entity.jpa.notification;
 import io.github.mostafanasiri.pansy.app.common.BaseEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(
         name = "notifications",

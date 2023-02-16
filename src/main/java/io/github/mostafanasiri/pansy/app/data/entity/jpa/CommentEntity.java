@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class CommentEntity extends BaseEntity {
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "comment")
     private List<CommentNotificationEntity> notifications;
 
-    public CommentEntity(UserEntity user, PostEntity post, String text) {
+    public CommentEntity(@NonNull UserEntity user, @NonNull PostEntity post, @NonNull String text) {
         this.user = user;
         this.post = post;
         this.text = text;
