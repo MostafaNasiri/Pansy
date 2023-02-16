@@ -76,10 +76,9 @@ public class CommentService extends BaseService {
 
     @Transactional
     public void deleteComment(int postId, int commentId) {
-        var commentator = userJpaRepository.getReferenceById(getAuthenticatedUserId());
         var commentEntity = getCommentEntity(commentId);
 
-        if (commentEntity.getUser().getId() != commentator.getId()) {
+        if (commentEntity.getUser().getId() != getAuthenticatedUserId()) {
             throw new AuthorizationException("Comment does not belong to the authenticated user");
         }
 
@@ -90,6 +89,7 @@ public class CommentService extends BaseService {
         }
 
         commentJpaRepository.delete(commentEntity);
+
         updatePostCommentCount(post.getId());
         notificationService.deleteCommentNotification(commentEntity.getId());
     }

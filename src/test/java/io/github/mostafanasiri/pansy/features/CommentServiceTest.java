@@ -1,6 +1,9 @@
 package io.github.mostafanasiri.pansy.features;
 
+import io.github.mostafanasiri.pansy.app.common.exception.AuthorizationException;
+import io.github.mostafanasiri.pansy.app.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.CommentEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.CommentJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.PostJpaRepository;
@@ -29,14 +32,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceTest {
+    private final static int AUTHENTICATED_USER_ID = 123;
+
     @Mock
     private PostService postService;
     @Mock
@@ -68,7 +76,7 @@ public class CommentServiceTest {
         when(appUserDetails.getUser())
                 .thenReturn(Mockito.mock(UserEntity.class));
         when(appUserDetails.getUser().getId())
-                .thenReturn(1);
+                .thenReturn(AUTHENTICATED_USER_ID);
 
         when(authentication.getPrincipal())
                 .thenReturn(appUserDetails);
@@ -89,9 +97,9 @@ public class CommentServiceTest {
         service.getComments(postId, page, size);
 
         // Assert
-        Mockito.verify(postService)
+        verify(postService)
                 .getPost(postId);
-        Mockito.verify(commentJpaRepository)
+        verify(commentJpaRepository)
                 .getComments(postId, pageable);
     }
 
@@ -135,7 +143,7 @@ public class CommentServiceTest {
         service.addComment(postId, comment);
 
         // Assert
-        Mockito.verify(commentJpaRepository)
+        verify(commentJpaRepository)
                 .save(any());
     }
 
@@ -165,7 +173,7 @@ public class CommentServiceTest {
         service.addComment(postId, comment);
 
         // Assert
-        Mockito.verify(postService)
+        verify(postService)
                 .updatePostCommentCount(postId, postCommentCount);
     }
 
@@ -197,7 +205,162 @@ public class CommentServiceTest {
                 commentEntity.getId(),
                 postId
         );
-        Mockito.verify(notificationService)
+        verify(notificationService)
                 .addCommentNotification(expectedNotification);
+    }
+
+    @Test
+    public void deleteComment_commentNotBelongingToAuthenticatedUser_throwsException() {
+        // Arrange
+        var postId = 1;
+        var commentId = 2;
+
+        var commentEntity = Mockito.mock(CommentEntity.class);
+        when(commentEntity.getUser())
+                .thenReturn(Mockito.mock(UserEntity.class));
+        when(commentEntity.getUser().getId())
+                .thenReturn(AUTHENTICATED_USER_ID * 2);
+
+        when(commentJpaRepository.findById(commentId))
+                .thenReturn(Optional.of(commentEntity));
+
+        // Act & Assert
+        var exception = assertThrows(
+                AuthorizationException.class,
+                () -> service.deleteComment(postId, commentId),
+                ""
+        );
+        var expectedMessage = "Comment does not belong to the authenticated user";
+
+        assertEquals(exception.getMessage(), expectedMessage);
+    }
+
+    @Test
+    public void deleteComment_commentNotBelongingToPost_throwsException() {
+        // Arrange
+        var postId = 1;
+        var commentId = 2;
+
+        var commentEntity = Mockito.mock(CommentEntity.class);
+        when(commentEntity.getUser())
+                .thenReturn(Mockito.mock(UserEntity.class));
+        when(commentEntity.getUser().getId())
+                .thenReturn(AUTHENTICATED_USER_ID);
+        when(commentEntity.getPost())
+                .thenReturn(Mockito.mock(PostEntity.class));
+        when(commentEntity.getPost().getId())
+                .thenReturn(postId * 2);
+
+        when(commentJpaRepository.findById(commentId))
+                .thenReturn(Optional.of(commentEntity));
+
+        when(postService.getPost(postId))
+                .thenReturn(new Post(postId, null, null));
+
+        // Act & Assert
+        var exception = assertThrows(
+                InvalidInputException.class,
+                () -> service.deleteComment(postId, commentId),
+                ""
+        );
+        var expectedMessage = "Comment does not belong to this post";
+
+        assertEquals(exception.getMessage(), expectedMessage);
+    }
+
+    @Test
+    public void deleteComment_successful_deletesCommentFromDatabase() {
+        // Arrange
+        var postId = 1;
+        var commentId = 2;
+
+        var commentEntity = Mockito.mock(CommentEntity.class);
+        when(commentEntity.getUser())
+                .thenReturn(Mockito.mock(UserEntity.class));
+        when(commentEntity.getUser().getId())
+                .thenReturn(AUTHENTICATED_USER_ID);
+        when(commentEntity.getPost())
+                .thenReturn(Mockito.mock(PostEntity.class));
+        when(commentEntity.getPost().getId())
+                .thenReturn(postId);
+
+        when(commentJpaRepository.findById(commentId))
+                .thenReturn(Optional.of(commentEntity));
+
+        when(postService.getPost(postId))
+                .thenReturn(new Post(postId, null, null));
+
+        // Act
+        service.deleteComment(postId, commentId);
+
+        // Assert
+        verify(commentJpaRepository)
+                .delete(commentEntity);
+    }
+
+    @Test
+    public void deleteComment_successful_updatesPostCommentCount() {
+        // Arrange
+        var postId = 1;
+        var commentId = 2;
+
+        var commentEntity = Mockito.mock(CommentEntity.class);
+        when(commentEntity.getUser())
+                .thenReturn(Mockito.mock(UserEntity.class));
+        when(commentEntity.getUser().getId())
+                .thenReturn(AUTHENTICATED_USER_ID);
+        when(commentEntity.getPost())
+                .thenReturn(Mockito.mock(PostEntity.class));
+        when(commentEntity.getPost().getId())
+                .thenReturn(postId);
+
+        when(commentJpaRepository.findById(commentId))
+                .thenReturn(Optional.of(commentEntity));
+
+        when(postService.getPost(postId))
+                .thenReturn(new Post(postId, null, null));
+
+        var postCommentCount = 3;
+        when(commentJpaRepository.getPostCommentCount(postId))
+                .thenReturn(postCommentCount);
+
+        // Act
+        service.deleteComment(postId, commentId);
+
+        // Assert
+        verify(postService)
+                .updatePostCommentCount(postId, postCommentCount);
+    }
+
+    @Test
+    public void deleteComment_successful_deletesCommentNotification() {
+        // Arrange
+        var postId = 1;
+        var commentId = 2;
+
+        var commentEntity = Mockito.mock(CommentEntity.class);
+        when(commentEntity.getId())
+                .thenReturn(commentId);
+        when(commentEntity.getUser())
+                .thenReturn(Mockito.mock(UserEntity.class));
+        when(commentEntity.getUser().getId())
+                .thenReturn(AUTHENTICATED_USER_ID);
+        when(commentEntity.getPost())
+                .thenReturn(Mockito.mock(PostEntity.class));
+        when(commentEntity.getPost().getId())
+                .thenReturn(postId);
+
+        when(commentJpaRepository.findById(commentId))
+                .thenReturn(Optional.of(commentEntity));
+
+        when(postService.getPost(postId))
+                .thenReturn(new Post(postId, null, null));
+
+        // Act
+        service.deleteComment(postId, commentId);
+
+        // Assert
+        verify(notificationService)
+                .deleteCommentNotification(commentId);
     }
 }
