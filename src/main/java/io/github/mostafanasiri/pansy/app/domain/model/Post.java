@@ -11,8 +11,8 @@ public class Post {
     private User user;
     private String caption;
     private List<Image> images;
-    private Integer likeCount;
-    private Integer commentCount;
+    private int likeCount;
+    private int commentCount;
     private Date createdAt;
     private boolean isLikedByAuthenticatedUser;
 
@@ -32,8 +32,8 @@ public class Post {
             User user,
             String caption,
             List<Image> images,
-            Integer likeCount,
-            Integer commentCount,
+            int likeCount,
+            int commentCount,
             Date createdAt
     ) {
         this.id = id;

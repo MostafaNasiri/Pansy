@@ -29,8 +29,8 @@ public class PostResponseMapper {
                 user,
                 post.getCaption(),
                 imageUrls,
-                post.getLikeCount() != null ? post.getLikeCount() : 0,
-                post.getCommentCount() != null ? post.getCommentCount() : 0,
+                0,
+                0,
                 post.isLikedByAuthenticatedUser(),
                 post.getCreatedAt()
         );

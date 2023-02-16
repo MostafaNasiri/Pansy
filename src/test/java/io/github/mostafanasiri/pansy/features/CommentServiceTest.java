@@ -103,7 +103,7 @@ public class CommentServiceTest extends BaseServiceTest {
         when(userJpaRepository.getReferenceById(anyInt()))
                 .thenReturn(commentator);
 
-        var post = new Post(postId, new User(1), null, null, null, null, null);
+        var post = new Post(postId, new User(1), null, null, 0, 0, null);
         when(postService.getPost(postId))
                 .thenReturn(post);
 
@@ -129,7 +129,7 @@ public class CommentServiceTest extends BaseServiceTest {
         when(userJpaRepository.getReferenceById(anyInt()))
                 .thenReturn(commentator);
 
-        var post = new Post(postId, new User(1), null, null, null, null, null);
+        var post = new Post(postId, new User(1), null, null, 0, 0, null);
         when(postService.getPost(postId))
                 .thenReturn(post);
 
@@ -159,7 +159,7 @@ public class CommentServiceTest extends BaseServiceTest {
         when(userJpaRepository.getReferenceById(anyInt()))
                 .thenReturn(commentator);
 
-        var post = new Post(postId, new User(1), null, null, null, null, null);
+        var post = new Post(postId, new User(1), null, null, 0, 0, null);
         when(postService.getPost(postId))
                 .thenReturn(post);
 

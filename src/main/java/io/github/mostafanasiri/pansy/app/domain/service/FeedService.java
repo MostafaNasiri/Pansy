@@ -22,6 +22,7 @@ public class FeedService extends BaseService {
     private FeedJpaRepository feedJpaRepository;
     @Autowired
     private FollowerJpaRepository followerJpaRepository;
+
     @Autowired
     private PostDomainMapper postDomainMapper;
 

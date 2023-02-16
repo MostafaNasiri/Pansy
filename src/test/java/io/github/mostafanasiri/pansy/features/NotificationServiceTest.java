@@ -18,7 +18,6 @@ import io.github.mostafanasiri.pansy.app.domain.model.notification.CommentNotifi
 import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.LikeNotification;
 import io.github.mostafanasiri.pansy.app.domain.service.NotificationService;
-import io.jsonwebtoken.lang.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,9 +71,9 @@ public class NotificationServiceTest extends BaseServiceTest {
         var size = 1;
         var pageRequest = PageRequest.of(page, size);
 
-        List<NotificationEntity> notifications = Collections.arrayToList(new NotificationEntity[]{
-                new CommentNotificationEntity()
-        });
+        List<NotificationEntity> notifications = new ArrayList<>();
+        notifications.add(new CommentNotificationEntity());
+
         when(notificationJpaRepository.getNotifications(AUTHENTICATED_USER_ID, pageRequest))
                 .thenReturn(notifications);
 
