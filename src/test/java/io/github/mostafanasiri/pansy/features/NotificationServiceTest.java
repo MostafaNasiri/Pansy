@@ -15,6 +15,8 @@ import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.app.domain.mapper.NotificationDomainMapper;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.model.notification.CommentNotification;
+import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotification;
+import io.github.mostafanasiri.pansy.app.domain.model.notification.LikeNotification;
 import io.github.mostafanasiri.pansy.app.domain.service.NotificationService;
 import io.jsonwebtoken.lang.Collections;
 import org.junit.jupiter.api.Test;
@@ -147,6 +149,44 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void addLikeNotification_successful_storesNotificationInDatabase() {
+        // Arrange
+        var notifierUserId = 1;
+        var notifiedUserId = 2;
+        var postId = 20;
+
+        var notification = new LikeNotification(
+                new User(notifierUserId),
+                new User(notifiedUserId),
+                postId
+        );
+
+        var notifierUserEntity = new UserEntity("A", null, null);
+        when(userJpaRepository.getReferenceById(notifierUserId))
+                .thenReturn(notifierUserEntity);
+
+        var notifiedUserEntity = new UserEntity("B", null, null);
+        when(userJpaRepository.getReferenceById(notifiedUserId))
+                .thenReturn(notifiedUserEntity);
+
+        var postEntity = new PostEntity(null, "caption", null);
+        when(postJpaRepository.getReferenceById(postId))
+                .thenReturn(postEntity);
+
+        // Act
+        service.addLikeNotification(notification);
+
+        // Assert
+        var expectedEntityToSave = new LikeNotificationEntity(
+                notifierUserEntity,
+                notifiedUserEntity,
+                postEntity
+        );
+        verify(notificationJpaRepository)
+                .save(expectedEntityToSave);
+    }
+
+    @Test
     public void deleteLikeNotification_successful_deletesNotificationFromDatabase() {
         // Arrange
         var notifierUserId = 1;
@@ -162,6 +202,37 @@ public class NotificationServiceTest extends BaseServiceTest {
         // Assert
         verify(notificationJpaRepository)
                 .delete(notificationEntity);
+    }
+
+    @Test
+    public void addFollowNotification_successful_storesNotificationInDatabase() {
+        // Arrange
+        var notifierUserId = 1;
+        var notifiedUserId = 2;
+
+        var notification = new FollowNotification(
+                new User(notifierUserId),
+                new User(notifiedUserId)
+        );
+
+        var notifierUserEntity = new UserEntity("A", null, null);
+        when(userJpaRepository.getReferenceById(notifierUserId))
+                .thenReturn(notifierUserEntity);
+
+        var notifiedUserEntity = new UserEntity("B", null, null);
+        when(userJpaRepository.getReferenceById(notifiedUserId))
+                .thenReturn(notifiedUserEntity);
+
+        // Act
+        service.addFollowNotification(notification);
+
+        // Assert
+        var expectedEntityToSave = new FollowNotificationEntity(
+                notifierUserEntity,
+                notifiedUserEntity
+        );
+        verify(notificationJpaRepository)
+                .save(expectedEntityToSave);
     }
 
     @Test
