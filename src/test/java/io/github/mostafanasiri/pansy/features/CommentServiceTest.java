@@ -90,7 +90,7 @@ public class CommentServiceTest extends BaseServiceTest {
         var result = service.getComments(0, 0, 1);
 
         // Assert
-        assertEquals(result.size(), commentEntities.size());
+        assertEquals(commentEntities.size(), result.size());
     }
 
     @Test
@@ -204,7 +204,7 @@ public class CommentServiceTest extends BaseServiceTest {
         );
         var expectedMessage = "Comment does not belong to the authenticated user";
 
-        assertEquals(exception.getMessage(), expectedMessage);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class CommentServiceTest extends BaseServiceTest {
         );
         var expectedMessage = "Comment does not belong to this post";
 
-        assertEquals(exception.getMessage(), expectedMessage);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test

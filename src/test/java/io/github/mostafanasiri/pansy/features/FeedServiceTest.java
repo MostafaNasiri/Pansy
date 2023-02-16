@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -58,7 +59,35 @@ public class FeedServiceTest extends BaseServiceTest {
         service.addPostToFollowersFeeds(post);
 
         // Assert
-        assertEquals(feeds.get(0).getItems().size(), 1);
+        assertEquals(1, feeds.get(0).getItems().size());
+    }
+
+    @Test
+    public void addPostToFollowersFeeds_successful_updatesDatabase() {
+        // Arrange
+        var post = new Post(0, new User(1), null, null, 0, 0, null);
+
+        List<Integer> followerIds = new ArrayList<>();
+        followerIds.add(1);
+
+        when(followerJpaRepository.getFollowersIds(post.getUser().id()))
+                .thenReturn(followerIds);
+
+        List<FeedEntity> feeds = new ArrayList<>();
+        feeds.add(new FeedEntity());
+
+        when(feedJpaRepository.findAllById(followerIds))
+                .thenReturn(feeds);
+
+        when(postDomainMapper.postToFeedItem(post))
+                .thenReturn(new FeedEntity.FeedItem(post.getUser().id(), post.getId()));
+
+        // Act
+        service.addPostToFollowersFeeds(post);
+
+        // Assert
+        verify(feedJpaRepository)
+                .saveAll(feeds);
     }
 
     @Test
@@ -86,7 +115,7 @@ public class FeedServiceTest extends BaseServiceTest {
         service.removePostFromFollowersFeeds(post);
 
         // Assert
-        assertEquals(feeds.get(0).getItems().size(), 0);
+        assertEquals(0, feeds.get(0).getItems().size());
     }
 
     @Test
@@ -112,5 +141,43 @@ public class FeedServiceTest extends BaseServiceTest {
         // Assert
         verify(feedJpaRepository)
                 .saveAll(feeds);
+    }
+
+    @Test
+    public void removeAllPostsFromFeed_successful_removesPosts() {
+        // Arrange
+        var feedOwnerUserId = 1;
+        var postsAuthorUserId = 2;
+
+        var feed = new FeedEntity();
+        feed.getItems().add(new FeedEntity.FeedItem(postsAuthorUserId, 1));
+        feed.getItems().add(new FeedEntity.FeedItem(234, 1)); // We don't want this item to be removed
+
+        when(feedJpaRepository.findById(feedOwnerUserId))
+                .thenReturn(Optional.of(feed));
+
+        // Act
+        service.removeAllPostsFromFeed(feedOwnerUserId, postsAuthorUserId);
+
+        // Assert
+        assertEquals(1, feed.getItems().size());
+    }
+
+    @Test
+    public void removeAllPostsFromFeed_successful_updatesDatabase() {
+        // Arrange
+        var feedOwnerUserId = 1;
+        var postsAuthorUserId = 2;
+
+        var feed = new FeedEntity();
+        when(feedJpaRepository.findById(feedOwnerUserId))
+                .thenReturn(Optional.of(feed));
+
+        // Act
+        service.removeAllPostsFromFeed(feedOwnerUserId, postsAuthorUserId);
+
+        // Assert
+        verify(feedJpaRepository)
+                .save(feed);
     }
 }
