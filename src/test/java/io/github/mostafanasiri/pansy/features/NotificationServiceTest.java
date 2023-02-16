@@ -5,6 +5,8 @@ import io.github.mostafanasiri.pansy.app.data.entity.jpa.CommentEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.CommentNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.FollowNotificationEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.LikeNotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.notification.NotificationEntity;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.CommentJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.NotificationJpaRepository;
@@ -23,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -124,5 +127,58 @@ public class NotificationServiceTest extends BaseServiceTest {
         );
         verify(notificationJpaRepository)
                 .save(expectedEntityToSave);
+    }
+
+    @Test
+    public void deleteCommentNotification_successful_deletesNotificationFromDatabase() {
+        // Arrange
+        var commentId = 1;
+        var notificationEntity = new CommentNotificationEntity();
+
+        when(notificationJpaRepository.getCommentNotification(commentId))
+                .thenReturn(Optional.of(notificationEntity));
+
+        // Act
+        service.deleteCommentNotification(commentId);
+
+        // Assert
+        verify(notificationJpaRepository)
+                .delete(notificationEntity);
+    }
+
+    @Test
+    public void deleteLikeNotification_successful_deletesNotificationFromDatabase() {
+        // Arrange
+        var notifierUserId = 1;
+        var postId = 2;
+        var notificationEntity = new LikeNotificationEntity();
+
+        when(notificationJpaRepository.getLikeNotification(notifierUserId, postId))
+                .thenReturn(Optional.of(notificationEntity));
+
+        // Act
+        service.deleteLikeNotification(notifierUserId, postId);
+
+        // Assert
+        verify(notificationJpaRepository)
+                .delete(notificationEntity);
+    }
+
+    @Test
+    public void deleteFollowNotification_successful_deletesNotificationFromDatabase() {
+        // Arrange
+        var notifierUserId = 1;
+        var notifiedUserId = 2;
+        var notificationEntity = new FollowNotificationEntity();
+
+        when(notificationJpaRepository.getFollowNotification(notifierUserId, notifiedUserId))
+                .thenReturn(Optional.of(notificationEntity));
+
+        // Act
+        service.deleteFollowNotification(notifierUserId, notifiedUserId);
+
+        // Assert
+        verify(notificationJpaRepository)
+                .delete(notificationEntity);
     }
 }
