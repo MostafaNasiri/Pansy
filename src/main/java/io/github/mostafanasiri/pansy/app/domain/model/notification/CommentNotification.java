@@ -1,9 +1,11 @@
 package io.github.mostafanasiri.pansy.app.domain.model.notification;
 
 import io.github.mostafanasiri.pansy.app.domain.model.User;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Getter
+@EqualsAndHashCode
 public final class CommentNotification extends Notification {
     private final int commentId;
     private final int postId;
