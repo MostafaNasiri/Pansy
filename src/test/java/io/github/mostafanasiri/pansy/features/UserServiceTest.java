@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features;
 
+import io.github.mostafanasiri.pansy.app.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.redis.UserRedis;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FeedJpaRepository;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -218,41 +220,72 @@ public class UserServiceTest {
                 .save(any());
     }
 
-//    @Test
-//    public void createUser_duplicateUsername_throwsException() {
-//        // Arrange
-//        var username = "username";
-//
-//        var user = new UserEntity("f", username, "");
-//
-//        when(userJpaRepository.findByUsername(username))
-//                .thenReturn(new UserEntity());
-//
-//        // Act & Assert
-//        InvalidInputException ex = assertThrows(
-//                InvalidInputException.class,
-//                () -> userService.createUser(user),
-//                ""
-//        );
-//
-//        assertEquals(ex.getMessage(), "Username already exists");
-//    }
-//
-//    @Test
-//    public void createUser_validInput_returnsCreatedUser() {
-//        // Arrange
-//        var user = new UserEntity("name", "username", "pass");
-//
-//        when(userJpaRepository.save(user))
-//                .thenReturn(user);
-//
-//        // Act
-//        var result = userService.createUser(user);
-//
-//        // Assert
-//        assertEquals(user, result);
-//    }
-//
+    @Test
+    public void createUser_duplicateUsername_throwsException() {
+        // Arrange
+        var user = new User("name", "username", "123");
+
+        when(userJpaRepository.findByUsername(user.username()))
+                .thenReturn(Optional.of(new UserEntity()));
+
+        // Act & Assert
+        var ex = assertThrows(
+                InvalidInputException.class,
+                () -> service.createUser(user),
+                ""
+        );
+
+        assertEquals(ex.getMessage(), "Username already exists");
+    }
+
+    @Test
+    public void createUser_successful_createsFeedForUser() {
+        // Arrange
+        var user = new User("", "", "");
+
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+
+        // Act
+        service.createUser(user);
+
+        // Assert
+        verify(feedJpaRepository)
+                .save(any());
+    }
+
+    @Test
+    public void createUser_successful_savesCreatedUserInRedis() {
+        // Arrange
+        var user = new User("", "", "");
+
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+
+        // Act
+        service.createUser(user);
+
+        // Assert
+        verify(userRedisRepository)
+                .save(any());
+    }
+
+    @Test
+    public void createUser_successful_returnsCreatedUser() {
+        // Arrange
+        var input = new User("", "", "");
+
+        var user = new User(0);
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(user);
+
+        // Act
+        var result = service.createUser(input);
+
+        // Assert
+        assertEquals(user, result);
+    }
+
 //    @Test
 //    public void updateUser_validInput_returnsUpdatedUser() {
 //        // Arrange

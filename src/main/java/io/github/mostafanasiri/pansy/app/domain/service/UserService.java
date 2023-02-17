@@ -145,6 +145,7 @@ public class UserService extends BaseService {
         return user;
     }
 
+    @Transactional
     public @NonNull User createUser(@NonNull User user) {
         if (userJpaRepository.findByUsername(user.username()).isPresent()) {
             throw new InvalidInputException("Username already exists");
@@ -153,6 +154,7 @@ public class UserService extends BaseService {
         var hashedPassword = passwordEncoder.encode(user.password());
         var userEntity = new UserEntity(user.fullName(), user.username(), hashedPassword);
 
+        // Create a feed for user
         var feedEntity = new FeedEntity(userEntity);
         feedJpaRepository.save(feedEntity);
 
