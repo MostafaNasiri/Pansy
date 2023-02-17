@@ -1,23 +1,132 @@
 package io.github.mostafanasiri.pansy.features;
 
+import io.github.mostafanasiri.pansy.app.data.entity.redis.UserRedis;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.FeedJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.jpa.FileJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
+import io.github.mostafanasiri.pansy.app.data.repository.redis.UserRedisRepository;
+import io.github.mostafanasiri.pansy.app.domain.mapper.UserDomainMapper;
+import io.github.mostafanasiri.pansy.app.domain.model.User;
+import io.github.mostafanasiri.pansy.app.domain.service.FeedService;
+import io.github.mostafanasiri.pansy.app.domain.service.FileService;
+import io.github.mostafanasiri.pansy.app.domain.service.NotificationService;
 import io.github.mostafanasiri.pansy.app.domain.service.UserService;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
     @Mock
     private UserJpaRepository userJpaRepository;
-
+    @Mock
+    private UserRedisRepository userRedisRepository;
     @Mock
     private FollowerJpaRepository followerJpaRepository;
+    @Mock
+    private FeedJpaRepository feedJpaRepository;
+    @Mock
+    private FileJpaRepository fileJpaRepository;
+
+    @Mock
+    private NotificationService notificationService;
+    @Mock
+    private FeedService feedService;
+    @Mock
+    private FileService fileService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private UserDomainMapper userDomainMapper;
 
     @InjectMocks
-    private UserService userService;
+    private UserService service;
+
+    @Test
+    public void getUsers_successful_fetchesUnCachedUsersFromDatabase() {
+        // Arrange
+        var userIds = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+
+        var cachedUsersRedis = Arrays.asList(
+                new UserRedis(userIds.get(0), null, null, null, null, 0, 0, 0),
+                new UserRedis(userIds.get(1), null, null, null, null, 0, 0, 0)
+        );
+        when(userRedisRepository.findAllById(userIds))
+                .thenReturn(cachedUsersRedis);
+
+        var cachedUsers = Arrays.asList(
+                new User(cachedUsersRedis.get(0).getId()),
+                new User(cachedUsersRedis.get(1).getId())
+        );
+        when(userDomainMapper.usersRedisToUsers(cachedUsersRedis))
+                .thenReturn(cachedUsers);
+
+        // Act
+        service.getUsers(userIds);
+
+        // Assert
+        var cachedUserIds = cachedUsers.stream().map(User::id).toList();
+        userIds.removeAll(cachedUserIds);
+
+        verify(userJpaRepository)
+                .findAllById(userIds);
+    }
+
+    @Test
+    public void getUsers_successful_savesUnCachedUsersInRedis() {
+        // Arrange
+        var userIds = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+
+        var unCachedUsers = List.of(new User(0));
+        when(userDomainMapper.userEntitiesToUsers(any()))
+                .thenReturn(unCachedUsers);
+
+        // Act
+        service.getUsers(userIds);
+
+        // Assert
+        verify(userRedisRepository)
+                .saveAll(any());
+    }
+
+    @Test
+    public void getUsers_noUnCachedUsers_doesNotHitDatabase() {
+        // Arrange
+        var userIds = new ArrayList<>(Arrays.asList(1, 2));
+
+        var cachedUsersRedis = Arrays.asList(
+                new UserRedis(userIds.get(0), null, null, null, null, 0, 0, 0),
+                new UserRedis(userIds.get(1), null, null, null, null, 0, 0, 0)
+        );
+        when(userRedisRepository.findAllById(userIds))
+                .thenReturn(cachedUsersRedis);
+
+        var cachedUsers = Arrays.asList(
+                new User(cachedUsersRedis.get(0).getId()),
+                new User(cachedUsersRedis.get(1).getId())
+        );
+        when(userDomainMapper.usersRedisToUsers(cachedUsersRedis))
+                .thenReturn(cachedUsers);
+
+        // Act
+        service.getUsers(userIds);
+
+        // Assert
+        verify(userJpaRepository, times(0))
+                .findAllById(any());
+    }
 
 //    @Test
 //    public void createUser_duplicateUsername_throwsException() {

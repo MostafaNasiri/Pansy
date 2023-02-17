@@ -21,7 +21,6 @@ import io.github.mostafanasiri.pansy.app.domain.model.notification.FollowNotific
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,25 +63,19 @@ public class UserService extends BaseService {
     private UserDomainMapper userDomainMapper;
 
     public @NonNull List<User> searchInUsers(@NonNull String name, int page, int size) {
-        SearchSession searchSession = Search.session(entityManager);
-
+        var searchSession = Search.session(entityManager);
         var pageRequest = PageRequest.of(page, size);
+
         var searchResult = searchSession.search(UserEntity.class)
-                .where(
-                        f -> f.bool()
-                                .should(
-                                        f.match()
-                                                .field("username")
-                                                .matching(name)
-                                                .fuzzy()
-                                )
-                                .should(
-                                        f.match()
-                                                .field("fullName")
-                                                .matching(name)
-                                                .fuzzy()
-                                )
-                )
+                .where(f -> f.bool()
+                        .should(f.match()
+                                .field("username")
+                                .matching(name)
+                                .fuzzy(1))
+                        .should(f.match()
+                                .field("fullName")
+                                .matching(name)
+                                .fuzzy(1)))
                 .fetchHits((int) pageRequest.getOffset(), pageRequest.getPageSize());
 
         return userDomainMapper.userEntitiesToUsers(searchResult);
