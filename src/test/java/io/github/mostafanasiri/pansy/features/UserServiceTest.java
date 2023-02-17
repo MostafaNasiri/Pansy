@@ -1,5 +1,6 @@
 package io.github.mostafanasiri.pansy.features;
 
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.redis.UserRedis;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FeedJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FileJpaRepository;
@@ -22,7 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -126,6 +129,93 @@ public class UserServiceTest {
         // Assert
         verify(userJpaRepository, times(0))
                 .findAllById(any());
+    }
+
+    @Test
+    public void getUser_userExistsInCache_returnsCachedUser() {
+        // Arrange
+        var userId = 1;
+
+        var userRedis = new UserRedis(userId, null, null, null, null, 0, 0, 0);
+        when(userRedisRepository.findById(userId))
+                .thenReturn(Optional.of(userRedis));
+
+        var expectedResult = new User(userRedis.getId());
+        when(userDomainMapper.userRedisToUser(userRedis))
+                .thenReturn(expectedResult);
+
+        // Act
+        var result = service.getUser(userId);
+
+        // Assert
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void getUser_userExistsInCache_doesNotHitDatabase() {
+        // Arrange
+        var userId = 1;
+
+        var userRedis = new UserRedis(userId, null, null, null, null, 0, 0, 0);
+        when(userRedisRepository.findById(userId))
+                .thenReturn(Optional.of(userRedis));
+
+        // Act
+        service.getUser(userId);
+
+        // Assert
+        verify(userJpaRepository, times(0))
+                .findById(userId);
+    }
+
+    @Test
+    public void getUser_userDoesNotExistInCache_fetchesUserFromDatabase() {
+        // Arrange
+        var userId = 1;
+
+        when(userRedisRepository.findById(userId))
+                .thenReturn(Optional.empty());
+
+        var userEntity = new UserEntity();
+        when(userJpaRepository.findById(userId))
+                .thenReturn(Optional.of(userEntity));
+
+        var expectedResult = new User(userId);
+        when(userDomainMapper.userEntityToUser(userEntity))
+                .thenReturn(expectedResult);
+
+        // Act
+        var result = service.getUser(userId);
+
+        // Assert
+        verify(userJpaRepository)
+                .findById(userId);
+
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void getUser_userDoesNotExistInCache_savesUserInRedis() {
+        // Arrange
+        var userId = 1;
+
+        when(userRedisRepository.findById(userId))
+                .thenReturn(Optional.empty());
+
+        var userEntity = new UserEntity();
+        when(userJpaRepository.findById(userId))
+                .thenReturn(Optional.of(userEntity));
+
+        var user = new User(userId);
+        when(userDomainMapper.userEntityToUser(userEntity))
+                .thenReturn(user);
+
+        // Act
+        service.getUser(userId);
+
+        // Assert
+        verify(userRedisRepository)
+                .save(any());
     }
 
 //    @Test
