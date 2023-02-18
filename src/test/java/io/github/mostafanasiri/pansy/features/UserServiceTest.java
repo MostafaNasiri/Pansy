@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
@@ -436,96 +437,46 @@ public class UserServiceTest extends BaseServiceTest {
                 .save(any());
     }
 
-//    @Test
-//    public void getFollowers_invalidUserId_throwsException() {
-//        // Arrange
-//        var userId = 13;
-//
-//        when(userJpaRepository.findById(userId))
-//                .thenReturn(Optional.empty());
-//
-//        // Act & Assert
-//        EntityNotFoundException ex = assertThrows(
-//                EntityNotFoundException.class,
-//                () -> userService.getFollowers(userId),
-//                ""
-//        );
-//
-//        var expectedMessage = new EntityNotFoundException(UserEntity.class, userId).getMessage();
-//
-//        assertEquals(ex.getMessage(), expectedMessage);
-//    }
-//
-//    @Test
-//    public void getFollowers_validInput_returnsFollowers() {
-//        // Arrange
-//        var userId = 13;
-//
-//        var user = new UserEntity();
-//
-//        when(userJpaRepository.findById(userId))
-//                .thenReturn(Optional.of(user));
-//
-//        var followers = new ArrayList<FollowerEntity>();
-//        followers.add(new FollowerEntity(new UserEntity("follower1", "", ""), user));
-//
-//        when(followerJpaRepository.getFollowers(user))
-//                .thenReturn(followers);
-//
-//        // Act
-//        var result = userService.getFollowers(userId);
-//
-//        // Assert
-//        var expectedResult = followers.stream().map((f) -> f.getSourceUser()).toList();
-//
-//        assertEquals(result, expectedResult);
-//    }
-//
-//    @Test
-//    public void getFollowing_invalidUserId_throwsException() {
-//        // Arrange
-//        var userId = 13;
-//
-//        when(userJpaRepository.findById(userId))
-//                .thenReturn(Optional.empty());
-//
-//        // Act & Assert
-//        EntityNotFoundException ex = assertThrows(
-//                EntityNotFoundException.class,
-//                () -> userService.getFollowing(userId),
-//                ""
-//        );
-//
-//        var expectedMessage = new EntityNotFoundException(UserEntity.class, userId).getMessage();
-//
-//        assertEquals(ex.getMessage(), expectedMessage);
-//    }
-//
-//    @Test
-//    public void getFollowing_validInput_returnsFollowing() {
-//        // Arrange
-//        var userId = 13;
-//
-//        var user = new UserEntity();
-//
-//        when(userJpaRepository.findById(userId))
-//                .thenReturn(Optional.of(user));
-//
-//        var followers = new ArrayList<FollowerEntity>();
-//        followers.add(new FollowerEntity(new UserEntity("follower1", "", ""), user));
-//
-//        when(followerJpaRepository.getFollowing(user))
-//                .thenReturn(followers);
-//
-//        // Act
-//        var result = userService.getFollowing(userId);
-//
-//        // Assert
-//        var expectedResult = followers.stream().map((f) -> f.getTargetUser()).toList();
-//
-//        assertEquals(result, expectedResult);
-//    }
-//
+    @Test
+    public void getFollowers_validInput_usesInputsCorrectly() {
+        // Arrange
+        var userId = 1;
+        var page = 0;
+        var size = 10;
+
+        when(userJpaRepository.findById(userId))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(userId));
+
+        // Act
+        service.getFollowers(userId, page, size);
+
+        // Assert
+        verify(followerJpaRepository)
+                .getFollowerIds(userId, PageRequest.of(page, size));
+    }
+
+    @Test
+    public void getFollowing_validInput_usesInputsCorrectly() {
+        // Arrange
+        var userId = 1;
+        var page = 0;
+        var size = 10;
+
+        when(userJpaRepository.findById(userId))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(userId));
+
+        // Act
+        service.getFollowing(userId, page, size);
+
+        // Assert
+        verify(followerJpaRepository)
+                .getFollowingIds(userId, PageRequest.of(page, size));
+    }
+
 //    @Test
 //    public void followUser_sourceUserIdSameAsTargetUserId_throwsException() {
 //        // Arrange
