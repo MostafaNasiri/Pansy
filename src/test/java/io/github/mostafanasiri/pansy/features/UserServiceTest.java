@@ -3,6 +3,7 @@ package io.github.mostafanasiri.pansy.features;
 import io.github.mostafanasiri.pansy.app.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.app.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FileEntity;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.FollowerEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.redis.UserRedis;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FeedJpaRepository;
@@ -134,7 +135,7 @@ public class UserServiceTest extends BaseServiceTest {
         service.getUsers(userIds);
 
         // Assert
-        verify(userJpaRepository, times(0))
+        verify(userJpaRepository, never())
                 .findAllById(any());
     }
 
@@ -171,7 +172,7 @@ public class UserServiceTest extends BaseServiceTest {
         service.getUser(userId);
 
         // Assert
-        verify(userJpaRepository, times(0))
+        verify(userJpaRepository, never())
                 .findById(userId);
     }
 
@@ -477,123 +478,121 @@ public class UserServiceTest extends BaseServiceTest {
                 .getFollowingIds(userId, PageRequest.of(page, size));
     }
 
-//    @Test
-//    public void followUser_sourceUserIdSameAsTargetUserId_throwsException() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = sourceUserId;
-//
-//        // Act & Assert
-//        InvalidInputException ex = assertThrows(
-//                InvalidInputException.class,
-//                () -> userService.followUser(sourceUserId, targetUserId),
-//                ""
-//        );
-//
-//        assertEquals(ex.getMessage(), "A user can't follow him/herself!");
-//    }
-//
-//    @Test
-//    public void followUser_invalidSourceUserId_throwsException() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = 2;
-//
-//        when(userJpaRepository.findById(sourceUserId))
-//                .thenReturn(Optional.empty());
-//
-//        // Act & Assert
-//        EntityNotFoundException ex = assertThrows(
-//                EntityNotFoundException.class,
-//                () -> userService.followUser(sourceUserId, targetUserId),
-//                ""
-//        );
-//
-//        var expectedMessage = new EntityNotFoundException(UserEntity.class, sourceUserId).getMessage();
-//
-//        assertEquals(ex.getMessage(), expectedMessage);
-//    }
-//
-//    @Test
-//    public void followUser_invalidTargetUserId_throwsException() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = 2;
-//
-//        when(userJpaRepository.findById(sourceUserId))
-//                .thenReturn(Optional.of(new UserEntity()));
-//        when(userJpaRepository.findById(targetUserId))
-//                .thenReturn(Optional.empty());
-//
-//        // Act & Assert
-//        EntityNotFoundException ex = assertThrows(
-//                EntityNotFoundException.class,
-//                () -> userService.followUser(sourceUserId, targetUserId),
-//                ""
-//        );
-//
-//        var expectedMessage = new EntityNotFoundException(UserEntity.class, targetUserId).getMessage();
-//
-//        assertEquals(ex.getMessage(), expectedMessage);
-//    }
-//
-//    @Test
-//    public void followUser_targetUserAlreadyFollowed_doesNothing() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = 2;
-//
-//        var sourceUser = new UserEntity();
-//        sourceUser.setId(sourceUserId);
-//
-//        var targetUser = new UserEntity();
-//        targetUser.setId(targetUserId);
-//
-//        when(userJpaRepository.findById(sourceUserId))
-//                .thenReturn(Optional.of(sourceUser));
-//        when(userJpaRepository.findById(targetUserId))
-//                .thenReturn(Optional.of(targetUser));
-//
-//        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
-//                .thenReturn(new FollowerEntity());
-//
-//        // Act
-//        userService.followUser(sourceUserId, targetUserId);
-//
-//        // Assert
-//        verify(followerJpaRepository, never())
-//                .save(any());
-//    }
-//
-//    @Test
-//    public void followUser_validInput_savesData() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = 2;
-//
-//        var sourceUser = new UserEntity();
-//        sourceUser.setId(sourceUserId);
-//
-//        var targetUser = new UserEntity();
-//        targetUser.setId(targetUserId);
-//
-//        when(userJpaRepository.findById(sourceUserId))
-//                .thenReturn(Optional.of(sourceUser));
-//        when(userJpaRepository.findById(targetUserId))
-//                .thenReturn(Optional.of(targetUser));
-//
-//        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
-//                .thenReturn(null);
-//
-//        // Act
-//        userService.followUser(sourceUserId, targetUserId);
-//
-//        // Assert
-//        var follower = new FollowerEntity(sourceUser, targetUser);
-//        verify(followerJpaRepository, times(1))
-//                .save(follower);
-//    }
-//
+    @Test
+    public void followUser_sourceUserIdNotEqualToAuthenticatedUserId_throwsException() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID * 2;
+        var targetUserId = sourceUserId * 2;
+
+        // Act & Assert
+        var ex = assertThrows(
+                AuthorizationException.class,
+                () -> service.followUser(sourceUserId, targetUserId),
+                ""
+        );
+
+        assertEquals(ex.getMessage(), "Forbidden action");
+    }
+
+    @Test
+    public void followUser_sourceUserIdSameAsTargetUserId_throwsException() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+
+        // Act & Assert
+        var ex = assertThrows(
+                InvalidInputException.class,
+                () -> service.followUser(sourceUserId, sourceUserId),
+                ""
+        );
+
+        assertEquals(ex.getMessage(), "A user can't follow him/herself!");
+    }
+
+    @Test
+    public void followUser_successful_updatesDatabase() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+        var targetUserId = 2;
+
+        when(userJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
+                .thenReturn(Optional.empty());
+
+        // Act
+        service.followUser(sourceUserId, targetUserId);
+
+        // Assert
+        verify(userJpaRepository, times(2))
+                .save(any());
+    }
+
+    @Test
+    public void followUser_successful_addsFollowNotification() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+        var targetUserId = 2;
+
+        when(userJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
+                .thenReturn(Optional.empty());
+
+        // Act
+        service.followUser(sourceUserId, targetUserId);
+
+        // Assert
+        verify(notificationService)
+                .addFollowNotification(any());
+    }
+
+    @Test
+    public void followUser_successful_updatesFollowingFollowerCount() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+        var targetUserId = 2;
+
+        when(userJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
+                .thenReturn(Optional.empty());
+
+        // Act
+        service.followUser(sourceUserId, targetUserId);
+
+        // Assert
+        verify(followerJpaRepository)
+                .save(any());
+    }
+
+    @Test
+    public void followUser_targetUserAlreadyFollowed_doesNothing() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+        var targetUserId = 2;
+
+        when(userJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
+                .thenReturn(Optional.of(new FollowerEntity()));
+
+        // Act
+        service.followUser(sourceUserId, targetUserId);
+
+        // Assert
+        verify(followerJpaRepository, never())
+                .save(any());
+    }
+
 //    @Test
 //    public void unfollowUser_sourceUserIdSameAsTargetUserId_throwsException() {
 //        // Arrange

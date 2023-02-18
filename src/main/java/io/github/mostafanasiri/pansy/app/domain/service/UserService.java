@@ -238,11 +238,11 @@ public class UserService extends BaseService {
             updateFollowingCount(sourceUserId);
             updateFollowerCount(targetUserId);
 
-            createFollowNotification(sourceUserId, targetUserId);
+            addFollowNotification(sourceUserId, targetUserId);
         }
     }
 
-    private void createFollowNotification(int sourceUserId, int targetUserId) {
+    private void addFollowNotification(int sourceUserId, int targetUserId) {
         var notification = new FollowNotification(new User(sourceUserId), new User(targetUserId));
         notificationService.addFollowNotification(notification);
     }
