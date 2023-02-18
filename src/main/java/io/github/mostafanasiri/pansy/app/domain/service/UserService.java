@@ -194,20 +194,6 @@ public class UserService extends BaseService {
         saveUserInRedis(updatedUser);
     }
 
-    private void saveUsersInRedis(List<User> users) {
-        logger.info(String.format("Saving users %s in Redis", users.stream().map(User::id).toList()));
-
-        var usersRedis = userDomainMapper.usersToUsersRedis(users);
-        userRedisRepository.saveAll(usersRedis);
-    }
-
-    private void saveUserInRedis(User user) {
-        logger.info(String.format("Saving user %s in Redis", user.id()));
-
-        var userRedis = userDomainMapper.userToUserRedis(user);
-        userRedisRepository.save(userRedis);
-    }
-
     public @NonNull List<User> getFollowers(int userId, int page, int size) {
         var user = getUser(userId);
 
@@ -304,6 +290,20 @@ public class UserService extends BaseService {
 
         var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
         saveUserInRedis(updatedUser);
+    }
+
+    private void saveUsersInRedis(List<User> users) {
+        logger.info(String.format("Saving users %s in Redis", users.stream().map(User::id).toList()));
+
+        var usersRedis = userDomainMapper.usersToUsersRedis(users);
+        userRedisRepository.saveAll(usersRedis);
+    }
+
+    private void saveUserInRedis(User user) {
+        logger.info(String.format("Saving user %s in Redis", user.id()));
+
+        var userRedis = userDomainMapper.userToUserRedis(user);
+        userRedisRepository.save(userRedis);
     }
 
     private UserEntity getUserEntity(int userId) {

@@ -1,6 +1,8 @@
 package io.github.mostafanasiri.pansy.features;
 
+import io.github.mostafanasiri.pansy.app.common.exception.AuthorizationException;
 import io.github.mostafanasiri.pansy.app.common.exception.InvalidInputException;
+import io.github.mostafanasiri.pansy.app.data.entity.jpa.FileEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.redis.UserRedis;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FeedJpaRepository;
@@ -9,6 +11,7 @@ import io.github.mostafanasiri.pansy.app.data.repository.jpa.FollowerJpaReposito
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.redis.UserRedisRepository;
 import io.github.mostafanasiri.pansy.app.domain.mapper.UserDomainMapper;
+import io.github.mostafanasiri.pansy.app.domain.model.Image;
 import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.service.FeedService;
 import io.github.mostafanasiri.pansy.app.domain.service.FileService;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -32,7 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+public class UserServiceTest extends BaseServiceTest {
     @Mock
     private UserJpaRepository userJpaRepository;
     @Mock
@@ -286,57 +290,152 @@ public class UserServiceTest {
         assertEquals(user, result);
     }
 
-//    @Test
-//    public void updateUser_validInput_returnsUpdatedUser() {
-//        // Arrange
-//        var user = new UserEntity("name", "username", "pass");
-//
-//        when(userJpaRepository.save(user))
-//                .thenReturn(user);
-//
-//        // Act
-//        var result = userService.updateUser(user);
-//
-//        // Assert
-//        assertEquals(result, user);
-//    }
-//
-//    @Test
-//    public void getUser_invalidUserId_throwsException() {
-//        // Arrange
-//        var userId = 13;
-//
-//        when(userJpaRepository.findById(userId))
-//                .thenReturn(Optional.empty());
-//
-//        // Act & Assert
-//        EntityNotFoundException ex = assertThrows(
-//                EntityNotFoundException.class,
-//                () -> userService.getUser(userId),
-//                ""
-//        );
-//
-//        var expectedMessage = new EntityNotFoundException(UserEntity.class, userId).getMessage();
-//
-//        assertEquals(ex.getMessage(), expectedMessage);
-//    }
-//
-//    @Test
-//    public void getUser_validInput_returnsUser() {
-//        // Arrange
-//        var userId = 13;
-//        var user = new UserEntity();
-//
-//        when(userJpaRepository.findById(userId))
-//                .thenReturn(Optional.of(user));
-//
-//        // Act
-//        var result = userService.getUser(userId);
-//
-//        // Assert
-//        assertEquals(result, user);
-//    }
-//
+    @Test
+    public void updateUser_inputNotBelongingToAuthenticatedUser_throwsException() {
+        // Arrange
+        var input = new User(AUTHENTICATED_USER_ID * 2, null, null, null);
+
+        // Act & Assert
+        var ex = assertThrows(
+                AuthorizationException.class,
+                () -> service.updateUser(input),
+                ""
+        );
+
+        assertEquals(ex.getMessage(), "Forbidden action");
+    }
+
+    @Test
+    public void updateUser_avatarNotNull_setsAvatarForUser() {
+        // Arrange
+        var input = new User(AUTHENTICATED_USER_ID, null, new Image(1), null);
+
+        var authenticatedUserEntity = Mockito.mock(UserEntity.class);
+
+        when(userJpaRepository.findById(AUTHENTICATED_USER_ID))
+                .thenReturn(Optional.of(authenticatedUserEntity));
+        when(fileJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new FileEntity()));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(input.id()));
+
+        // Act
+        service.updateUser(input);
+
+        // Service
+        verify(authenticatedUserEntity)
+                .setAvatar(any());
+    }
+
+    @Test
+    public void updateUser_successful_updatesUserData() {
+        // Arrange
+        var input = new User(AUTHENTICATED_USER_ID, "", null, "");
+
+        var authenticatedUserEntity = Mockito.mock(UserEntity.class);
+
+        when(userJpaRepository.findById(AUTHENTICATED_USER_ID))
+                .thenReturn(Optional.of(authenticatedUserEntity));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(input.id()));
+
+        // Act
+        service.updateUser(input);
+
+        // Assert
+        verify(authenticatedUserEntity)
+                .setFullName(input.fullName());
+        verify(authenticatedUserEntity)
+                .setBio(input.bio());
+        verify(userJpaRepository)
+                .save(authenticatedUserEntity);
+    }
+
+    @Test
+    public void updateUser_successful_savesUserInRedis() {
+        // Arrange
+        var input = new User(AUTHENTICATED_USER_ID, "", null, "");
+
+        var authenticatedUserEntity = Mockito.mock(UserEntity.class);
+
+        when(userJpaRepository.findById(AUTHENTICATED_USER_ID))
+                .thenReturn(Optional.of(authenticatedUserEntity));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(input.id()));
+
+        // Act
+        service.updateUser(input);
+
+        // Assert
+        verify(userRedisRepository)
+                .save(any());
+    }
+
+    @Test
+    public void updateUser_successful_returnsUpdatedUser() {
+        // Arrange
+        var input = new User(AUTHENTICATED_USER_ID, "", null, "");
+
+        var authenticatedUserEntity = Mockito.mock(UserEntity.class);
+
+        when(userJpaRepository.findById(AUTHENTICATED_USER_ID))
+                .thenReturn(Optional.of(authenticatedUserEntity));
+
+        var user = new User(input.id());
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(user);
+
+        // Act
+        var result = service.updateUser(input);
+
+        // Assert
+        assertEquals(user, result);
+    }
+
+    @Test
+    public void updateUserPostCount_successful_updatesUserData() {
+        // Arrange
+        var userId = 1;
+        var count = 2;
+
+        var userEntity = Mockito.mock(UserEntity.class);
+
+        when(userJpaRepository.findById(userId))
+                .thenReturn(Optional.of(userEntity));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(userId));
+
+        // Act
+        service.updateUserPostCount(userId, count);
+
+        // Assert
+        verify(userEntity)
+                .setPostCount(count);
+        verify(userJpaRepository)
+                .save(userEntity);
+    }
+
+    @Test
+    public void updateUserPostCount_successful_savesUserInRedis() {
+        // Arrange
+        var userId = 1;
+        var count = 2;
+
+        var userEntity = Mockito.mock(UserEntity.class);
+
+        when(userJpaRepository.findById(userId))
+                .thenReturn(Optional.of(userEntity));
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(userId));
+
+        // Act
+        service.updateUserPostCount(userId, count);
+
+        // Assert
+        verify(userRedisRepository)
+                .save(any());
+    }
+
 //    @Test
 //    public void getFollowers_invalidUserId_throwsException() {
 //        // Arrange
