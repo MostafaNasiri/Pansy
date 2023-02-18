@@ -222,21 +222,21 @@ public class UserService extends BaseService {
             throw new InvalidInputException("A user can't follow him/herself!");
         }
 
-        var sourceUser = getUser(getAuthenticatedUserId());
-        var targetUser = getUser(targetUserId);
+        var sourceUserEntity = getUserEntity(getAuthenticatedUserId());
+        var targetUserEntity = getUserEntity(targetUserId);
 
         var sourceUserHasNotFollowedTargetUser =
                 followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId).isEmpty();
 
         if (sourceUserHasNotFollowedTargetUser) {
             var follower = new FollowerEntity(
-                    userJpaRepository.getReferenceById(sourceUser.id()),
-                    userJpaRepository.getReferenceById(targetUser.id())
+                    sourceUserEntity,
+                    targetUserEntity
             );
             followerJpaRepository.save(follower);
 
-            updateFollowingCount(sourceUserId);
-            updateFollowerCount(targetUserId);
+            updateFollowingCount(sourceUserEntity);
+            updateFollowerCount(targetUserEntity);
 
             addFollowNotification(sourceUserId, targetUserId);
         }
@@ -257,38 +257,36 @@ public class UserService extends BaseService {
             throw new InvalidInputException("A user can't unfollow him/herself!");
         }
 
-        var sourceUser = getUser(getAuthenticatedUserId());
-        var targetUser = getUser(targetUserId);
+        var sourceUserEntity = getUserEntity(getAuthenticatedUserId());
+        var targetUserEntity = getUserEntity(targetUserId);
 
-        followerJpaRepository.findBySourceUserAndTargetUser(sourceUser.id(), targetUser.id())
+        followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId)
                 .ifPresent(followerEntity -> {
                     followerJpaRepository.delete(followerEntity);
 
-                    updateFollowingCount(sourceUserId);
-                    updateFollowerCount(targetUserId);
+                    updateFollowingCount(sourceUserEntity);
+                    updateFollowerCount(targetUserEntity);
 
                     notificationService.deleteFollowNotification(sourceUserId, targetUserId);
                     feedService.removeAllPostsFromFeed(sourceUserId, targetUserId);
                 });
     }
 
-    private void updateFollowingCount(int userId) {
-        var count = followerJpaRepository.getFollowingCount(userId);
+    private void updateFollowingCount(UserEntity userEntity) {
+        var count = followerJpaRepository.getFollowingCount(userEntity.getId());
 
-        var userEntity = getUserEntity(userId);
         userEntity.setFollowingCount(count);
-
         var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+
         saveUserInRedis(updatedUser);
     }
 
-    private void updateFollowerCount(int userId) {
-        var count = followerJpaRepository.getFollowerCount(userId);
+    private void updateFollowerCount(UserEntity userEntity) {
+        var count = followerJpaRepository.getFollowerCount(userEntity.getId());
 
-        var userEntity = getUserEntity(userId);
         userEntity.setFollowerCount(count);
-
         var updatedUser = userDomainMapper.userEntityToUser(userJpaRepository.save(userEntity));
+
         saveUserInRedis(updatedUser);
     }
 

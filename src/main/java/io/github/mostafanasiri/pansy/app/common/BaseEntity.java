@@ -24,8 +24,4 @@ public abstract class BaseEntity {
     @LastModifiedDate
     @Column(name = "updated_at")
     protected Date updatedAt;
-
-    public void setId(int id) {
-        this.id = id;
-    }
 }

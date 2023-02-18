@@ -580,8 +580,6 @@ public class UserServiceTest extends BaseServiceTest {
 
         when(userJpaRepository.findById(any()))
                 .thenReturn(Optional.of(new UserEntity()));
-        when(userDomainMapper.userEntityToUser(any()))
-                .thenReturn(new User(0));
         when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
                 .thenReturn(Optional.of(new FollowerEntity()));
 
@@ -593,121 +591,122 @@ public class UserServiceTest extends BaseServiceTest {
                 .save(any());
     }
 
-//    @Test
-//    public void unfollowUser_sourceUserIdSameAsTargetUserId_throwsException() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = sourceUserId;
-//
-//        // Act & Assert
-//        InvalidInputException ex = assertThrows(
-//                InvalidInputException.class,
-//                () -> userService.unfollowUser(sourceUserId, targetUserId),
-//                ""
-//        );
-//
-//        assertEquals(ex.getMessage(), "A user can't unfollow him/herself!");
-//    }
-//
-//    @Test
-//    public void unfollowUser_invalidSourceUserId_throwsException() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = 2;
-//
-//        when(userJpaRepository.findById(sourceUserId))
-//                .thenReturn(Optional.empty());
-//
-//        // Act & Assert
-//        EntityNotFoundException ex = assertThrows(
-//                EntityNotFoundException.class,
-//                () -> userService.unfollowUser(sourceUserId, targetUserId),
-//                ""
-//        );
-//
-//        var expectedMessage = new EntityNotFoundException(UserEntity.class, sourceUserId).getMessage();
-//
-//        assertEquals(ex.getMessage(), expectedMessage);
-//    }
-//
-//    @Test
-//    public void unfollowUser_invalidTargetUserId_throwsException() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = 2;
-//
-//        when(userJpaRepository.findById(sourceUserId))
-//                .thenReturn(Optional.of(new UserEntity()));
-//        when(userJpaRepository.findById(targetUserId))
-//                .thenReturn(Optional.empty());
-//
-//        // Act & Assert
-//        EntityNotFoundException ex = assertThrows(
-//                EntityNotFoundException.class,
-//                () -> userService.unfollowUser(sourceUserId, targetUserId),
-//                ""
-//        );
-//
-//        var expectedMessage = new EntityNotFoundException(UserEntity.class, targetUserId).getMessage();
-//
-//        assertEquals(ex.getMessage(), expectedMessage);
-//    }
-//
-//    @Test
-//    public void unfollowUser_targetUserNotFollowed_doesNothing() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = 2;
-//
-//        var sourceUser = new UserEntity();
-//        sourceUser.setId(sourceUserId);
-//
-//        var targetUser = new UserEntity();
-//        targetUser.setId(targetUserId);
-//
-//        when(userJpaRepository.findById(sourceUserId))
-//                .thenReturn(Optional.of(sourceUser));
-//        when(userJpaRepository.findById(targetUserId))
-//                .thenReturn(Optional.of(targetUser));
-//
-//        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
-//                .thenReturn(null);
-//
-//        // Act
-//        userService.unfollowUser(sourceUserId, targetUserId);
-//
-//        // Assert
-//        verify(followerJpaRepository, never())
-//                .delete(any());
-//    }
-//
-//    @Test
-//    public void unfollowUser_validInput_deletesData() {
-//        // Arrange
-//        var sourceUserId = 1;
-//        var targetUserId = 2;
-//
-//        var sourceUser = new UserEntity();
-//        sourceUser.setId(sourceUserId);
-//
-//        var targetUser = new UserEntity();
-//        targetUser.setId(targetUserId);
-//
-//        when(userJpaRepository.findById(sourceUserId))
-//                .thenReturn(Optional.of(sourceUser));
-//        when(userJpaRepository.findById(targetUserId))
-//                .thenReturn(Optional.of(targetUser));
-//
-//        var follower = new FollowerEntity(sourceUser, targetUser);
-//
-//        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUser, targetUser))
-//                .thenReturn(follower);
-//
-//        // Act
-//        userService.unfollowUser(sourceUserId, targetUserId);
-//
-//        // Assert
-//        verify(followerJpaRepository, times(1))
-//                .delete(follower);
-//    }
+    @Test
+    public void unfollowUser_sourceUserIdNotEqualToAuthenticatedUserId_throwsException() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID * 2;
+        var targetUserId = sourceUserId * 2;
+
+        // Act & Assert
+        var ex = assertThrows(
+                AuthorizationException.class,
+                () -> service.unfollowUser(sourceUserId, targetUserId),
+                ""
+        );
+
+        assertEquals(ex.getMessage(), "Forbidden action");
+    }
+
+    @Test
+    public void unfollowUser_sourceUserIdSameAsTargetUserId_throwsException() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+
+        // Act & Assert
+        var ex = assertThrows(
+                InvalidInputException.class,
+                () -> service.unfollowUser(sourceUserId, sourceUserId),
+                ""
+        );
+
+        assertEquals(ex.getMessage(), "A user can't unfollow him/herself!");
+    }
+
+    @Test
+    public void unfollowUser_targetUserNotFollowed_doesNothing() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+        var targetUserId = 2;
+
+        when(userJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
+                .thenReturn(Optional.empty());
+
+        // Act
+        service.unfollowUser(sourceUserId, targetUserId);
+
+        // Assert
+        verify(followerJpaRepository, never())
+                .delete(any());
+    }
+
+    @Test
+    public void unfollowUser_successful_updatesDatabase() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+        var targetUserId = 2;
+
+        when(userJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userJpaRepository.save(any()))
+                .thenReturn(new UserEntity());
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
+                .thenReturn(Optional.of(new FollowerEntity()));
+
+        // Act
+        service.unfollowUser(sourceUserId, targetUserId);
+
+        // Assert
+        verify(followerJpaRepository)
+                .delete(any());
+    }
+
+    @Test
+    public void unfollowUser_successful_deletesFollowNotification() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+        var targetUserId = 2;
+
+        when(userJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userJpaRepository.save(any()))
+                .thenReturn(new UserEntity());
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
+                .thenReturn(Optional.of(new FollowerEntity()));
+
+        // Act
+        service.unfollowUser(sourceUserId, targetUserId);
+
+        // Assert
+        verify(notificationService)
+                .deleteFollowNotification(sourceUserId, targetUserId);
+    }
+
+    @Test
+    public void unfollowUser_successful_removesAllPostsFromFollowerFeed() {
+        // Arrange
+        var sourceUserId = AUTHENTICATED_USER_ID;
+        var targetUserId = 2;
+
+        when(userJpaRepository.findById(any()))
+                .thenReturn(Optional.of(new UserEntity()));
+        when(userJpaRepository.save(any()))
+                .thenReturn(new UserEntity());
+        when(userDomainMapper.userEntityToUser(any()))
+                .thenReturn(new User(0));
+        when(followerJpaRepository.findBySourceUserAndTargetUser(sourceUserId, targetUserId))
+                .thenReturn(Optional.of(new FollowerEntity()));
+
+        // Act
+        service.unfollowUser(sourceUserId, targetUserId);
+
+        // Assert
+        verify(feedService)
+                .removeAllPostsFromFeed(sourceUserId, targetUserId);
+    }
 }
