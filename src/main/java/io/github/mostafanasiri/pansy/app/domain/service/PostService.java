@@ -104,40 +104,16 @@ public class PostService extends BaseService {
         return result;
     }
 
-    private List<Post> fetchPosts(List<Integer> postIds) { // TODO: Refactor
-        var redisPosts = new ArrayList<PostRedis>();
-        var unCachedPostIds = new ArrayList<Integer>();
+    private List<Post> fetchPosts(List<Integer> postIds) {
+        var cachedPosts = getCachedPosts(postIds);
+        var cachedPostIds = cachedPosts.stream()
+                .map(Post::getId)
+                .toList();
 
-        // Find cached and uncached posts
-        postIds.forEach(id -> {
-            var postRedis = postRedisRepository.findById(id);
-
-            if (postRedis.isPresent()) {
-                logger.info(String.format("fetchPostsById - Fetched post %s from Redis", id));
-                redisPosts.add(postRedis.get());
-            } else {
-                logger.info(String.format(
-                        "fetchPostsById - Post %s doesn't exist in Redis. Must fetch it from the database",
-                        id
-                ));
-                unCachedPostIds.add(id);
-            }
-        });
-
-        // Get uncached posts from the database
-        List<Post> unCachedPosts = new ArrayList<>();
-        if (!unCachedPostIds.isEmpty()) {
-            var unCachedPostEntities = postJpaRepository.getPostsById(unCachedPostIds);
-
-            // Map uncached posts to Post models
-            unCachedPosts = postDomainMapper.postEntitiesToPosts(unCachedPostEntities);
-
-            // Save uncached posts in Redis
-            unCachedPosts.forEach(this::savePostInRedis);
+        var unCachedPosts = getUnCachedPosts(postIds, cachedPostIds);
+        if (!unCachedPosts.isEmpty()) {
+            savePostsInRedis(unCachedPosts);
         }
-
-        // Map cached posts to Post models
-        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts);
 
         // Combine all posts
         var result = new ArrayList<Post>();
@@ -145,6 +121,22 @@ public class PostService extends BaseService {
         result.addAll(cachedPosts);
 
         return result;
+    }
+
+    private List<Post> getUnCachedPosts(List<Integer> postIds, List<Integer> cachedPostIds) {
+        var unCachedPostIds = new ArrayList<>(postIds);
+        unCachedPostIds.removeAll(cachedPostIds);
+
+        List<Post> unCachedPosts = new ArrayList<>();
+
+        if (!unCachedPostIds.isEmpty()) {
+            logger.info(String.format("getUnCachedPosts - Fetching users %s from database", unCachedPostIds));
+
+            var unCachedPostEntities = postJpaRepository.getPostsById(unCachedPostIds);
+            unCachedPosts = postDomainMapper.postEntitiesToPosts(unCachedPostEntities);
+        }
+
+        return unCachedPosts;
     }
 
     public @NonNull List<Post> getUserPosts(int userId, int page, int size) {
@@ -162,42 +154,17 @@ public class PostService extends BaseService {
         return userPosts;
     }
 
-    private List<Post> fetchUserPosts(User user, List<Integer> userPostIds) { // TODO: Refactor
-        var redisPosts = new ArrayList<PostRedis>();
-        var unCachedPostIds = new ArrayList<Integer>();
+    private List<Post> fetchUserPosts(User user, List<Integer> userPostIds) {
+        var cachedPosts = getCachedPosts(userPostIds);
+        var cachedPostIds = cachedPosts.stream()
+                .map(Post::getId)
+                .toList();
 
-        // Find cached and uncached posts
-        userPostIds.forEach(id -> {
-            var postRedis = postRedisRepository.findById(id);
-
-            if (postRedis.isPresent()) {
-                logger.info(String.format("fetchUserPosts - Fetched post %s from Redis", id));
-                redisPosts.add(postRedis.get());
-            } else {
-                logger.info(String.format(
-                        "fetchUserPosts - Post %s doesn't exist in Redis. Must fetch it from the database",
-                        id
-                ));
-                unCachedPostIds.add(id);
-            }
-        });
-
-        // Get uncached posts from the database
-        List<Post> unCachedPosts = new ArrayList<>();
-        if (!unCachedPostIds.isEmpty()) {
-            var unCachedPostEntities = postJpaRepository.getPostsByIdWithoutUser(unCachedPostIds);
-
-            // Map uncached posts to Post models
-            unCachedPosts = postDomainMapper.postEntitiesToPosts(user, unCachedPostEntities);
-
-            // Save uncached posts in Redis
-            unCachedPosts.forEach(this::savePostInRedis);
+        var unCachedPosts = getUnCachedUserPosts(user, userPostIds, cachedPostIds);
+        if (!unCachedPosts.isEmpty()) {
+            savePostsInRedis(unCachedPosts);
         }
 
-        // Map cached posts to Post models
-        var cachedPosts = postDomainMapper.postsRedisToPosts(redisPosts);
-
-        // Combine all posts
         var result = new ArrayList<Post>();
         result.addAll(unCachedPosts);
         result.addAll(cachedPosts);
@@ -206,6 +173,34 @@ public class PostService extends BaseService {
         result.sort((p1, p2) -> ((-1) * p1.getCreatedAt().compareTo(p2.getCreatedAt())));
 
         return result;
+    }
+
+    private List<Post> getUnCachedUserPosts(User user, List<Integer> postIds, List<Integer> cachedPostIds) {
+        var unCachedPostIds = new ArrayList<>(postIds);
+        unCachedPostIds.removeAll(cachedPostIds);
+
+        List<Post> unCachedPosts = new ArrayList<>();
+
+        if (!unCachedPostIds.isEmpty()) {
+            logger.info(String.format("getUnCachedUserPosts - Fetching users %s from database", unCachedPostIds));
+
+            var unCachedPostEntities = postJpaRepository.getPostsByIdWithoutUser(unCachedPostIds);
+            unCachedPosts = postDomainMapper.postEntitiesToPosts(user, unCachedPostEntities);
+        }
+
+        return unCachedPosts;
+    }
+
+    private List<Post> getCachedPosts(List<Integer> postIds) {
+        var cachedPosts = new ArrayList<PostRedis>();
+
+        postRedisRepository.findAllById(postIds)
+                .forEach(postRedis -> {
+                    logger.info(String.format("getCachedPosts - Fetched post %s from Redis", postRedis.id()));
+                    cachedPosts.add(postRedis);
+                });
+
+        return postDomainMapper.postsRedisToPosts(cachedPosts);
     }
 
     @Transactional
@@ -300,15 +295,6 @@ public class PostService extends BaseService {
         }
     }
 
-    private void savePostInRedis(Post post) {
-        logger.info(String.format("Saving post %s in Redis", post.getId()));
-
-        var user = userService.getUser(post.getUser().id());
-
-        var postRedis = postDomainMapper.postToPostRedis(user, post);
-        postRedisRepository.save(postRedis);
-    }
-
     @Transactional
     public void deletePost(int postId) {
         var post = getPost(postId);
@@ -397,6 +383,19 @@ public class PostService extends BaseService {
 
         var post = postDomainMapper.postEntityToPost(postEntity);
         savePostInRedis(post);
+    }
+
+    private void savePostsInRedis(List<Post> posts) {
+        posts.forEach(this::savePostInRedis);
+    }
+
+    private void savePostInRedis(Post post) {
+        logger.info(String.format("Saving post %s in Redis", post.getId()));
+
+        var user = userService.getUser(post.getUser().id());
+
+        var postRedis = postDomainMapper.postToPostRedis(user, post);
+        postRedisRepository.save(postRedis);
     }
 
     private PostEntity getPostEntity(int postId) {
