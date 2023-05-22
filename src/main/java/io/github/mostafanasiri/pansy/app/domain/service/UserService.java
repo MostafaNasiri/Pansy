@@ -1,9 +1,6 @@
 package io.github.mostafanasiri.pansy.app.domain.service;
 
 import io.github.mostafanasiri.pansy.app.common.BaseService;
-import io.github.mostafanasiri.pansy.app.common.exception.AuthorizationException;
-import io.github.mostafanasiri.pansy.app.common.exception.EntityNotFoundException;
-import io.github.mostafanasiri.pansy.app.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FeedEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FileEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FollowerEntity;
@@ -14,6 +11,9 @@ import io.github.mostafanasiri.pansy.app.data.repository.jpa.FileJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FollowerJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.redis.UserRedisRepository;
+import io.github.mostafanasiri.pansy.app.domain.exception.AuthorizationException;
+import io.github.mostafanasiri.pansy.app.domain.exception.EntityNotFoundException;
+import io.github.mostafanasiri.pansy.app.domain.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.domain.mapper.UserDomainMapper;
 import io.github.mostafanasiri.pansy.app.domain.model.File;
 import io.github.mostafanasiri.pansy.app.domain.model.User;

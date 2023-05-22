@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.auth;
+package io.github.mostafanasiri.pansy.app.presentation.auth;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;

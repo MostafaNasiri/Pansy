@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.app.common.exception;
+package io.github.mostafanasiri.pansy.app.presentation.exception;
 
 public class AuthenticationException extends RuntimeException {
     public AuthenticationException(String message) {

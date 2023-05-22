@@ -1,7 +1,7 @@
 package io.github.mostafanasiri.pansy.features;
 
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
-import io.github.mostafanasiri.pansy.auth.AppUserDetails;
+import io.github.mostafanasiri.pansy.app.presentation.auth.AppUserDetails;
 import org.junit.jupiter.api.BeforeAll;
 import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;

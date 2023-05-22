@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.app.common.exception;
+package io.github.mostafanasiri.pansy.app.domain.exception;
 
 public class EntityNotFoundException extends RuntimeException {
     public EntityNotFoundException(Class<?> entity, int entityId) {

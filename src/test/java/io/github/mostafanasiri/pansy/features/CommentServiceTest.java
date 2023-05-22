@@ -1,13 +1,13 @@
 package io.github.mostafanasiri.pansy.features;
 
-import io.github.mostafanasiri.pansy.app.common.exception.AuthorizationException;
-import io.github.mostafanasiri.pansy.app.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.CommentEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.PostEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.CommentJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.PostJpaRepository;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
+import io.github.mostafanasiri.pansy.app.domain.exception.AuthorizationException;
+import io.github.mostafanasiri.pansy.app.domain.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.domain.mapper.CommentDomainMapper;
 import io.github.mostafanasiri.pansy.app.domain.model.Comment;
 import io.github.mostafanasiri.pansy.app.domain.model.Post;

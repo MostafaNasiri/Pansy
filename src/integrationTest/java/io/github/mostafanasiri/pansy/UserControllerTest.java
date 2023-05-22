@@ -1,8 +1,8 @@
 package io.github.mostafanasiri.pansy;
 
-import io.github.mostafanasiri.pansy.app.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FileEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
+import io.github.mostafanasiri.pansy.app.domain.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.app.domain.service.FileService;
 import io.github.mostafanasiri.pansy.app.domain.service.UserService;
 import io.github.mostafanasiri.pansy.app.presentation.FileUtils;

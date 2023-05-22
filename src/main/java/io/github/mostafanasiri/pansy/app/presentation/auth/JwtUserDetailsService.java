@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.auth;
+package io.github.mostafanasiri.pansy.app.presentation.auth;
 
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.UserJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;

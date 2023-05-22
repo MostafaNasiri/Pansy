@@ -1,10 +1,10 @@
 package io.github.mostafanasiri.pansy.app.domain.service;
 
-import io.github.mostafanasiri.pansy.app.common.exception.EntityNotFoundException;
 import io.github.mostafanasiri.pansy.app.common.exception.InternalErrorException;
-import io.github.mostafanasiri.pansy.app.common.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FileEntity;
 import io.github.mostafanasiri.pansy.app.data.repository.jpa.FileJpaRepository;
+import io.github.mostafanasiri.pansy.app.domain.exception.EntityNotFoundException;
+import io.github.mostafanasiri.pansy.app.domain.exception.InvalidInputException;
 import io.github.mostafanasiri.pansy.app.domain.model.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;

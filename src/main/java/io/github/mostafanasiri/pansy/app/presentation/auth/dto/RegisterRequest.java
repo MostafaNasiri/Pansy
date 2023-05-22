@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.auth.dto;
+package io.github.mostafanasiri.pansy.app.presentation.auth.dto;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

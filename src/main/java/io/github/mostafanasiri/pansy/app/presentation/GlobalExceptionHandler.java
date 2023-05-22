@@ -1,6 +1,11 @@
-package io.github.mostafanasiri.pansy.app.common;
+package io.github.mostafanasiri.pansy.app.presentation;
 
-import io.github.mostafanasiri.pansy.app.common.exception.*;
+import io.github.mostafanasiri.pansy.app.common.ApiResponse;
+import io.github.mostafanasiri.pansy.app.common.exception.InternalErrorException;
+import io.github.mostafanasiri.pansy.app.domain.exception.AuthorizationException;
+import io.github.mostafanasiri.pansy.app.domain.exception.EntityNotFoundException;
+import io.github.mostafanasiri.pansy.app.domain.exception.InvalidInputException;
+import io.github.mostafanasiri.pansy.app.presentation.exception.AuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;

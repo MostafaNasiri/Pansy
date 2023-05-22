@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.auth;
+package io.github.mostafanasiri.pansy.app.presentation.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
