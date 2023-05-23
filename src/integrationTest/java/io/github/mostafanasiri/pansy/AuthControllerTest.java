@@ -6,7 +6,6 @@ import io.github.mostafanasiri.pansy.app.domain.service.UserService;
 import io.github.mostafanasiri.pansy.app.presentation.auth.JwtTokenUtil;
 import io.github.mostafanasiri.pansy.app.presentation.auth.dto.LoginRequest;
 import io.github.mostafanasiri.pansy.app.presentation.auth.dto.RegisterRequest;
-import io.github.mostafanasiri.pansy.app.presentation.controller.AuthController;
 import io.github.mostafanasiri.pansy.app.presentation.exception.AuthenticationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthControllerTest extends BaseControllerTest {
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private AuthController controller;
 
     @MockBean
     private UserService userService;
