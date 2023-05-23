@@ -13,7 +13,7 @@ A backend api for a simple social network.
 ### Architecture:
 The app is divided into three layers ([read more](https://martinfowler.com/bliki/PresentationDomainDataLayering.html) about this architecture):\
 \
-![img.png](/Users/mostafa/Documents/Projects/Pansy/arch.png)
+![arch.png](arch.png)
 ### Tools & Technologies Used:
 * [Spring Boot](https://spring.io/)
 * [Hibernate](https://hibernate.org/)
