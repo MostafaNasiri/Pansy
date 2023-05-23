@@ -1,12 +1,12 @@
 package io.github.mostafanasiri.pansy;
 
-import io.github.mostafanasiri.pansy.app.data.entity.jpa.UserEntity;
 import io.github.mostafanasiri.pansy.app.domain.exception.InvalidInputException;
+import io.github.mostafanasiri.pansy.app.domain.model.User;
 import io.github.mostafanasiri.pansy.app.domain.service.UserService;
-import io.github.mostafanasiri.pansy.app.presentation.auth.AuthController;
 import io.github.mostafanasiri.pansy.app.presentation.auth.JwtTokenUtil;
 import io.github.mostafanasiri.pansy.app.presentation.auth.dto.LoginRequest;
 import io.github.mostafanasiri.pansy.app.presentation.auth.dto.RegisterRequest;
+import io.github.mostafanasiri.pansy.app.presentation.controller.AuthController;
 import io.github.mostafanasiri.pansy.app.presentation.exception.AuthenticationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,12 +50,12 @@ public class AuthControllerTest extends BaseControllerTest {
         // Arrange
         var requestDto = getValidInputForRegister();
 
-        var entity = new UserEntity(requestDto.getFullName(), requestDto.getUsername(), requestDto.getPassword());
+        var user = new User(requestDto.fullName(), requestDto.username(), requestDto.password());
 
         when(jwtTokenUtil.generateAccessToken(any()))
                 .thenReturn("");
-        when(userService.createUser(entity))
-                .thenReturn(entity);
+        when(userService.createUser(user))
+                .thenReturn(new User(0));
 
         // Act
         var result = mockMvc.perform(
@@ -159,8 +159,8 @@ public class AuthControllerTest extends BaseControllerTest {
         // Arrange
         var requestDto = getValidInputForRegister();
 
-        var entity = new UserEntity(requestDto.getFullName(), requestDto.getUsername(), requestDto.getPassword());
-        when(userService.createUser(entity))
+        var user = new User(requestDto.fullName(), requestDto.username(), requestDto.password());
+        when(userService.createUser(user))
                 .thenThrow(new InvalidInputException("Username already exists"));
 
         var expectedResponse = createFailApiResponse("Username already exists");

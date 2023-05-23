@@ -1,4 +1,4 @@
-package io.github.mostafanasiri.pansy.features;
+package io.github.mostafanasiri.pansy;
 
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FileEntity;
 import io.github.mostafanasiri.pansy.app.data.entity.jpa.FollowerEntity;
