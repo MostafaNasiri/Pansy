@@ -2,7 +2,7 @@
 A backend api for a simple social network.
 
 ### Features:
-* Feed (implemented using "fan-out on write" model)
+* Feed (implemented using "fan-out write" model)
 * Create/Edit/Delete posts
 * Follow/Unfollow users
 * Search in users by name
